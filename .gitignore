@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# --- Block spreadsheet files from being committed ---
+*.xlsx
+*.xls
+01_Data/raw/*.xlsx
+01_Data/cleaned/*.xlsx
+
+# Optional: avoid zips in the repo
+*.zip
+*.7z
