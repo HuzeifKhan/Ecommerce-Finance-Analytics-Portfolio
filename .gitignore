@@ -215,3 +215,38 @@ __marimo__/
 # Optional: avoid zips in the repo
 *.zip
 *.7z
+
+# --- DATA FILES ---
+# Ignore all raw and processed CSV/Excel data
+#01_Data/raw/*.csv
+#01_Data/processed/*.csv
+#*.csv
+*.xlsx
+*.xls
+*.zip
+*.rar
+
+# --- SYSTEM FILES ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- PYTHON CACHE & TEMP FILES ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.tmp
+
+# --- NOTEBOOK CHECKPOINTS ---
+.ipynb_checkpoints/
+
+# --- VSCODE SETTINGS ---
+.vscode/
+
+# --- ENVIRONMENTS ---
+.env
+.venv/
+venv/
+env/
