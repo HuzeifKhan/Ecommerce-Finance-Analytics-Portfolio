@@ -218,9 +218,9 @@ __marimo__/
 
 # --- DATA FILES ---
 # Ignore all raw and processed CSV/Excel data
-#01_Data/raw/*.csv
-#01_Data/processed/*.csv
-#*.csv
+01_Data/raw/*.csv
+01_Data/processed/*.csv
+*.csv
 *.xlsx
 *.xls
 *.zip
