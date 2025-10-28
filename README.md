@@ -1,3 +1,15 @@
+<p align="center">
+  <img src="github_banner.png" alt="E-commerce & Finance Analytics Portfolio Banner" width="100%">
+</p>
+
+<h1 align="center">🧾 E-commerce & Finance Analytics Portfolio</h1>
+
+<p align="center">
+  <em>SQL-driven data cleaning and analysis uncovering revenue trends, product performance, and seasonal insights from 500K+ e-commerce transactions.</em>
+</p>
+
+---
+
 # 🧾 Ecommerce Finance Analytics Portfolio  
 
 ## 📖 Project Overview  
