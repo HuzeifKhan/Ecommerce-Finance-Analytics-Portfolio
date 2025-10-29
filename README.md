@@ -108,7 +108,8 @@ Revenue increases sharply during **Q4 (Sept–Nov)** due to seasonal demand, pea
 ---
 
 ## 📁 Project Structure  
-```Ecommerce-Finance-Analytics-Portfolio/
+```
+Ecommerce-Finance-Analytics-Portfolio/
 │
 ├── 01_Data/ # Raw and processed datasets
 │ ├── raw/ # Original CSV from Kaggle
@@ -123,7 +124,7 @@ Revenue increases sharply during **Q4 (Sept–Nov)** due to seasonal demand, pea
 │ └── figures/ # Exported cyberpunk charts (.png)
 │
 ├── README.md # Project overview and documentation
-└── .gitignore # Ignored system and temporary files```
+└── .gitignore # Ignored system and temporary files
 ---
 
 ## 🧠 Key Features  
