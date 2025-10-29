@@ -10,7 +10,6 @@
 
 ---
 
-![Ecommerce Banner](03_Analysis/figures/github_banner.png)
 
 # 🧾 Ecommerce & Finance Analytics Portfolio  
 
