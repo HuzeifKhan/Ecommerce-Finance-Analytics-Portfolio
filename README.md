@@ -125,6 +125,7 @@ Ecommerce-Finance-Analytics-Portfolio/
 │
 ├── README.md # Project overview and documentation
 └── .gitignore # Ignored system and temporary files
+```
 ---
 
 ## 🧠 Key Features  
