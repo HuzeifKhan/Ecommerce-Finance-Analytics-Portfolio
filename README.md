@@ -111,20 +111,20 @@ Revenue increases sharply during **Q4 (Sept–Nov)** due to seasonal demand, pea
 ```
 Ecommerce-Finance-Analytics-Portfolio/
 │
-├── 01_Data/ # Raw and processed datasets
-│ ├── raw/ # Original CSV from Kaggle
-│ └── processed/ # Cleaned and RFM datasets
+├── 01_Data/                      # Raw and processed datasets
+│ ├── raw/                        # Original CSV from Kaggle
+│ └── processed/                  # Cleaned and RFM datasets
 │
-├── 02_SQL/ # SQL data cleaning scripts
-│ ├── 01_load_raw.sql # Loads and imports raw CSV into MySQL
-│ └── 02_cleaning.sql # Cleans, transforms, and adds analytical columns
+├── 02_SQL/                       # SQL data cleaning scripts
+│ ├── 01_load_raw.sql             # Loads and imports raw CSV into MySQL
+│ └── 02_cleaning.sql             # Cleans, transforms, and adds analytical columns
 │
-├── 03_Analysis/ # Python notebooks and visuals
-│ ├── ecommerce_analysis.ipynb # Main analysis notebook (SQL → EDA → RFM)
-│ └── figures/ # Exported cyberpunk charts (.png)
+├── 03_Analysis/                  # Python notebooks and visuals
+│ ├── ecommerce_analysis.ipynb    # Main analysis notebook (SQL → EDA → RFM)
+│ └── figures/                    # Exported cyberpunk charts (.png)
 │
-├── README.md # Project overview and documentation
-└── .gitignore # Ignored system and temporary files
+├── README.md                     # Project overview and documentation
+└── .gitignore                    # Ignored system and temporary files
 ```
 ---
 
