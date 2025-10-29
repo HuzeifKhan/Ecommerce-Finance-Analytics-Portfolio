@@ -10,21 +10,29 @@
 
 ---
 
-# 🧾 Ecommerce Finance Analytics Portfolio  
+![Ecommerce Banner](03_Analysis/figures/github_banner.png)
+
+# 🧾 Ecommerce & Finance Analytics Portfolio  
+
+> **End-to-end Data Analytics Project** — from raw retail data to actionable business insights using **SQL + Python + Cyberpunk Visualization**.  
+> Cleaned, analyzed, and visualized **500K+ transactions** to uncover patterns in revenue, products, and customer behavior.  
+
+---
 
 ## 📖 Project Overview  
-This project demonstrates a complete **data cleaning and analytics workflow** using **SQL (MySQL)** on a real-world **E-Commerce and Finance dataset**.  
+This project demonstrates a complete **data cleaning and analytics workflow** using **SQL (MySQL)** and **Python (Pandas, Matplotlib)** on a real-world **E-Commerce and Finance dataset**.  
 It contains 500K+ retail transactions from a UK-based online retailer between 2010–2011.  
 
-The goal was to clean, transform, and analyze raw transactional data to uncover insights into **revenue trends**, **top-performing products**, and **seasonal patterns** — building a foundation for BI dashboards and predictive analytics.
+The goal was to transform raw data into **business intelligence** — revealing insights into revenue growth, top-performing products, and customer segmentation.  
 
 ---
 
 ## ⚙️ Tech Stack  
-- **SQL (MySQL)** – Data cleaning, transformation, KPI computation  
-- **Excel / CSV** – Data validation and exports  
-- **GitHub** – Version control and project documentation  
-- *(Next Phase: Python + Tableau for visual analytics)*  
+- 🧮 **SQL (MySQL)** — Data cleaning, transformation, KPI computation  
+- 🐍 **Python (Pandas, Matplotlib)** — Data analysis & Cyberpunk visualizations  
+- 📊 **Excel / CSV** — Data validation and exports  
+- 💾 **GitHub** — Version control and project documentation  
+- *(Next Phase: Tableau / Power BI dashboards)*  
 
 ---
 
@@ -35,7 +43,7 @@ The goal was to clean, transform, and analyze raw transactional data to uncover 
 ### Cleaning Steps  
 1. **Imported raw data (541,909 rows)** via `LOAD DATA INFILE`.  
 2. **Converted string to datetime** using `STR_TO_DATE`.  
-3. **Handled missing and anomalous data**  
+3. **Handled missing and anomalous data:**  
    - Fixed date parsing  
    - Found 2,521 zero-price & 2 negative-price rows  
 4. **Removed duplicates** using `ROW_NUMBER()` window function.  
@@ -86,48 +94,55 @@ Shipping revenue (`POSTAGE`) is a notable contributor.
 | 2011-11 | **1,503,329.78 (Peak Sales)** |
 
 📈 *Insight:*  
-Revenue grows steadily from **August → November 2011**, peaking during the **holiday season** (Black Friday/Christmas).  
-December shows a drop — likely due to incomplete data for that month.
+Revenue increases sharply during **Q4 (Sept–Nov)** due to seasonal demand, peaking before the holidays.
 
 ---
 
-## 📂 Project Structure  
+## 🎨 Visual Gallery  
 
+| Monthly Revenue Trend | Top 10 Products by Revenue | Customer Segmentation (RFM) |
+|:--:|:--:|:--:|
+| ![Monthly Revenue](03_Analysis/figures/monthly_revenue.png) | ![Top Products](03_Analysis/figures/top_products.png) | ![RFM Segments](03_Analysis/figures/rfm_segments.png) |
+
+*Cyberpunk-inspired visual storytelling using a dark neon aesthetic.*
+
+---
+
+## 📂 Repository Structure  
 Ecommerce-Finance-Analytics-Portfolio/
 │
 ├── 01_Data/
 │ ├── raw/ # Original CSV from Kaggle
-│ └── cleaned/ # Final cleaned dataset
+│ └── processed/ # Cleaned & RFM data
 │
 ├── 02_SQL/
-│ ├── 01_load_raw.sql # Data import and setup
-│ └── 02_cleaning.sql # Cleaning & transformations
+│ ├── 01_load_raw.sql
+│ └── 02_cleaning.sql
 │
-├── README.md # Project summary (this file)
-└── .gitignore
+├── 03_Analysis/
+│ ├── ecommerce_analysis.ipynb
+│ └── figures/ # exported charts
+│
+└── README.md
 
 ---
 
-## 📊 Next Steps (Phase 2)
-- 🐍 Integrate **Python (Pandas + SQLAlchemy)** to connect MySQL  
-- 📊 Build **Tableau / Power BI dashboards**  
-- 🎯 Perform **RFM Analysis** & **Customer Segmentation**  
-- 🤖 Automate monthly KPI tracking  
+## 🧠 Key Features  
+✅ End-to-end SQL + Python analytics workflow  
+✅ Cyberpunk-themed data storytelling  
+✅ RFM customer segmentation with quantile scoring  
+✅ Cleaned and export-ready datasets for BI integration  
 
 ---
 
-## ✨ Highlights  
-✅ End-to-end SQL data cleaning workflow  
-✅ Scalable, indexed schema ready for BI tools  
-✅ Analytical storytelling with key KPIs  
-✅ Ideal for demonstrating data wrangling + reporting skills  
+## 🧩 Next Steps  
+- Integrate **Tableau / Power BI dashboards**  
+- Perform **Customer Lifetime Value (CLV)** and **Churn Prediction**  
+- Automate via **dbt** or **Airflow pipelines**
 
 ---
 
 ## 👨‍💻 Author  
 **Huzeif Khan**  
-MBA in Data Science & Analytics — IU International University, Berlin 🇩🇪  
-📍 Based in Berlin | 💼 Data Analyst / BI Analyst  
-📧 huzeifkhz989@gmail.com 
+📍 Berlin, Germany | 💼 Data Analyst / BI Analyst  
 🔗 [LinkedIn](https://www.linkedin.com/in/huzeif-khan-651042274/) | [GitHub](https://github.com/HuzeifKhan)
-
