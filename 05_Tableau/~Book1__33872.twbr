@@ -1937,7 +1937,7 @@
       <simple-id uuid='{DB6CC044-D173-435C-AF8F-4172A761BFC2}' />
     </dashboard>
   </dashboards>
-  <windows pres-mode='true' saved-dpi-scale-factor='1.25' source-height='89'>
+  <windows saved-dpi-scale-factor='1.25' source-height='89'>
     <window class='worksheet' name='📈 Monthly Revenue Trend'>
       <cards>
         <edge name='left'>
@@ -1990,7 +1990,7 @@
       </viewpoint>
       <simple-id uuid='{873520B9-C7F3-4E15-B092-152E2E07E4CC}' />
     </window>
-    <window class='worksheet' name='🧠 Customer Segmentation (RFM Model)'>
+    <window class='worksheet' maximized='true' name='🧠 Customer Segmentation (RFM Model)'>
       <cards>
         <edge name='left'>
           <strip size='160'>
@@ -2016,7 +2016,7 @@
       </viewpoint>
       <simple-id uuid='{599EB4D0-764C-499A-9F52-F9FA6ECF7BB9}' />
     </window>
-    <window class='dashboard' maximized='true' name='🧾 E-commerce &amp; Finance Analytics Dashboard'>
+    <window class='dashboard' name='🧾 E-commerce &amp; Finance Analytics Dashboard'>
       <viewpoints>
         <viewpoint name='KPI Overview (Dynamic Selector)'>
           <zoom type='entire-view' />
@@ -2031,7 +2031,7 @@
           <zoom type='entire-view' />
         </viewpoint>
       </viewpoints>
-      <active id='1' />
+      <active id='-1' />
       <simple-id uuid='{F84ED2D8-B5E0-46EB-AB51-0BDF2BD12264}' />
     </window>
     <window class='worksheet' name='KPI Overview (Dynamic Selector)'>
