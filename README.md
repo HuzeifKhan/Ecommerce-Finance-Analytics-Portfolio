@@ -17,6 +17,16 @@
 
 ---
 
+<!-- Badges -->
+[![Refresh PDF report](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main)](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml)
+![Last updated](https://img.shields.io/github/last-commit/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=Last%20updated)
+![Python](https://img.shields.io/badge/Python-3.13%20%7C%203.12-blue?logo=python)
+![License](https://img.shields.io/github/license/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio)
+![Repo size](https://img.shields.io/github/repo-size/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio)
+![Open issues](https://img.shields.io/github/issues/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio)
+
+---
+
 ## 📖 Project Overview
 
 This project demonstrates a complete **data cleaning, analytics, and visualization workflow** using
