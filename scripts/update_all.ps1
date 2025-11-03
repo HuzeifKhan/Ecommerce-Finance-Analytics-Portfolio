@@ -1,44 +1,94 @@
 # scripts/update_all.ps1
+# Pull latest, rebuild PDF + Excel snapshot, stage, commit, push
+
 $ErrorActionPreference = "Stop"
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-Set-Location $repoRoot
+function Say($msg, $color='Gray') { Write-Host $msg -ForegroundColor $color }
 
-Write-Host "Refreshing report..." -ForegroundColor Cyan
+# Resolve repo root (one level above /scripts)
+$repoRoot    = Split-Path -Parent $PSScriptRoot
+Set-Location $repoRoot
 
 # Paths
 $reportScript = Join-Path $repoRoot "03_Python\make_report.py"
 $pdfDir       = Join-Path $repoRoot "06_Reports"
 $excelDir     = Join-Path $repoRoot "04_Excel"
 
-if (-not (Test-Path ".git")) { throw "Not a git repo: $repoRoot" }
+# Basic checks
+if (-not (Test-Path ".git")) { throw "Not a git repository: $repoRoot" }
 if (-not (Test-Path $reportScript)) { throw "Report script not found: $reportScript" }
 
-# Build artifacts (PDF + Excel snapshot from your Python script)
-py -3.13 $reportScript
+# Ensure git is available
+& git --version | Out-Null
 
-git --version | Out-Null
+# Ensure binary merge rules (avoid text merges on PDFs/XLSX/PNGs)
+if (-not (Test-Path ".gitattributes")) { '' | Out-File ".gitattributes" -Encoding utf8 }
+$attrs = Get-Content ".gitattributes" -ErrorAction SilentlyContinue
+$needed = @("*.pdf binary","*.xlsx binary","*.png binary","*.jpg binary","*.jpeg binary")
+foreach ($line in $needed) {
+    if ($attrs -notcontains $line) { Add-Content ".gitattributes" $line }
+}
+git add .gitattributes 2>$null
+git diff --cached --quiet
+if ($LASTEXITCODE -ne 0) { git commit -m "chore: ensure binary merge rules in .gitattributes" }
 
-# Stage PDF(s) – use RELATIVE globs for git add
-if (Test-Path $pdfDir)   { git add 06_Reports/*.pdf 2>$null }
+# Pull latest (rebase)
+Say "Pulling latest changes (rebase)..." "Cyan"
+git fetch origin
+try { git pull --rebase origin main } catch {}
 
-# Stage Excel(s) only if any exist
-$excelFiles = @()
-if (Test-Path $excelDir) { $excelFiles = Get-ChildItem $excelDir -Filter *.xlsx -File -ErrorAction SilentlyContinue }
-if ($excelFiles.Count -gt 0) { git add 04_Excel/*.xlsx 2>$null }
+# If there are merge conflicts on binary files, keep ours
+$conflicted = (& git diff --name-only --diff-filter=U) 2>$null
+if ($conflicted) {
+    $binExt = @(".pdf",".xlsx",".png",".jpg",".jpeg")
+    foreach ($f in $conflicted) {
+        if ($binExt -contains ([IO.Path]::GetExtension($f).ToLower())) {
+            Say "Auto-resolving binary conflict (keeping ours): $f" "Yellow"
+            git checkout --ours -- "$f"
+            git add -- "$f"
+        } else {
+            throw "Manual conflict encountered: $f"
+        }
+    }
+    git rebase --continue
+    Say "Rebase completed after conflict resolution." "Green"
+}
 
-# Commit if anything is staged
+# Build artifacts
+Say "Building report and Excel snapshot..." "Cyan"
+py -3.13 "$reportScript"
+
+# Stage artifacts using explicit relative paths (avoid wildcard issues)
+# PDFs
+if (Test-Path $pdfDir) {
+    $pdfs = Get-ChildItem $pdfDir -Filter *.pdf -File -ErrorAction SilentlyContinue
+    foreach ($f in $pdfs) {
+        $rel = Resolve-Path -Relative $f.FullName
+        & git add -- "$rel" 2>$null
+    }
+}
+
+# Excel
+$excels = @()
+if (Test-Path $excelDir) {
+    $excels = Get-ChildItem $excelDir -Filter *.xlsx -File -ErrorAction SilentlyContinue
+    foreach ($f in $excels) {
+        $rel = Resolve-Path -Relative $f.FullName
+        & git add -- "$rel" 2>$null
+    }
+}
+
+# Commit if anything staged
 git diff --cached --quiet
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
 if ($LASTEXITCODE -ne 0) {
-    git commit -m "chore(artifacts): refresh PDF + KPI Excel ($timestamp)"
-    Write-Host "Committed changes." -ForegroundColor Yellow
+    $msg = "chore(artifacts): refresh PDF + KPI Excel ($timestamp)"
+    & git commit -m $msg
+    Say "Committed: $msg" "Yellow"
 } else {
-    Write-Host "Nothing to commit (no artifact changes detected)." -ForegroundColor DarkGray
+    Say "Nothing to commit (no artifact changes detected)." "DarkGray"
 }
 
 # Push
-git push
-
-Write-Host "Done. Latest PDF + Excel pushed." -ForegroundColor Green
-
+& git push
+Say "Done. Latest PDF and Excel pushed." "Green"
