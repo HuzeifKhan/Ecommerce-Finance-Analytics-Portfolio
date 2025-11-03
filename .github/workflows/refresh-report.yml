@@ -1,14 +1,9 @@
 name: Refresh PDF report
 
 on:
-  # Manual run button in the Actions tab
   workflow_dispatch:
-
-  # Auto-run monthly (1st of each month at 06:00 UTC)
   schedule:
-    - cron: "0 6 1 * *"
-
-  # (Optional) Rebuild when these parts change
+    - cron: "0 6 1 * *"   # Auto-run monthly
   push:
     paths:
       - "03_Python/**"
@@ -16,50 +11,59 @@ on:
       - "requirements.txt"
       - ".github/workflows/refresh-report.yml"
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build report
-        run: python 03_Python/make_report.py
-        
+      - name: Generate PDF and Excel
+        run: |
+          python 03_Python/make_report.py
+
       - name: Copy Tableau exports into docs
         run: |
           mkdir -p docs/assets/tableau
           cp -f 05_Tableau/exports/*.png docs/assets/tableau/ || true
 
-      - name: Commit updated images (if any)
+      - name: Commit artifacts (PDF + Excel + Tableau)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/assets/tableau/*.png 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "ci: update tableau exports ($(date -u +'%Y-%m-%d %H:%M UTC'))"
-          git push
 
-      - name: Commit PDF if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add 06_Reports/*.pdf || echo "No report found"
-          git commit -m "chore(report): refresh PDF [skip ci]" || echo "No changes to commit"
+          # Stage PDF
+          if ls 06_Reports/*.pdf 1>/dev/null 2>&1; then
+            git add 06_Reports/*.pdf
+          fi
 
-      - name: Push changes
-        run: git push
+          # Stage Excel
+          if ls 04_Excel/*.xlsx 1>/dev/null 2>&1; then
+            git add 04_Excel/*.xlsx
+          fi
 
+          # Stage Tableau exports
+          if ls docs/assets/tableau/*.png 1>/dev/null 2>&1; then
+            git add docs/assets/tableau/*.png
+          fi
+
+          # Commit if any changes
+          if ! git diff --cached --quiet; then
+            git commit -m "ci: refresh reports + Excel + Tableau ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git push
+          else
+            echo "No artifact changes detected."
+          fi
