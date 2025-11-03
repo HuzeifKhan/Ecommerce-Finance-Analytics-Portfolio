@@ -33,7 +33,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 # Paths
 # -------------------------
 BASE_DIR = Path(__file__).resolve().parents[1]
-DATA_DIR = BASE_DIR / "01_Data" / "processed"
+DATA_DIR = Path(__file__).resolve().parents[1] / "01_Data" / "processed"
 REPORT_DIR = BASE_DIR / "06_Reports"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_PATH = REPORT_DIR / "Ecommerce_Finance_Insights_Report.pdf"
@@ -127,26 +127,66 @@ def fit_image_keep_ratio(img_path: Path, max_w: float, max_h: float) -> Image:
     return img
 
 # -------------------------
-# Load data for KPIs
+# Load data for KPIs (CSV/XLSX tolerant)
 # -------------------------
-monthly_df = load_excel_or_zero(DATA_DIR / "monthly_revenue.xlsx")
-top_df     = load_excel_or_zero(DATA_DIR / "top_products.xlsx")
-rfm_df     = load_excel_or_zero(DATA_DIR / "customer_rfm_segments.xlsx")
+def load_table(name: str) -> pd.DataFrame:
+    """
+    Try CSV first, then XLSX, inside 01_Data/processed.
+    """
+    csv_path = DATA_DIR / f"{name}.csv"
+    xlsx_path = DATA_DIR / f"{name}.xlsx"
+    if csv_path.exists():
+        return pd.read_csv(csv_path)
+    if xlsx_path.exists():
+        return pd.read_excel(xlsx_path)
+    return pd.DataFrame()
 
-try:
-    total_revenue = float(monthly_df["Line Amount"].sum())
-except Exception:
-    total_revenue = 0.0
+monthly = load_table("monthly_revenue")
+top     = load_table("top_products")
+rfm     = load_table("customer_rfm_segments")
 
-try:
-    if "Customer ID" in rfm_df.columns:
-        total_customers = int(rfm_df["Customer ID"].nunique())
-    elif "Customers" in rfm_df.columns:
-        total_customers = int(rfm_df["Customers"].sum())
+# Normalize column names to handle spacing/case differences
+def norm_cols(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty: 
+        return df
+    df = df.copy()
+    df.columns = [c.strip().replace(" ", "").lower() for c in df.columns]
+    return df
+
+monthly_n = norm_cols(monthly)
+rfm_n     = norm_cols(rfm)
+
+# KPI calculations with robust fallbacks
+# total_revenue: prefer 'lineamount' then 'lineamount' with space removed, else 0
+if not monthly_n.empty and "lineamount" in monthly_n.columns:
+    total_revenue = float(monthly_n["lineamount"].sum())
+else:
+    # try original names if normalization failed
+    if "LineAmount" in monthly.columns:
+        total_revenue = float(monthly["LineAmount"].sum())
+    elif "Line Amount" in monthly.columns:
+        total_revenue = float(monthly["Line Amount"].sum())
+    else:
+        total_revenue = 0.0
+
+# total_customers: from customer id distinct if present, else 'customers' aggregate
+if not rfm_n.empty:
+    if "customerid" in rfm_n.columns:
+        total_customers = int(rfm_n["customerid"].nunique())
+    elif "customers" in rfm_n.columns:
+        total_customers = int(rfm_n["customers"].sum())
     else:
         total_customers = 0
-except Exception:
-    total_customers = 0
+else:
+    # try original headers
+    if "CustomerID" in rfm.columns:
+        total_customers = int(rfm["CustomerID"].nunique())
+    elif "Customer ID" in rfm.columns:
+        total_customers = int(rfm["Customer ID"].nunique())
+    elif "Customers" in rfm.columns:
+        total_customers = int(rfm["Customers"].sum())
+    else:
+        total_customers = 0
 
 avg_order_value = (total_revenue / total_customers) if total_customers else 0.0
 
