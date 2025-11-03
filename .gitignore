@@ -250,3 +250,9 @@ __pycache__/
 .venv/
 venv/
 env/
+
+# --- keep processed data under version control ---
+!01_Data/
+!01_Data/processed/
+!01_Data/processed/**
+
