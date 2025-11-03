@@ -145,9 +145,14 @@ Ecommerce-Finance-Analytics-Portfolio/
 
 ## 📈 Quick Links  
 
-- 🔗 **Tableau Dashboard:** [View on Tableau Public](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)  
-- 📄 **Auto PDF Report:** `06_Reports/Ecommerce_Finance_Insights_Report.pdf`  
-- 🌐 **Live Preview (GitHub Pages):** *(see `/docs` folder for site)*  
+- 🔗 **Tableau Dashboard:**  
+  [View Live on Tableau Public](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)
+
+- 📄 **Auto-generated PDF Report:**  
+  [Download / View Report (GitHub)](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/blob/main/06_Reports/Ecommerce_Finance_Insights_Report.pdf)
+
+- 🌐 **Live Portfolio Website (GitHub Pages):**  
+  [Visit Site](https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/)
 
 ---
 
