@@ -1,0 +1,8 @@
+* text=auto
+
+# Treat these as binary (no EOL conversions)
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.xlsx binary
+*.twbx binary

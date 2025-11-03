@@ -191,6 +191,39 @@ else:
 avg_order_value = (total_revenue / total_customers) if total_customers else 0.0
 
 # -------------------------
+# Save KPIs to Excel
+# -------------------------
+from openpyxl import Workbook, load_workbook
+from datetime import datetime
+
+excel_path = BASE_DIR / "04_Excel" / "KPI_Snapshot.xlsx"
+
+try:
+    if excel_path.exists():
+        wb = load_workbook(excel_path)
+        ws = wb.active
+    else:
+        wb = Workbook()
+        ws = wb.active
+        ws.append(["Metric", "Value", "Last Updated"])
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    data = [
+        ["Total Revenue", total_revenue, now],
+        ["Total Customers", total_customers, now],
+        ["Average Order Value", avg_order_value, now]
+    ]
+
+    for row in data:
+        ws.append(row)
+
+    wb.save(excel_path)
+    print(f"💾 Excel KPI snapshot updated at {excel_path}")
+except Exception as e:
+    print(f"⚠️ Excel update skipped due to: {e}")
+
+# -------------------------
 # Build document
 # -------------------------
 doc = SimpleDocTemplate(

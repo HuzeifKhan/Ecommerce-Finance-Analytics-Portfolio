@@ -1,48 +1,44 @@
 # scripts/update_all.ps1
-# One-click refresh: rebuild PDF report and push changes to GitHub
-
 $ErrorActionPreference = "Stop"
 
-# Correct: repo root is ONE level above /scripts
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
-Write-Host "Refreshing report..."
+Write-Host "Refreshing report..." -ForegroundColor Cyan
 
-# Resolve paths safely
+# Paths
 $reportScript = Join-Path $repoRoot "03_Python\make_report.py"
-$pdfGlob      = Join-Path $repoRoot "06_Reports\*.pdf"
+$pdfDir       = Join-Path $repoRoot "06_Reports"
+$excelDir     = Join-Path $repoRoot "04_Excel"
 
-# Sanity checks
-if (-not (Test-Path ".git")) {
-    throw "This folder is not a git repository: $repoRoot"
-}
-if (-not (Test-Path $reportScript)) {
-    throw "Report script not found: $reportScript"
-}
+if (-not (Test-Path ".git")) { throw "Not a git repo: $repoRoot" }
+if (-not (Test-Path $reportScript)) { throw "Report script not found: $reportScript" }
 
-# Run the Python report generator (use 'python' if your py launcher isn't set)
+# Build artifacts (PDF + Excel snapshot from your Python script)
 py -3.13 $reportScript
 
-# Ensure Git is installed
 git --version | Out-Null
 
-# Stage the updated PDF(s)
-git add $pdfGlob
+# Stage PDF(s) – use RELATIVE globs for git add
+if (Test-Path $pdfDir)   { git add 06_Reports/*.pdf 2>$null }
 
-# Create a timestamped commit message
+# Stage Excel(s) only if any exist
+$excelFiles = @()
+if (Test-Path $excelDir) { $excelFiles = Get-ChildItem $excelDir -Filter *.xlsx -File -ErrorAction SilentlyContinue }
+if ($excelFiles.Count -gt 0) { git add 04_Excel/*.xlsx 2>$null }
+
+# Commit if anything is staged
+git diff --cached --quiet
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
-$commitMessage = "chore(report): refresh PDF ($timestamp)"
-
-# Try to commit; if nothing staged, commit returns non-zero
-& git commit -m $commitMessage 2>$null
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Nothing to commit (no PDF changes detected)."
+    git commit -m "chore(artifacts): refresh PDF + KPI Excel ($timestamp)"
+    Write-Host "Committed changes." -ForegroundColor Yellow
 } else {
-    Write-Host "Committed: $commitMessage"
+    Write-Host "Nothing to commit (no artifact changes detected)." -ForegroundColor DarkGray
 }
 
-# Push (safe even if there was nothing new)
+# Push
 git push
 
-Write-Host "Done. Latest report pushed."
+Write-Host "Done. Latest PDF + Excel pushed." -ForegroundColor Green
+
