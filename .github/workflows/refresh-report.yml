@@ -1,12 +1,23 @@
 name: Refresh PDF report
 
 on:
-  workflow_dispatch:          # run manually from the Actions tab
+  # Manual run button in the Actions tab
+  workflow_dispatch:
+
+  # Auto-run monthly (1st of each month at 06:00 UTC)
   schedule:
-    - cron: "0 6 1 * *"       # 06:00 UTC on the 1st of every month
+    - cron: "0 6 1 * *"
+
+  # (Optional) Rebuild when these parts change
+  push:
+    paths:
+      - "03_Python/**"
+      - "05_Tableau/exports/**"
+      - "requirements.txt"
+      - ".github/workflows/refresh-report.yml"
 
 permissions:
-  contents: write             # allow the workflow to push commits
+  contents: write
 
 jobs:
   build:
@@ -15,8 +26,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -35,8 +44,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add 06_Reports/*.pdf
+          git add 06_Reports/*.pdf || echo "No report found"
           git commit -m "chore(report): refresh PDF [skip ci]" || echo "No changes to commit"
 
       - name: Push changes
         run: git push
+
