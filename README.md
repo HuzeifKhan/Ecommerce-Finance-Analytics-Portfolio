@@ -106,7 +106,64 @@ A professional, auto-generated PDF created via **ReportLab**, combining text ins
 ---
 
 ## 📁 Project Structure  
+```
+Ecommerce-Finance-Analytics-Portfolio/
+│
+├── 01_Data/
+│ ├── raw/ # Original CSV from Kaggle
+│ └── processed/ # Cleaned + RFM datasets
+│
+├── 02_SQL/
+│ ├── 01_load_raw.sql # Data import and setup
+│ └── 02_cleaning.sql # Cleaning, transformation, indexing
+│
+├── 03_Python/
+│ ├── ecommerce_analysis.ipynb # EDA, RFM, and analytics
+│ └── make_report.py # Automated PDF generator
+│
+├── 05_Tableau/
+│ ├── exports/ # Exported charts (.png)
+│ └── 05_Tableau.twbx # Interactive dashboard
+│
+├── 06_Reports/ # Final PDF output
+│ └── Ecommerce_Finance_Insights_Report.pdf
+│
+├── README.md
+└── .github/workflows/refresh-report.yml
+```
+---
 
+## ✨ Highlights  
+
+✅ Full pipeline: SQL → Python → Tableau → PDF  
+✅ Cyberpunk-themed visuals for a modern portfolio aesthetic  
+✅ Automated monthly reporting workflow via GitHub Actions  
+✅ Hosted live dashboard + PDF report via GitHub Pages  
+✅ Clean modular structure, easy to extend for cloud / CI/CD  
+
+---
+
+## 📈 Quick Links  
+
+- 🔗 **Tableau Dashboard:** [View on Tableau Public](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)  
+- 📄 **Auto PDF Report:** `06_Reports/Ecommerce_Finance_Insights_Report.pdf`  
+- 🌐 **Live Preview (GitHub Pages):** *(see `/docs` folder for site)*  
+
+---
+
+## 🧩 Next Steps  
+
+- 🧠 Extend with CLV & Churn Prediction models (Python)  
+- 🧾 Add Power BI version for professional benchmarking  
+- 🔁 Optional dbt / Airflow simulation for enterprise refresh  
+
+---
+
+## 👨‍💻 Author  
+
+**Huzeif Khan**  
+📍 Berlin, Germany | 💼 Data Analyst / BI Analyst  
+🔗 [LinkedIn](https://www.linkedin.com/in/huzeif-khan-651042274/) • [GitHub](https://github.com/HuzeifKhan)
 
 
 
