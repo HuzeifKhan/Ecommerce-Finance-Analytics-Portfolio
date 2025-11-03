@@ -10,140 +10,172 @@
 
 ---
 
+# 🧾 E-Commerce & Finance Analytics Portfolio
 
-# 🧾 Ecommerce & Finance Analytics Portfolio  
-
-> **End-to-end Data Analytics Project** — from raw retail data to actionable business insights using **SQL + Python + Cyberpunk Visualization**.  
-> Cleaned, analyzed, and visualized **500K+ transactions** to uncover patterns in revenue, products, and customer behavior.  
-
----
-
-## 📖 Project Overview  
-This project demonstrates a complete **data cleaning and analytics workflow** using **SQL (MySQL)** and **Python (Pandas, Matplotlib)** on a real-world **E-Commerce and Finance dataset**.  
-It contains 500K+ retail transactions from a UK-based online retailer between 2010–2011.  
-
-The goal was to transform raw data into **business intelligence** — revealing insights into revenue growth, top-performing products, and customer segmentation.  
+> **End-to-End Business Intelligence Project** — from raw retail data to actionable insights using **SQL, Python, and Tableau**.
+> Cleaned, transformed, and visualized **500K+ transactions** to uncover revenue patterns, top products, and customer segments — all with a **cyberpunk-inspired aesthetic**.
 
 ---
 
-## ⚙️ Tech Stack  
-- 🧮 **SQL (MySQL)** — Data cleaning, transformation, KPI computation  
-- 🐍 **Python (Pandas, Matplotlib)** — Data analysis & Cyberpunk visualizations  
-- 📊 **Excel / CSV** — Data validation and exports  
-- 💾 **GitHub** — Version control and project documentation  
-- *(Next Phase: Tableau / Power BI dashboards)*  
+## 📖 Project Overview
+
+This portfolio project showcases a complete **data analytics pipeline** built using **MySQL, Python (Pandas & Matplotlib), and Tableau**.
+It demonstrates how structured analytics can turn messy transactional data into **insightful dashboards and automated reports**.
+
+The dataset contains **500K+ transactions** from a **UK-based online retailer (2010–2011)**.
+The goal was to transform raw sales data into clean, visual, and interactive business intelligence.
 
 ---
 
-## 🧹 Data Cleaning Workflow  
+## ⚙️ Tech Stack
+
+| Tool                              | Purpose                                        |
+| --------------------------------- | ---------------------------------------------- |
+| 🧮 **SQL (MySQL)**                | Data cleaning, transformation, KPI computation |
+| 🐍 **Python (Pandas, ReportLab)** | EDA, visualization, automated reporting        |
+| 📊 **Tableau**                    | Interactive BI dashboard design                |
+| 💾 **GitHub**                     | Version control & project documentation        |
+| 🧰 **Excel / CSV**                | Validation & data export                       |
+
+---
+
+## 🧹 Data Cleaning Workflow
 
 **Source:** [Kaggle – E-Commerce Data (Carrie1)](https://www.kaggle.com/datasets/carrie1/ecommerce-data)
 
-### Cleaning Steps  
-1. **Imported raw data (541,909 rows)** via `LOAD DATA INFILE`.  
-2. **Converted string to datetime** using `STR_TO_DATE`.  
-3. **Handled missing and anomalous data:**  
-   - Fixed date parsing  
-   - Found 2,521 zero-price & 2 negative-price rows  
-4. **Removed duplicates** using `ROW_NUMBER()` window function.  
-5. **Filtered invalid records** (Quantity ≠ 0, UnitPrice > 0).  
-6. **Created new analytical fields:**  
-   - `LineAmount = Quantity × UnitPrice`  
-   - `IsReturn` flag for negative quantities  
-   - `InvoiceYear`, `InvoiceMonth`, `InvoiceHour`  
-7. **Built indexes** for faster querying (`date`, `customer`, `stock`).  
-8. Final **cleaned dataset:** **534,123 valid transactions**.
+### Cleaning Steps
+
+1. Imported **541,909 rows** into MySQL via `LOAD DATA INFILE`.
+2. Converted date strings using `STR_TO_DATE`.
+3. Fixed **2,521 zero-price** and **2 negative-price** rows.
+4. Removed duplicates using the `ROW_NUMBER()` window function.
+5. Filtered invalid records (`Quantity ≠ 0`, `UnitPrice > 0`).
+6. Created analytical fields:
+
+   * `LineAmount = Quantity × UnitPrice`
+   * `IsReturn` flag for negative quantities
+   * `InvoiceYear`, `InvoiceMonth`, `InvoiceHour`
+7. Added indexes for query optimization.
+8. Final cleaned dataset: **534,123 valid transactions**.
 
 ---
 
-## 💰 Key Insights  
+## 💰 Key Business Insights
 
-### **1️⃣ Gross Revenue**
-**€10,641,558.95** from 534K valid transactions  
+### 🏷️ Gross Revenue
 
----
+**€10.64 million** from 534K valid transactions
 
-### **2️⃣ Top 10 Products by Revenue**
-| Rank | Product | Revenue (€) |
-|------|----------|-------------|
-| 1 | DOTCOM POSTAGE | 206,248.77 |
-| 2 | REGENCY CAKESTAND 3 TIER | 174,156.54 |
-| 3 | PAPER CRAFT, LITTLE BIRDIE | 168,469.60 |
-| 4 | WHITE HANGING HEART T-LIGHT HOLDER | 106,236.72 |
-| 5 | PARTY BUNTING | 99,445.23 |
-| 6 | JUMBO BAG RED RETROSPOT | 94,159.81 |
-| 7 | MEDIUM CERAMIC TOP STORAGE JAR | 81,700.92 |
-| 8 | POSTAGE | 78,101.88 |
-| 9 | MANUAL | 77,752.82 |
-| 10 | RABBIT NIGHT LIGHT | 66,870.03 |
+### 🎯 Top-Selling Products
 
-🧩 *Observation:* Top sellers are **decorative and household gift items**, aligning with the brand’s catalog.  
-Shipping revenue (`POSTAGE`) is a notable contributor.
+| Rank | Product                            | Revenue (€) |
+| ---- | ---------------------------------- | ----------- |
+| 1    | DOTCOM POSTAGE                     | 206,248.77  |
+| 2    | REGENCY CAKESTAND 3 TIER           | 174,156.54  |
+| 3    | PAPER CRAFT, LITTLE BIRDIE         | 168,469.60  |
+| 4    | WHITE HANGING HEART T-LIGHT HOLDER | 106,236.72  |
+| 5    | PARTY BUNTING                      | 99,445.23   |
+| …    | *(more in Tableau dashboard)*      |             |
 
----
+🧩 *Observation:* Decorative and household gift items dominate — especially during holiday months.
 
-### **3️⃣ Monthly Revenue Trend**
-| Month | Revenue (€) |
-|--------|--------------|
-| 2010-12 | 821,452.73 |
-| 2011-01 | 689,811.61 |
-| 2011-02 | 522,545.56 |
-| 2011-03 | 716,215.26 |
-| 2011-09 | 1,056,435.19 |
-| 2011-11 | **1,503,329.78 (Peak Sales)** |
+### 📈 Monthly Revenue Trend
 
-📈 *Insight:*  
-Revenue increases sharply during **Q4 (Sept–Nov)** due to seasonal demand, peaking before the holidays.
+Revenue accelerates steadily from **August → November 2011**, peaking at **€1.5M in November**, likely due to holiday sales.
 
 ---
 
-## 🎨 Visual Gallery  
+## 🎨 Visual Gallery — Python (Cyberpunk Aesthetic)
 
-| Monthly Revenue Trend | Top 10 Products by Revenue | Customer Segmentation (RFM) |
-|:--:|:--:|:--:|
+|                    Monthly Revenue Trend                    |               Top 10 Products by Revenue              |              Customer Segmentation (RFM)              |
+| :---------------------------------------------------------: | :---------------------------------------------------: | :---------------------------------------------------: |
 | ![Monthly Revenue](03_Analysis/figures/monthly_revenue.png) | ![Top Products](03_Analysis/figures/top_products.png) | ![RFM Segments](03_Analysis/figures/rfm_segments.png) |
 
-*Cyberpunk-inspired visual storytelling using a dark neon aesthetic.*
+> *Custom dark-theme charts with neon highlights for immersive data storytelling.*
 
 ---
 
-## 📁 Project Structure  
+## 📊 Tableau Dashboard Preview
+
+[![Dashboard Overview](05_Tableau/exports/dashboard_overview.png)](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)
+*Click the image to open the full interactive Tableau dashboard on Tableau Public.*
+
+#### 🔍 Individual Views
+
+[![Monthly Revenue](05_Tableau/exports/monthly_revenue.png)](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)
+[![Top Products](05_Tableau/exports/top_products.png)](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)
+[![Customer Segments](05_Tableau/exports/customer_segments.png)](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)
+
+> Interactive Tableau dashboard integrates the processed KPIs, monthly revenue trends, and RFM segments into a single view.
+
+---
+
+## 🧾 Automated Report Generation (Python)
+
+The project includes a Python script [`make_report.py`](03_Python/make_report.py) that:
+
+* Loads processed datasets (`monthly_revenue`, `top_products`, `customer_rfm_segments`)
+* Summarizes KPIs (Total Revenue, Avg Order Value, Customer Count)
+* Embeds Tableau exports into a **professionally formatted PDF**
+
+**Output file:**
+📄 [`06_Reports/Ecommerce_Finance_Insights_Report.pdf`](06_Reports/Ecommerce_Finance_Insights_Report.pdf)
+
+---
+
+## 📂 Project Structure
+
 ```
 Ecommerce-Finance-Analytics-Portfolio/
 │
-├── 01_Data/                      # Raw and processed datasets
-│ ├── raw/                        # Original CSV from Kaggle
-│ └── processed/                  # Cleaned and RFM datasets
+├── 01_Data/                      # Raw & processed datasets
+│   ├── raw/                      # Original CSV (Kaggle)
+│   └── processed/                # Cleaned + RFM outputs
 │
-├── 02_SQL/                       # SQL data cleaning scripts
-│ ├── 01_load_raw.sql             # Loads and imports raw CSV into MySQL
-│ └── 02_cleaning.sql             # Cleans, transforms, and adds analytical columns
+├── 02_SQL/                       # SQL cleaning & transformation
+│   ├── 01_load_raw.sql
+│   └── 02_cleaning.sql
 │
-├── 03_Analysis/                  # Python notebooks and visuals
-│ ├── ecommerce_analysis.ipynb    # Main analysis notebook (SQL → EDA → RFM)
-│ └── figures/                    # Exported cyberpunk charts (.png)
+├── 03_Analysis/                  # Python notebook & charts
+│   ├── ecommerce_analysis.ipynb
+│   └── figures/
 │
-├── README.md                     # Project overview and documentation
-└── .gitignore                    # Ignored system and temporary files
+├── 03_Python/                    # Automation scripts
+│   └── make_report.py
+│
+├── 05_Tableau/                   # Tableau dashboard & exports
+│   └── exports/                  # PNG visuals for README & PDF
+│
+├── 06_Reports/                   # Auto-generated PDF reports
+│
+└── README.md
 ```
----
-
-## 🧠 Key Features  
-✅ End-to-end SQL + Python analytics workflow  
-✅ Cyberpunk-themed data storytelling  
-✅ RFM customer segmentation with quantile scoring  
-✅ Cleaned and export-ready datasets for BI integration  
 
 ---
 
-## 🧩 Next Steps  
-- Integrate **Tableau / Power BI dashboards**  
-- Perform **Customer Lifetime Value (CLV)** and **Churn Prediction**  
-- Automate via **dbt** or **Airflow pipelines**
+## 🧠 Highlights
+
+✅ End-to-end data pipeline — SQL → Python → Tableau
+✅ Automated PDF reporting using ReportLab
+✅ RFM customer segmentation with quantile scoring
+✅ Cyberpunk dark-theme BI design
+✅ Ready for extension into predictive analytics
 
 ---
 
-## 👨‍💻 Author  
-**Huzeif Khan**  
-📍 Berlin, Germany | 💼 Data Analyst / BI Analyst  
+## 🚀 Next Steps
+
+* Integrate **Customer Lifetime Value (CLV)** analysis
+* Build **automated KPI refresh** using Airflow/dbt
+* Extend dashboard with **churn prediction and forecasting**
+
+---
+
+## 👨‍💻 Author
+
+**Huzeif Khan**
+MBA in Data Science & Analytics — IU International University, Berlin 🇩🇪
+📍 Based in Berlin | 💼 Data Analyst / BI Analyst
+📧 [huzeifkhz989@gmail.com](mailto:huzeifkhz989@gmail.com)
 🔗 [LinkedIn](https://www.linkedin.com/in/huzeif-khan-651042274/) | [GitHub](https://github.com/HuzeifKhan)
+
