@@ -1,0 +1,42 @@
+name: Refresh PDF report
+
+on:
+  workflow_dispatch:          # run manually from the Actions tab
+  schedule:
+    - cron: "0 6 1 * *"       # 06:00 UTC on the 1st of every month
+
+permissions:
+  contents: write             # allow the workflow to push commits
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build report
+        run: python 03_Python/make_report.py
+
+      - name: Commit PDF if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add 06_Reports/*.pdf
+          git commit -m "chore(report): refresh PDF [skip ci]" || echo "No changes to commit"
+
+      - name: Push changes
+        run: git push
