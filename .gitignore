@@ -257,3 +257,6 @@ env/
 !01_Data/processed/**
 01_Data/**/*.xlsx
 
+!06_Reports/*.pdf
+!04_Excel/*.xlsx
+
