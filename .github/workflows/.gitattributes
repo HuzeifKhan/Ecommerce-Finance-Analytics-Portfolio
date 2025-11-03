@@ -6,3 +6,6 @@
 *.jpg  binary
 *.xlsx binary
 *.twbx binary
+# --- allow tracked artifacts ---
+!06_Reports/**/*.pdf
+!04_Excel/**/*.xlsx

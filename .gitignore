@@ -255,4 +255,5 @@ env/
 !01_Data/
 !01_Data/processed/
 !01_Data/processed/**
+01_Data/**/*.xlsx
 
