@@ -206,6 +206,83 @@ except Exception as e:
     print(f"⚠️ Excel update skipped due to: {e}")
 
     # -------------------------
+# Build Excel: 01_Data_Overview.xlsx
+# -------------------------
+from openpyxl import Workbook as _WB, load_workbook as _load_wb
+from openpyxl.utils.dataframe import dataframe_to_rows as _dfrows
+
+overview_path = BASE_DIR / "04_Excel" / "01_Data_Overview.xlsx"
+
+def _ensure_wb(path):
+    if path.exists():
+        try:
+            return _load_wb(path)
+        except Exception:
+            return _WB()
+    return _WB()
+
+try:
+    wb_over = _ensure_wb(overview_path)
+
+    # wipe / recreate sheets
+    for s in list(wb_over.sheetnames):
+        del wb_over[s]
+    ws_sum = wb_over.create_sheet("Overview")
+    ws_mo  = wb_over.create_sheet("Monthly_Revenue")
+    ws_top = wb_over.create_sheet("Top_Products")
+
+    # --- Overview (KPIs)
+    ws_sum.append(["Metric", "Value"])
+    ws_sum.append(["Total Revenue", total_revenue])
+    ws_sum.append(["Total Customers", total_customers])
+    ws_sum.append(["Average Order Value", avg_order_value])
+
+    # --- Monthly Revenue table (if present)
+    if not monthly.empty:
+        mo = monthly.copy()
+        # keep a tidy selection if available
+        keep_cols = [c for c in mo.columns if c.lower().strip() in ("invoiceyear","invoicemonth","line amount","lineamount","month","year","revenue","total_revenue")]
+        if keep_cols:
+            mo = mo[keep_cols]
+        for r in _dfrows(mo, index=False, header=True):
+            ws_mo.append(r)
+    else:
+        ws_mo.append(["Note", "No monthly_revenue data found in 01_Data/processed"])
+
+    # --- Top Products table (if present)
+    if not top.empty:
+        for r in _dfrows(top, index=False, header=True):
+            ws_top.append(r)
+    else:
+        ws_top.append(["Note", "No top_products data found in 01_Data/processed"])
+
+    wb_over.save(overview_path)
+    print(f"💾 Data Overview updated at {overview_path}")
+except Exception as e:
+    print(f"⚠️ Data Overview update skipped: {e}")
+
+# -------------------------
+# Build Excel: Dashboard_Notes.xlsx
+# -------------------------
+notes_path = BASE_DIR / "04_Excel" / "Dashboard_Notes.xlsx"
+try:
+    wb_notes = _ensure_wb(notes_path)
+    for s in list(wb_notes.sheetnames):
+        del wb_notes[s]
+    ws = wb_notes.create_sheet("Notes")
+
+    ws.append(["Section", "Note"])
+    ws.append(["Overview", "This workbook mirrors what the Tableau dashboard shows."])
+    ws.append(["Refresh", "Auto-generated during the CI run (make_report.py)."])
+    ws.append(["Source",  "01_Data/processed (CSV/XLSX). See README for pipeline details."])
+    ws.append(["Tip",     "Keep Excel files CLOSED during refresh to avoid file locks."])
+
+    wb_notes.save(notes_path)
+    print(f"📝 Dashboard Notes updated at {notes_path}")
+except Exception as e:
+    print(f"⚠️ Dashboard Notes update skipped: {e}")
+
+    # -------------------------
 # Excel: Data Overview + Dashboard Notes
 # -------------------------
 from openpyxl import Workbook, load_workbook
