@@ -1,6 +1,9 @@
 ﻿
-*.pdf binary
-*.xlsx binary
-*.png binary
-*.jpg binary
-*.jpeg binary
+# Treat common binary artifacts as binary (no text diffs)
+*.pdf   binary
+*.xlsx  binary
+*.xls   binary
+*.twbx  binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
