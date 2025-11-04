@@ -2,23 +2,13 @@
 """
 Ecommerce & Finance – Insights Report (Cyan headings, dark-grey text, soft light-grey background)
 
-Pages
-1) Title + KPIs + Live Tableau link
-2) Monthly Revenue + Top Products (Tableau exports)
-3) Customer Segmentation (RFM) title + chart
-
-Inputs:
-- 01_Data/processed/monthly_revenue.xlsx
-- 01_Data/processed/top_products.xlsx
-- 01_Data/processed/customer_rfm_segments.xlsx
-- 05_Tableau/exports/{dashboard_overview,monthly_revenue,top_products,customer_segments}.png
-
-Output:
-- 06_Reports/Ecommerce_Finance_Insights_Report.pdf
+Adds:
+- "Last Updated (UTC)" timestamp in the Excel KPI snapshot
+- Same timestamp rendered in the footer of every PDF page
 """
 
 from pathlib import Path
-import os
+from datetime import datetime, timezone
 import pandas as pd
 
 from reportlab.lib.pagesizes import A4
@@ -33,7 +23,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 # Paths
 # -------------------------
 BASE_DIR = Path(__file__).resolve().parents[1]
-DATA_DIR = Path(__file__).resolve().parents[1] / "01_Data" / "processed"
+DATA_DIR = BASE_DIR / "01_Data" / "processed"
 REPORT_DIR = BASE_DIR / "06_Reports"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_PATH = REPORT_DIR / "Ecommerce_Finance_Insights_Report.pdf"
@@ -102,7 +92,7 @@ def strong_cyan(txt: str) -> str:
     return f'<font color="#00DDD8"><b>{txt}</b></font>'
 
 # -------------------------
-# Background painter (soft light-grey)
+# Background + footer (soft light-grey + UTC timestamp)
 # -------------------------
 def paint_background(canvas, doc):
     canvas.saveState()
@@ -111,28 +101,19 @@ def paint_background(canvas, doc):
     canvas.rect(0, 0, w, h, fill=1, stroke=0)
     canvas.restoreState()
 
+def draw_footer(canvas, stamp_text: str):
+    canvas.saveState()
+    canvas.setFillColor(DARKGREY)
+    canvas.setFont("Helvetica", 8)
+    footer = f"{stamp_text}  •  Page {canvas.getPageNumber()}"
+    canvas.drawRightString(A4[0] - 2*cm, 1.0*cm, footer)
+    canvas.restoreState()
+
 # -------------------------
 # Helpers
 # -------------------------
-def load_excel_or_zero(path: Path, sheet=None) -> pd.DataFrame:
-    try:
-        return pd.read_excel(path, sheet_name=sheet)
-    except Exception:
-        return pd.DataFrame()
-
-def fit_image_keep_ratio(img_path: Path, max_w: float, max_h: float) -> Image:
-    img = Image(str(img_path))
-    # Let reportlab keep aspect while limiting box:
-    img._restrictSize(max_w, max_h)
-    return img
-
-# -------------------------
-# Load data for KPIs (CSV/XLSX tolerant)
-# -------------------------
 def load_table(name: str) -> pd.DataFrame:
-    """
-    Try CSV first, then XLSX, inside 01_Data/processed.
-    """
+    """Try CSV first, then XLSX, inside 01_Data/processed."""
     csv_path = DATA_DIR / f"{name}.csv"
     xlsx_path = DATA_DIR / f"{name}.xlsx"
     if csv_path.exists():
@@ -141,13 +122,21 @@ def load_table(name: str) -> pd.DataFrame:
         return pd.read_excel(xlsx_path)
     return pd.DataFrame()
 
+def fit_image_keep_ratio(img_path: Path, max_w: float, max_h: float) -> Image:
+    img = Image(str(img_path))
+    img._restrictSize(max_w, max_h)  # keep aspect ratio within box
+    return img
+
+# -------------------------
+# Load data for KPIs (CSV/XLSX tolerant)
+# -------------------------
 monthly = load_table("monthly_revenue")
 top     = load_table("top_products")
 rfm     = load_table("customer_rfm_segments")
 
 # Normalize column names to handle spacing/case differences
 def norm_cols(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty: 
+    if df.empty:
         return df
     df = df.copy()
     df.columns = [c.strip().replace(" ", "").lower() for c in df.columns]
@@ -157,11 +146,9 @@ monthly_n = norm_cols(monthly)
 rfm_n     = norm_cols(rfm)
 
 # KPI calculations with robust fallbacks
-# total_revenue: prefer 'lineamount' then 'lineamount' with space removed, else 0
 if not monthly_n.empty and "lineamount" in monthly_n.columns:
     total_revenue = float(monthly_n["lineamount"].sum())
 else:
-    # try original names if normalization failed
     if "LineAmount" in monthly.columns:
         total_revenue = float(monthly["LineAmount"].sum())
     elif "Line Amount" in monthly.columns:
@@ -169,7 +156,6 @@ else:
     else:
         total_revenue = 0.0
 
-# total_customers: from customer id distinct if present, else 'customers' aggregate
 if not rfm_n.empty:
     if "customerid" in rfm_n.columns:
         total_customers = int(rfm_n["customerid"].nunique())
@@ -178,7 +164,6 @@ if not rfm_n.empty:
     else:
         total_customers = 0
 else:
-    # try original headers
     if "CustomerID" in rfm.columns:
         total_customers = int(rfm["CustomerID"].nunique())
     elif "Customer ID" in rfm.columns:
@@ -191,12 +176,12 @@ else:
 avg_order_value = (total_revenue / total_customers) if total_customers else 0.0
 
 # -------------------------
-# Save KPIs to Excel
+# Save KPIs to Excel (UTC)
 # -------------------------
 from openpyxl import Workbook, load_workbook
-from datetime import datetime
 
 excel_path = BASE_DIR / "04_Excel" / "KPI_Snapshot.xlsx"
+ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 try:
     if excel_path.exists():
@@ -205,16 +190,13 @@ try:
     else:
         wb = Workbook()
         ws = wb.active
-        ws.append(["Metric", "Value", "Last Updated"])
-
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ws.append(["Metric", "Value", "Last Updated (UTC)"])
 
     data = [
-        ["Total Revenue", total_revenue, now],
-        ["Total Customers", total_customers, now],
-        ["Average Order Value", avg_order_value, now]
+        ["Total Revenue", total_revenue, ts_utc],
+        ["Total Customers", total_customers, ts_utc],
+        ["Average Order Value", avg_order_value, ts_utc],
     ]
-
     for row in data:
         ws.append(row)
 
@@ -222,6 +204,192 @@ try:
     print(f"💾 Excel KPI snapshot updated at {excel_path}")
 except Exception as e:
     print(f"⚠️ Excel update skipped due to: {e}")
+
+    # -------------------------
+# Excel: Data Overview + Dashboard Notes
+# -------------------------
+from openpyxl import Workbook, load_workbook
+from datetime import datetime
+import numpy as np
+
+utc_now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+excel_dir = BASE_DIR / "04_Excel"
+excel_dir.mkdir(parents=True, exist_ok=True)
+
+# ---------- helpers ----------
+def safe_cols(df):
+    try:
+        return [str(c) for c in df.columns]
+    except Exception:
+        return []
+
+def null_summary(df, label):
+    if df.empty:
+        return [[label, "N/A", "N/A"]]
+    s = df.isna().sum()
+    rows = [[label, str(idx), int(val)] for idx, val in s.items()]
+    return rows
+
+def try_date_range(df):
+    """Try to find a date-like column and return min/max as strings."""
+    if df.empty:
+        return "N/A", "N/A"
+    for cand in ["InvoiceDate","Date","Month","OrderDate","Invoice_Timestamp"]:
+        for col in df.columns:
+            if cand.lower() == str(col).lower():
+                series = pd.to_datetime(df[col], errors="coerce")
+                if series.notna().any():
+                    return (
+                        str(series.min().date()),
+                        str(series.max().date())
+                    )
+    # fallback for monthly table having month-period text
+    for col in df.columns:
+        if "month" in str(col).lower():
+            vals = df[col].dropna().astype(str)
+            if len(vals) > 0:
+                return vals.min(), vals.max()
+    return "N/A", "N/A"
+
+# ======================================
+# 01) 04_Excel/01_Data_Overview.xlsx
+# ======================================
+overview_path = excel_dir / "01_Data_Overview.xlsx"
+
+# create or open
+if overview_path.exists():
+    wb = load_workbook(overview_path)
+else:
+    wb = Workbook()
+
+# Summary
+if "Summary" in wb.sheetnames:
+    ws = wb["Summary"]
+    ws.delete_rows(1, ws.max_rows)
+else:
+    ws = wb.create_sheet("Summary")
+
+min_date, max_date = try_date_range(monthly)
+rows = [
+    ["Metric", "Value"],
+    ["Total Revenue", f"{total_revenue:,.2f}"],
+    ["Total Customers", f"{total_customers:,}"],
+    ["Average Order Value", f"{avg_order_value:,.2f}"],
+    ["Monthly Period (min)", min_date],
+    ["Monthly Period (max)", max_date],
+    ["Tables Present", ", ".join([n for n,df in [("monthly_revenue",monthly),
+                                                 ("top_products",top),
+                                                 ("customer_rfm_segments",rfm)] if not df.empty]) or "N/A"],
+]
+for r in rows: ws.append(r)
+
+# Columns
+if "Columns" in wb.sheetnames:
+    ws_cols = wb["Columns"]
+    ws_cols.delete_rows(1, ws_cols.max_rows)
+else:
+    ws_cols = wb.create_sheet("Columns")
+
+ws_cols.append(["Table","Column"])
+for name, df in [("monthly_revenue", monthly),
+                 ("top_products", top),
+                 ("customer_rfm_segments", rfm)]:
+    cols = safe_cols(df)
+    if cols:
+        for c in cols:
+            ws_cols.append([name, c])
+    else:
+        ws_cols.append([name, "(no columns)"])
+
+# Data_Quality
+if "Data_Quality" in wb.sheetnames:
+    ws_dq = wb["Data_Quality"]
+    ws_dq.delete_rows(1, ws_dq.max_rows)
+else:
+    ws_dq = wb.create_sheet("Data_Quality")
+
+ws_dq.append(["Table","Column","Null_Count"])
+for name, df in [("monthly_revenue", monthly),
+                 ("top_products", top),
+                 ("customer_rfm_segments", rfm)]:
+    for row in null_summary(df, name):
+        ws_dq.append(row)
+
+# Refresh_Log
+if "Refresh_Log" not in wb.sheetnames:
+    wb.create_sheet("Refresh_Log")
+ws_log = wb["Refresh_Log"]
+if ws_log.max_row == 1 and ws_log.max_column == 1 and ws_log["A1"].value is None:
+    ws_log.append(["Refreshed_At_UTC"])
+ws_log.append([utc_now])
+
+wb.save(overview_path)
+print(f"💾 Data Overview updated at {overview_path}")
+
+# ======================================
+# 02) 04_Excel/Dashboard_Notes.xlsx
+# ======================================
+notes_path = excel_dir / "Dashboard_Notes.xlsx"
+
+if notes_path.exists():
+    nb = load_workbook(notes_path)
+else:
+    nb = Workbook()
+
+# Dashboard_Notes
+if "Dashboard_Notes" in nb.sheetnames:
+    ws_dn = nb["Dashboard_Notes"]
+    ws_dn.delete_rows(1, ws_dn.max_rows)
+else:
+    ws_dn = nb.create_sheet("Dashboard_Notes")
+
+ws_dn.append(["View","What it shows","How to read","Filters / Drilldowns"])
+ws_dn.append(["Dashboard Overview",
+              "Executive overview combining KPIs and key charts.",
+              "Scan KPIs (top) → trend (left) → product mix (right).",
+              "Date range, country/region (if available)."])
+ws_dn.append(["Monthly Revenue",
+              "Revenue trend by month.",
+              "Look for seasonality, spikes, and sustained trends.",
+              "Month picker or date range."])
+ws_dn.append(["Top Products",
+              "Top 10 products by total revenue.",
+              "Compare bars by length; hover for totals.",
+              "Category / product filter."])
+ws_dn.append(["Customer Segments (RFM)",
+              "Customer clusters by Recency, Frequency, Monetary.",
+              "Focus on ‘Champions’ and ‘Loyal’ groups for upsell.",
+              "RFM score sliders / segment filter."])
+
+# KPI_Definitions
+if "KPI_Definitions" in nb.sheetnames:
+    ws_kpi = nb["KPI_Definitions"]
+    ws_kpi.delete_rows(1, ws_kpi.max_rows)
+else:
+    ws_kpi = nb.create_sheet("KPI_Definitions")
+
+ws_kpi.append(["KPI","Definition","Current Value"])
+ws_kpi.append(["Total Revenue","Σ(LineAmount) over selected period", f"{total_revenue:,.2f}"])
+ws_kpi.append(["Total Customers","Distinct count of Customer ID", f"{total_customers:,}"])
+ws_kpi.append(["Average Order Value","Revenue / Customers (or Orders where applicable)", f"{avg_order_value:,.2f}"])
+
+# Links
+if "Links" in nb.sheetnames:
+    ws_l = nb["Links"]
+    ws_l.delete_rows(1, ws_l.max_rows)
+else:
+    ws_l = nb.create_sheet("Links")
+
+tableau_url = "https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard"
+pdf_url = "06_Reports/Ecommerce_Finance_Insights_Report.pdf"
+ws_l.append(["Asset","URL"])
+ws_l.append(["Live Tableau Dashboard", tableau_url])
+ws_l.append(["Latest PDF Report (repo path)", pdf_url])
+ws_l.append(["Last Refreshed (UTC)", utc_now])
+
+nb.save(notes_path)
+print(f"📝 Dashboard Notes updated at {notes_path}")
 
 # -------------------------
 # Build document
@@ -290,11 +458,11 @@ if IMG_RFM.exists():
 else:
     Story.append(Paragraph("RFM chart not found in 05_Tableau/exports/", styles["SmallGrey"]))
 
-# Build with soft background on every page
-doc.build(Story, onFirstPage=paint_background, onLaterPages=paint_background)
+# Build with soft background + timestamp footer on every page
+def _on_page(canvas, doc):
+    paint_background(canvas, doc)
+    draw_footer(canvas, f"Last refreshed: {ts_utc}")
+
+doc.build(Story, onFirstPage=_on_page, onLaterPages=_on_page)
 
 print(f"\n✅ Report saved to {OUTPUT_PATH}\n")
-
-
-
-
