@@ -6,6 +6,7 @@ Pages
 1) Title + KPIs + Live Tableau link
 2) Monthly Revenue + Top Products (Tableau exports)
 3) Customer Segmentation (RFM) title + chart
+4) Cohort Retention (cohort_retention.png)
 
 Inputs (CSV/XLSX tolerant):
 - 01_Data/processed/monthly_revenue.{csv|xlsx}
@@ -14,6 +15,7 @@ Inputs (CSV/XLSX tolerant):
 
 Images:
 - 05_Tableau/exports/{dashboard_overview,monthly_revenue,top_products,customer_segments}.png
+- 03_Analysis/figures/cohort_retention.png
 
 Output:
 - 06_Reports/Ecommerce_Finance_Insights_Report.pdf
@@ -53,6 +55,9 @@ IMG_DASH = IMG_DIR / "dashboard_overview.png"
 IMG_REV  = IMG_DIR / "monthly_revenue.png"
 IMG_TOP  = IMG_DIR / "top_products.png"
 IMG_RFM  = IMG_DIR / "customer_segments.png"
+
+# NEW: cohort heatmap from analysis
+IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
 
 EXCEL_DIR = BASE_DIR / "04_Excel"
 EXCEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -256,7 +261,7 @@ try:
     # Summary sheet
     if "Summary" in owb.sheetnames:
         ws_sum = owb["Summary"]
-        ws_sum.delete_rows(1, ws_sum.max_rows)
+        ws_sum.delete_rows(1, ws_sum.max_row)
     else:
         ws_sum = owb.create_sheet("Summary")
 
@@ -270,7 +275,7 @@ try:
     # Columns sheet
     if "Columns" in owb.sheetnames:
         ws_cols = owb["Columns"]
-        ws_cols.delete_rows(1, ws_cols.max_rows)
+        ws_cols.delete_rows(1, ws_cols.max_row)
     else:
         ws_cols = owb.create_sheet("Columns")
     write_timestamp(ws_cols, ts_utc)
@@ -289,7 +294,7 @@ try:
     # Data_Quality sheet
     if "Data_Quality" in owb.sheetnames:
         ws_dq = owb["Data_Quality"]
-        ws_dq.delete_rows(1, ws_dq.max_rows)
+        ws_dq.delete_rows(1, ws_dq.max_row)
     else:
         ws_dq = owb.create_sheet("Data_Quality")
     write_timestamp(ws_dq, ts_utc)
@@ -316,7 +321,7 @@ try:
     # Monthly_Revenue & Top_Products views (optional)
     if "Monthly_Revenue" in owb.sheetnames:
         ws_mo = owb["Monthly_Revenue"]
-        ws_mo.delete_rows(1, ws_mo.max_rows)
+        ws_mo.delete_rows(1, ws_mo.max_row)
     else:
         ws_mo = owb.create_sheet("Monthly_Revenue")
     write_timestamp(ws_mo, ts_utc)
@@ -329,7 +334,7 @@ try:
 
     if "Top_Products" in owb.sheetnames:
         ws_tp = owb["Top_Products"]
-        ws_tp.delete_rows(1, ws_tp.max_rows)
+        ws_tp.delete_rows(1, ws_tp.max_row)
     else:
         ws_tp = owb.create_sheet("Top_Products")
     write_timestamp(ws_tp, ts_utc)
@@ -341,7 +346,6 @@ try:
         ws_tp.append(["Note", "No top_products data found in 01_Data/processed"])
 
     # Save
-    # Remove default empty "Sheet" if present and unused
     if "Sheet" in owb.sheetnames and len(owb.sheetnames) > 1:
         try:
             del owb["Sheet"]
@@ -365,7 +369,7 @@ try:
     # Dashboard_Notes
     if "Dashboard_Notes" in nwb.sheetnames:
         ws_dn = nwb["Dashboard_Notes"]
-        ws_dn.delete_rows(1, ws_dn.max_rows)
+        ws_dn.delete_rows(1, ws_dn.max_row)
     else:
         ws_dn = nwb.create_sheet("Dashboard_Notes")
 
@@ -392,7 +396,7 @@ try:
     # KPI_Definitions
     if "KPI_Definitions" in nwb.sheetnames:
         ws_kpi = nwb["KPI_Definitions"]
-        ws_kpi.delete_rows(1, ws_kpi.max_rows)
+        ws_kpi.delete_rows(1, ws_kpi.max_row)
     else:
         ws_kpi = nwb.create_sheet("KPI_Definitions")
     write_timestamp(ws_kpi, ts_utc)
@@ -405,7 +409,7 @@ try:
     # Links
     if "Links" in nwb.sheetnames:
         ws_l = nwb["Links"]
-        ws_l.delete_rows(1, ws_l.max_rows)
+        ws_l.delete_rows(1, ws_l.max_row)
     else:
         ws_l = nwb.create_sheet("Links")
     write_timestamp(ws_l, ts_utc)
@@ -417,7 +421,6 @@ try:
     ws_l.append(["Latest PDF Report (repo path)", pdf_url])
     ws_l.append(["Last Refreshed (UTC)", ts_utc])
 
-    # Remove default "Sheet" if needed
     if "Sheet" in nwb.sheetnames and len(nwb.sheetnames) > 1:
         try:
             del nwb["Sheet"]
@@ -496,6 +499,23 @@ if IMG_RFM.exists():
 else:
     Story.append(Paragraph("RFM chart not found in 05_Tableau/exports/", styles["SmallGrey"]))
 
+# === Page 4 — Cohort Retention (NEW) ===
+Story.append(PageBreak())
+Story.append(Paragraph("Cohort Retention", styles["Heading2Cyan"]))
+Story.append(Spacer(1, 6))
+caption = ("Each cell shows the % of customers who returned after N months, "
+           "grouped by their first purchase month (cohort).")
+Story.append(Paragraph(caption, styles["SmallGrey"]))
+Story.append(Spacer(1, 8))
+if IMG_COHORT.exists():
+    Story.append(fit_image_keep_ratio(IMG_COHORT, max_w=16.5*cm, max_h=17*cm))
+else:
+    Story.append(Paragraph(
+        "Cohort heatmap not found (expected 03_Analysis/figures/cohort_retention.png).",
+        styles["SmallGrey"]
+    ))
+
+# background + timestamp footer on every page
 def _on_page(canvas, doc):
     paint_background(canvas, doc)
     draw_footer(canvas, f"Last refreshed: {ts_utc}")
