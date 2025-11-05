@@ -55,6 +55,8 @@ IMG_DASH = IMG_DIR / "dashboard_overview.png"
 IMG_REV  = IMG_DIR / "monthly_revenue.png"
 IMG_TOP  = IMG_DIR / "top_products.png"
 IMG_RFM  = IMG_DIR / "customer_segments.png"
+IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
+IMG_CLV    = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
 
 # NEW: cohort heatmap from analysis
 IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
@@ -512,6 +514,24 @@ if IMG_COHORT.exists():
 else:
     Story.append(Paragraph(
         "Cohort heatmap not found (expected 03_Analysis/figures/cohort_retention.png).",
+        styles["SmallGrey"]
+    ))
+
+# === Page 5 — Customer Lifetime Value (CLV) ===
+Story.append(PageBreak())
+Story.append(Paragraph("Customer Lifetime Value (CLV) – 6-Month Outlook", styles["Heading2Cyan"]))
+Story.append(Spacer(1, 6))
+Story.append(Paragraph(
+    "We estimate a simple 6-month CLV as AOV × (avg monthly repeat probability) × 6, "
+    "added to the historical revenue. Top 20 customers shown.",
+    styles["SmallGrey"]
+))
+Story.append(Spacer(1, 8))
+if IMG_CLV.exists():
+    Story.append(fit_image_keep_ratio(IMG_CLV, max_w=16.5*cm, max_h=17*cm))
+else:
+    Story.append(Paragraph(
+        "CLV figure not found (expected 03_Analysis/figures/clv_top20.png).",
         styles["SmallGrey"]
     ))
 
