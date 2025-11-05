@@ -27,6 +27,10 @@
 
 ---
 
+**Last refreshed (UTC):** see footer in the latest PDF and the `04_Excel/KPI_Snapshot.xlsx` “Last Updated (UTC)” column.
+
+---
+
 ## 🚀 Project Overview  
 
 I built an end-to-end BI workflow on a real **E-Commerce Finance dataset** (541K transactions → 534K valid) to deliver decision-ready insights.  
