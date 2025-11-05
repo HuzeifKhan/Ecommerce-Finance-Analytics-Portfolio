@@ -1,6 +1,7 @@
 pandas
 matplotlib
 reportlab
+seaborn
 openpyxl
 xlsxwriter
 
