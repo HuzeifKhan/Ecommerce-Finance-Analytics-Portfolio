@@ -3,7 +3,7 @@
 Ecommerce & Finance – Insights Report (Cyan headings, dark-grey text, soft light-grey background)
 
 Pages
-1) Title + KPIs + Live Tableau link
+1) Title + KPIs (Python charts) + Live Tableau link
 2) Monthly Revenue + Top Products (Tableau exports)
 3) Customer Segmentation (RFM) title + chart
 4) Cohort Retention (cohort_retention.png)
@@ -20,12 +20,15 @@ Inputs (CSV/XLSX tolerant):
 - (optional) 01_Data/processed/rfm_clv_insights.csv
 
 Images:
-- 05_Tableau/exports/{dashboard_overview,monthly_revenue,top_products,customer_segments}.png
+- 05_Tableau/exports/{monthly_revenue,top_products,customer_segments}.png
 - 03_Analysis/figures/cohort_retention.png
 - 03_Analysis/figures/clv_top20.png
 - 03_Analysis/figures/clv_by_segment.png
 - (optional) 03_Analysis/figures/rfm_clv_correlation.png
 - (optional) 03_Analysis/figures/rfm_clv_scatter.png
+- (new) 03_Analysis/figures/kpi_total_revenue.png
+- (new) 03_Analysis/figures/kpi_total_customers.png
+- (new) 03_Analysis/figures/kpi_aov.png
 
 Output:
 - 06_Reports/Ecommerce_Finance_Insights_Report.pdf
@@ -42,7 +45,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak
+    SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, Table, TableStyle
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -65,17 +68,24 @@ CSV_RFM_CLV_SUMMARY  = DATA_DIR / "rfm_clv_summary.csv"
 CSV_RFM_CLV_INSIGHTS = DATA_DIR / "rfm_clv_insights.csv"
 
 IMG_DIR = BASE_DIR / "05_Tableau" / "exports"
-IMG_DASH = IMG_DIR / "dashboard_overview.png"
+# Removed dashboard_overview (per request to remove dashboard section)
 IMG_REV  = IMG_DIR / "monthly_revenue.png"
 IMG_TOP  = IMG_DIR / "top_products.png"
 IMG_RFM  = IMG_DIR / "customer_segments.png"
 
 # analysis figures
-IMG_COHORT       = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
-IMG_CLV          = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
-IMG_CLV_SEGMENT  = BASE_DIR / "03_Analysis" / "figures" / "clv_by_segment.png"
-IMG_RFM_CLV_CORR = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_correlation.png"
-IMG_RFM_CLV_SCAT = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_scatter.png"
+FIG_DIR = BASE_DIR / "03_Analysis" / "figures"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+IMG_COHORT       = FIG_DIR / "cohort_retention.png"
+IMG_CLV          = FIG_DIR / "clv_top20.png"
+IMG_CLV_SEGMENT  = FIG_DIR / "clv_by_segment.png"
+IMG_RFM_CLV_CORR = FIG_DIR / "rfm_clv_correlation.png"
+IMG_RFM_CLV_SCAT = FIG_DIR / "rfm_clv_scatter.png"
+
+# NEW: KPI chart outputs (Python-rendered)
+IMG_KPI_REV   = FIG_DIR / "kpi_total_revenue.png"
+IMG_KPI_CUST  = FIG_DIR / "kpi_total_customers.png"
+IMG_KPI_AOV   = FIG_DIR / "kpi_aov.png"
 
 EXCEL_DIR = BASE_DIR / "04_Excel"
 EXCEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -423,10 +433,6 @@ try:
     write_timestamp(ws_dn, ts_utc)
     ws_dn.append([])
     ws_dn.append(["View","What it shows","How to read","Filters / Drilldowns"])
-    ws_dn.append(["Dashboard Overview",
-                  "Executive overview combining KPIs and key charts.",
-                  "Scan KPIs (top) → trend (left) → product mix (right).",
-                  "Date range, country/region (if available)."])
     ws_dn.append(["Monthly Revenue",
                   "Revenue trend by month.",
                   "Look for seasonality, spikes, and sustained trends.",
@@ -480,6 +486,62 @@ except Exception as e:
     print(f"⚠️ Dashboard Notes update skipped: {e}")
 
 # -------------------------
+# NEW: Generate KPI charts in Python (matplotlib)
+# -------------------------
+def _safe_make_kpi_charts():
+    try:
+        import matplotlib.pyplot as plt
+        from matplotlib.ticker import FuncFormatter
+
+        def fmt_currency(x, pos):
+            try:
+                return f"€{x:,.0f}"
+            except Exception:
+                return str(x)
+
+        def make_single_bar(value: float, title: str, outfile: Path, formatter=None, subtitle: str = ""):
+            # Compact 4:3 PNG optimized to fit 3 per page
+            plt.figure(figsize=(3.4, 2.6), dpi=200)
+            plt.bar([title], [value])
+            if formatter:
+                plt.gca().yaxis.set_major_formatter(FuncFormatter(formatter))
+            plt.title(title, loc="left")
+            if subtitle:
+                plt.suptitle(subtitle, y=0.02, ha="left", fontsize=8)
+            # Minimal axes chrome
+            plt.grid(axis="y", linestyle=":", linewidth=0.6, alpha=0.6)
+            plt.tight_layout()
+            plt.savefig(outfile, bbox_inches="tight")
+            plt.close()
+
+        make_single_bar(
+            total_revenue,
+            "Total Revenue",
+            IMG_KPI_REV,
+            formatter=fmt_currency,
+            subtitle=f"Last updated: {ts_utc}"
+        )
+        make_single_bar(
+            total_customers,
+            "Total Customers",
+            IMG_KPI_CUST,
+            formatter=lambda x, pos: f"{x:,.0f}",
+            subtitle=f"Last updated: {ts_utc}"
+        )
+        make_single_bar(
+            avg_order_value,
+            "Average Order Value",
+            IMG_KPI_AOV,
+            formatter=fmt_currency,
+            subtitle=f"Last updated: {ts_utc}"
+        )
+        print("📈 KPI charts rendered (Python).")
+    except Exception as e:
+        print(f"⚠️ KPI chart rendering skipped: {e}")
+
+_safe_make_kpi_charts()
+
+# -------------------------
 # Build PDF document
 # -------------------------
 doc = SimpleDocTemplate(
@@ -503,8 +565,9 @@ Story.append(Paragraph(
     f'Live Dashboard: <a href="{tableau_url}" color="#00DDD8">{strong_cyan("Open in Tableau Public")}</a>',
     styles["BodyGrey"]
 ))
-Story.append(Spacer(1, 14))
+Story.append(Spacer(1, 12))
 
+# KPIs as text (keep) + Python KPI charts (new)
 Story.append(Paragraph("Key Performance Indicators (KPIs)", styles["Heading2Cyan"]))
 kpi_lines = [
     f'{strong_cyan("Total Revenue")}: {total_revenue:,.2f}',
@@ -513,12 +576,35 @@ kpi_lines = [
 ]
 for line in kpi_lines:
     Story.append(Paragraph("• " + line, styles["BodyGrey"]))
-Story.append(Spacer(1, 10))
+Story.append(Spacer(1, 8))
 
-if IMG_DASH.exists():
-    Story.append(Paragraph("Dashboard Preview", styles["Heading3Cyan"]))
-    Story.append(fit_image_keep_ratio(IMG_DASH, max_w=16.5*cm, max_h=8.5*cm))
-    Story.append(Spacer(1, 8))
+# ---- REMOVE the Dashboard Preview block (per request) ----
+# (Deleted IMG_DASH section entirely)
+
+# ---- NEW: Place all 3 KPI charts on the same page ----
+kpi_imgs = []
+if IMG_KPI_REV.exists():
+    kpi_imgs.append(fit_image_keep_ratio(IMG_KPI_REV, max_w=5.2*cm, max_h=5.2*cm))
+if IMG_KPI_CUST.exists():
+    kpi_imgs.append(fit_image_keep_ratio(IMG_KPI_CUST, max_w=5.2*cm, max_h=5.2*cm))
+if IMG_KPI_AOV.exists():
+    kpi_imgs.append(fit_image_keep_ratio(IMG_KPI_AOV, max_w=5.2*cm, max_h=5.2*cm))
+
+if kpi_imgs:
+    # Arrange 3 images in one row using a small table to ensure they stay on the same page
+    tbl = Table([[kpi_imgs[0] if len(kpi_imgs) > 0 else "",
+                  kpi_imgs[1] if len(kpi_imgs) > 1 else "",
+                  kpi_imgs[2] if len(kpi_imgs) > 2 else ""]],
+                colWidths=[5.6*cm, 5.6*cm, 5.6*cm])
+    tbl.setStyle(TableStyle([
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("LEFTPADDING", (0,0), (-1,-1), 0),
+        ("RIGHTPADDING", (0,0), (-1,-1), 0),
+        ("TOPPADDING", (0,0), (-1,-1), 2),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 2),
+    ]))
+    Story.append(tbl)
 
 Story.append(PageBreak())
 
