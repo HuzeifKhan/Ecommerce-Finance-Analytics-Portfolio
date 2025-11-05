@@ -3,9 +3,9 @@
 Ecommerce & Finance – Insights Report (Cyan headings, dark-grey text, soft light-grey background)
 
 Pages
-1) Title + KPIs (Python charts) + Live Tableau link
-2) Monthly Revenue + Top Products (Tableau exports)
-3) Customer Segmentation (RFM) title + chart
+1) Title + KPIs
+2) Key KPI Visuals (Python) — Monthly Revenue, Top Products, RFM Segments on one page
+3) Customer Segmentation (RFM) — Tableau image (if present)
 4) Cohort Retention (cohort_retention.png)
 5) Customer Lifetime Value (Top 20)
 6) Customer Lifetime Value v1 – 12-Month Model
@@ -20,15 +20,14 @@ Inputs (CSV/XLSX tolerant):
 - (optional) 01_Data/processed/rfm_clv_insights.csv
 
 Images:
-- 05_Tableau/exports/{monthly_revenue,top_products,customer_segments}.png
 - 03_Analysis/figures/cohort_retention.png
 - 03_Analysis/figures/clv_top20.png
 - 03_Analysis/figures/clv_by_segment.png
 - (optional) 03_Analysis/figures/rfm_clv_correlation.png
 - (optional) 03_Analysis/figures/rfm_clv_scatter.png
-- (new) 03_Analysis/figures/kpi_total_revenue.png
-- (new) 03_Analysis/figures/kpi_total_customers.png
-- (new) 03_Analysis/figures/kpi_aov.png
+- (generated) 03_Analysis/figures/monthly_revenue_py.png
+- (generated) 03_Analysis/figures/top_products_py.png
+- (generated) 03_Analysis/figures/rfm_segments_py.png
 
 Output:
 - 06_Reports/Ecommerce_Finance_Insights_Report.pdf
@@ -45,7 +44,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, Table, TableStyle
+    SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -67,25 +66,21 @@ OUTPUT_PATH = REPORT_DIR / "Ecommerce_Finance_Insights_Report.pdf"
 CSV_RFM_CLV_SUMMARY  = DATA_DIR / "rfm_clv_summary.csv"
 CSV_RFM_CLV_INSIGHTS = DATA_DIR / "rfm_clv_insights.csv"
 
+# (Legacy Tableau images kept ONLY for the RFM image on Page 3 if present)
 IMG_DIR = BASE_DIR / "05_Tableau" / "exports"
-# Removed dashboard_overview (per request to remove dashboard section)
-IMG_REV  = IMG_DIR / "monthly_revenue.png"
-IMG_TOP  = IMG_DIR / "top_products.png"
 IMG_RFM  = IMG_DIR / "customer_segments.png"
 
-# analysis figures
-FIG_DIR = BASE_DIR / "03_Analysis" / "figures"
-FIG_DIR.mkdir(parents=True, exist_ok=True)
-IMG_COHORT       = FIG_DIR / "cohort_retention.png"
-IMG_CLV          = FIG_DIR / "clv_top20.png"
-IMG_CLV_SEGMENT  = FIG_DIR / "clv_by_segment.png"
-IMG_RFM_CLV_CORR = FIG_DIR / "rfm_clv_correlation.png"
-IMG_RFM_CLV_SCAT = FIG_DIR / "rfm_clv_scatter.png"
+# Analysis figures
+IMG_COHORT       = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
+IMG_CLV          = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
+IMG_CLV_SEGMENT  = BASE_DIR / "03_Analysis" / "figures" / "clv_by_segment.png"
+IMG_RFM_CLV_CORR = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_correlation.png"
+IMG_RFM_CLV_SCAT = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_scatter.png"
 
-# NEW: KPI chart outputs (Python-rendered)
-IMG_KPI_REV   = FIG_DIR / "kpi_total_revenue.png"
-IMG_KPI_CUST  = FIG_DIR / "kpi_total_customers.png"
-IMG_KPI_AOV   = FIG_DIR / "kpi_aov.png"
+# NEW: Python-rendered KPI figures (we will generate these)
+IMG_REV_PY  = BASE_DIR / "03_Analysis" / "figures" / "monthly_revenue_py.png"
+IMG_TOP_PY  = BASE_DIR / "03_Analysis" / "figures" / "top_products_py.png"
+IMG_RFM_PY  = BASE_DIR / "03_Analysis" / "figures" / "rfm_segments_py.png"
 
 EXCEL_DIR = BASE_DIR / "04_Excel"
 EXCEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -205,6 +200,115 @@ def write_timestamp(ws, ts_utc: str):
         pass
 
 # -------------------------
+# Generate Python KPI charts (line, barh, bar)
+# -------------------------
+def generate_kpi_figures():
+    import matplotlib.pyplot as plt
+
+    # Ensure figure folder exists
+    fig_dir = BASE_DIR / "03_Analysis" / "figures"
+    fig_dir.mkdir(parents=True, exist_ok=True)
+
+    # --- 1) Monthly Revenue line chart
+    monthly_df = load_table("monthly_revenue")
+    if not monthly_df.empty:
+        m = monthly_df.copy()
+        cols = {c.strip().lower().replace(" ", ""): c for c in m.columns}
+        month_col = None
+        for cand in ("yearmonth", "month", "period", "date"):
+            if cand in cols:
+                month_col = cols[cand]
+                break
+        rev_col = None
+        for cand in ("lineamount", "revenue", "totalrevenue", "sales", "amount"):
+            if cand in cols:
+                rev_col = cols[cand]
+                break
+        if month_col and rev_col:
+            plt.figure(figsize=(10, 4))
+            try:
+                order = pd.to_datetime(m[month_col], errors="coerce").argsort(kind="mergesort")
+                m = m.iloc[order]
+            except Exception:
+                pass
+            plt.plot(m[month_col], m[rev_col], marker="o")
+            plt.title("Monthly Revenue")
+            plt.xlabel("Month")
+            plt.ylabel("Revenue")
+            plt.xticks(rotation=45, ha="right")
+            plt.tight_layout()
+            plt.savefig(IMG_REV_PY, dpi=200, bbox_inches="tight")
+            plt.close()
+
+    # --- 2) Top Products bar chart (Top 10)
+    top_df = load_table("top_products")
+    if not top_df.empty:
+        t = top_df.copy()
+        cols = {c.strip().lower().replace(" ", ""): c for c in t.columns}
+        name_col = None
+        for cand in ("description", "product", "item", "stockcode", "sku"):
+            if cand in cols:
+                name_col = cols[cand]
+                break
+        val_col = None
+        for cand in ("lineamount", "revenue", "totalrevenue", "sales", "amount"):
+            if cand in cols:
+                val_col = cols[cand]
+                break
+        if name_col and val_col:
+            t = t.sort_values(val_col, ascending=False).head(10)
+            plt.figure(figsize=(10, 4))
+            plt.barh(t[name_col], t[val_col])
+            plt.gca().invert_yaxis()
+            plt.title("Top 10 Products by Revenue")
+            plt.xlabel("Revenue")
+            plt.ylabel("Product")
+            plt.tight_layout()
+            plt.savefig(IMG_TOP_PY, dpi=200, bbox_inches="tight")
+            plt.close()
+
+    # --- 3) RFM segments bar chart (counts by Segment)
+    rfm_df = load_table("customer_rfm_segments")
+    if not rfm_df.empty:
+        r = rfm_df.copy()
+        norm_map = {c: c.strip().lower().replace(" ", "") for c in r.columns}
+        inv = {v: k for k, v in norm_map.items()}
+        seg_key = None
+        for cand in ("segment", "rfmsegment", "rfm_class", "rfmgroup"):
+            if cand in inv:
+                seg_key = inv[cand]
+                break
+        if seg_key and seg_key in r.columns:
+            counts = r[seg_key].fillna("Unknown").value_counts().sort_values(ascending=False)
+            plt.figure(figsize=(10, 4))
+            plt.bar(counts.index.astype(str), counts.values)
+            plt.title("Customer Segments (RFM) — Counts")
+            plt.xlabel("Segment")
+            plt.ylabel("Customers")
+            plt.xticks(rotation=20, ha="right")
+            plt.tight_layout()
+            plt.savefig(IMG_RFM_PY, dpi=200, bbox_inches="tight")
+            plt.close()
+        else:
+            # simple fallback using Monetary quartiles (only if no segment exists)
+            mon_col = None
+            for c in r.columns:
+                if str(c).strip().lower().replace(" ", "") in ("monetary", "monetaryvalue", "spend", "revenue"):
+                    mon_col = c
+                    break
+            if mon_col:
+                s = pd.qcut(r[mon_col].rank(method="first"), 4, labels=["Low", "Mid-Low", "Mid-High", "High"])
+                counts = s.value_counts().reindex(["High", "Mid-High", "Mid-Low", "Low"])
+                plt.figure(figsize=(10, 4))
+                plt.bar(counts.index.astype(str), counts.values)
+                plt.title("Customer Segments (Monetary Buckets) — Counts")
+                plt.xlabel("Bucket")
+                plt.ylabel("Customers")
+                plt.tight_layout()
+                plt.savefig(IMG_RFM_PY, dpi=200, bbox_inches="tight")
+                plt.close()
+
+# -------------------------
 # Load data for KPIs (CSV/XLSX tolerant)
 # -------------------------
 monthly = load_table("monthly_revenue")
@@ -286,7 +390,6 @@ try:
     else:
         wb = Workbook()
         ws = wb.active
-        # A1 reserved for timestamp; header starts at row 3 for neatness
         ws.append([])  # row 1 (timestamp)
         ws.append([])  # row 2 spacer
         ws.append(["Metric", "Value", "Last Updated (UTC)"])
@@ -375,7 +478,7 @@ try:
         ws_log.append(["Refreshed_At_UTC"])
     ws_log.append([ts_utc])
 
-    # Monthly_Revenue & Top_Products views (optional)
+    # Monthly_Revenue & Top_Products views (optional raw table copies)
     if "Monthly_Revenue" in owb.sheetnames:
         ws_mo = owb["Monthly_Revenue"]
         ws_mo.delete_rows(1, ws_mo.max_row)
@@ -433,6 +536,10 @@ try:
     write_timestamp(ws_dn, ts_utc)
     ws_dn.append([])
     ws_dn.append(["View","What it shows","How to read","Filters / Drilldowns"])
+    ws_dn.append(["Dashboard Overview",
+                  "Executive overview combining KPIs and key charts.",
+                  "Scan KPIs (top) → trend (left) → product mix (right).",
+                  "Date range, country/region (if available)."])
     ws_dn.append(["Monthly Revenue",
                   "Revenue trend by month.",
                   "Look for seasonality, spikes, and sustained trends.",
@@ -485,65 +592,13 @@ try:
 except Exception as e:
     print(f"⚠️ Dashboard Notes update skipped: {e}")
 
-# -------------------------
-# NEW: Generate KPI charts in Python (matplotlib)
-# -------------------------
-def _safe_make_kpi_charts():
-    try:
-        import matplotlib.pyplot as plt
-        from matplotlib.ticker import FuncFormatter
+# =========================
+# Build the PDF
+# =========================
 
-        def fmt_currency(x, pos):
-            try:
-                return f"€{x:,.0f}"
-            except Exception:
-                return str(x)
+# Generate the 3 Python KPI charts before building the PDF
+generate_kpi_figures()
 
-        def make_single_bar(value: float, title: str, outfile: Path, formatter=None, subtitle: str = ""):
-            # Compact 4:3 PNG optimized to fit 3 per page
-            plt.figure(figsize=(3.4, 2.6), dpi=200)
-            plt.bar([title], [value])
-            if formatter:
-                plt.gca().yaxis.set_major_formatter(FuncFormatter(formatter))
-            plt.title(title, loc="left")
-            if subtitle:
-                plt.suptitle(subtitle, y=0.02, ha="left", fontsize=8)
-            # Minimal axes chrome
-            plt.grid(axis="y", linestyle=":", linewidth=0.6, alpha=0.6)
-            plt.tight_layout()
-            plt.savefig(outfile, bbox_inches="tight")
-            plt.close()
-
-        make_single_bar(
-            total_revenue,
-            "Total Revenue",
-            IMG_KPI_REV,
-            formatter=fmt_currency,
-            subtitle=f"Last updated: {ts_utc}"
-        )
-        make_single_bar(
-            total_customers,
-            "Total Customers",
-            IMG_KPI_CUST,
-            formatter=lambda x, pos: f"{x:,.0f}",
-            subtitle=f"Last updated: {ts_utc}"
-        )
-        make_single_bar(
-            avg_order_value,
-            "Average Order Value",
-            IMG_KPI_AOV,
-            formatter=fmt_currency,
-            subtitle=f"Last updated: {ts_utc}"
-        )
-        print("📈 KPI charts rendered (Python).")
-    except Exception as e:
-        print(f"⚠️ KPI chart rendering skipped: {e}")
-
-_safe_make_kpi_charts()
-
-# -------------------------
-# Build PDF document
-# -------------------------
 doc = SimpleDocTemplate(
     str(OUTPUT_PATH),
     pagesize=A4,
@@ -558,16 +613,8 @@ Story.append(Paragraph(
     "Generated via Python ReportLab • Author: Huzeif Khan",
     styles["BodyGrey"]
 ))
-Story.append(Spacer(1, 8))
+Story.append(Spacer(1, 14))
 
-tableau_url = "https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard"
-Story.append(Paragraph(
-    f'Live Dashboard: <a href="{tableau_url}" color="#00DDD8">{strong_cyan("Open in Tableau Public")}</a>',
-    styles["BodyGrey"]
-))
-Story.append(Spacer(1, 12))
-
-# KPIs as text (keep) + Python KPI charts (new)
 Story.append(Paragraph("Key Performance Indicators (KPIs)", styles["Heading2Cyan"]))
 kpi_lines = [
     f'{strong_cyan("Total Revenue")}: {total_revenue:,.2f}',
@@ -576,55 +623,31 @@ kpi_lines = [
 ]
 for line in kpi_lines:
     Story.append(Paragraph("• " + line, styles["BodyGrey"]))
-Story.append(Spacer(1, 8))
+Story.append(Spacer(1, 10))
 
-# ---- REMOVE the Dashboard Preview block (per request) ----
-# (Deleted IMG_DASH section entirely)
-
-# ---- NEW: Place all 3 KPI charts on the same page ----
-kpi_imgs = []
-if IMG_KPI_REV.exists():
-    kpi_imgs.append(fit_image_keep_ratio(IMG_KPI_REV, max_w=5.2*cm, max_h=5.2*cm))
-if IMG_KPI_CUST.exists():
-    kpi_imgs.append(fit_image_keep_ratio(IMG_KPI_CUST, max_w=5.2*cm, max_h=5.2*cm))
-if IMG_KPI_AOV.exists():
-    kpi_imgs.append(fit_image_keep_ratio(IMG_KPI_AOV, max_w=5.2*cm, max_h=5.2*cm))
-
-if kpi_imgs:
-    # Arrange 3 images in one row using a small table to ensure they stay on the same page
-    tbl = Table([[kpi_imgs[0] if len(kpi_imgs) > 0 else "",
-                  kpi_imgs[1] if len(kpi_imgs) > 1 else "",
-                  kpi_imgs[2] if len(kpi_imgs) > 2 else ""]],
-                colWidths=[5.6*cm, 5.6*cm, 5.6*cm])
-    tbl.setStyle(TableStyle([
-        ("ALIGN", (0,0), (-1,-1), "CENTER"),
-        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
-        ("LEFTPADDING", (0,0), (-1,-1), 0),
-        ("RIGHTPADDING", (0,0), (-1,-1), 0),
-        ("TOPPADDING", (0,0), (-1,-1), 2),
-        ("BOTTOMPADDING", (0,0), (-1,-1), 2),
-    ]))
-    Story.append(tbl)
-
+# === Page 2 — KPI Visuals (Python) ===
 Story.append(PageBreak())
-
-# === Page 2 ===
-Story.append(Paragraph("Visual Summary (Tableau Exports)", styles["Heading2Cyan"]))
+Story.append(Paragraph("Key KPI Visuals (Python)", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
 
-if IMG_REV.exists():
-    Story.append(Paragraph("Monthly Revenue Trend", styles["Heading3Cyan"]))
-    Story.append(fit_image_keep_ratio(IMG_REV, max_w=16.5*cm, max_h=8.8*cm))
-    Story.append(Spacer(1, 10))
-
-if IMG_TOP.exists():
-    Story.append(Paragraph("Top 10 Products by Revenue", styles["Heading3Cyan"]))
-    Story.append(fit_image_keep_ratio(IMG_TOP, max_w=16.5*cm, max_h=8.8*cm))
+if IMG_REV_PY.exists():
+    Story.append(Paragraph("Monthly Revenue", styles["Heading3Cyan"]))
+    Story.append(fit_image_keep_ratio(IMG_REV_PY, max_w=16.5*cm, max_h=6.2*cm))
     Story.append(Spacer(1, 6))
 
-Story.append(PageBreak())
+if IMG_TOP_PY.exists():
+    Story.append(Paragraph("Top 10 Products by Revenue", styles["Heading3Cyan"]))
+    Story.append(fit_image_keep_ratio(IMG_TOP_PY, max_w=16.5*cm, max_h=6.2*cm))
+    Story.append(Spacer(1, 6))
+
+if IMG_RFM_PY.exists():
+    Story.append(Paragraph("Customer Segments (RFM) — Counts", styles["Heading3Cyan"]))
+    Story.append(fit_image_keep_ratio(IMG_RFM_PY, max_w=16.5*cm, max_h=6.2*cm))
+else:
+    Story.append(Paragraph("RFM chart not found (will appear after RFM data is present).", styles["SmallGrey"]))
 
 # === Page 3 ===
+Story.append(PageBreak())
 Story.append(Paragraph("Customer Segmentation (RFM Model)", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
 if IMG_RFM.exists():
@@ -632,7 +655,7 @@ if IMG_RFM.exists():
 else:
     Story.append(Paragraph("RFM chart not found in 05_Tableau/exports/", styles["SmallGrey"]))
 
-# === Page 4 — Cohort Retention (NEW) ===
+# === Page 4 — Cohort Retention ===
 Story.append(PageBreak())
 Story.append(Paragraph("Cohort Retention", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
@@ -705,7 +728,6 @@ intro = ("How lifetime value varies by customer segment, and how it correlates w
 Story.append(Paragraph(intro, styles["SmallGrey"]))
 Story.append(Spacer(1, 8))
 
-# Bullet points from optional CSVs
 ins_bullets = bullets_from_insights(rfm_clv_insights, max_rows=4)
 sum_bullets = bullets_from_summary(rfm_clv_summary,  max_rows=4)
 for bl in (ins_bullets + sum_bullets):
@@ -714,7 +736,6 @@ if not (ins_bullets or sum_bullets):
     Story.append(Paragraph("No RFM–CLV insights CSVs found yet.", styles["SmallGrey"]))
 Story.append(Spacer(1, 10))
 
-# Correlation heatmap
 Story.append(Paragraph("RFM–CLV Correlation", styles["Heading3Cyan"]))
 if IMG_RFM_CLV_CORR.exists():
     Story.append(fit_image_keep_ratio(IMG_RFM_CLV_CORR, max_w=16.5*cm, max_h=8.5*cm))
@@ -723,7 +744,6 @@ else:
                            styles["SmallGrey"]))
 Story.append(Spacer(1, 10))
 
-# Scatter plot
 Story.append(Paragraph("CLV vs RFM (example scatter)", styles["Heading3Cyan"]))
 if IMG_RFM_CLV_SCAT.exists():
     Story.append(fit_image_keep_ratio(IMG_RFM_CLV_SCAT, max_w=16.5*cm, max_h=8.5*cm))
