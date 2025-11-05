@@ -78,6 +78,25 @@ if (Test-Path $excelDir) {
     }
 }
 
+# ========================= NEW: Cohort artifacts ============================
+# Cohort CSV
+$cohortCsv = Join-Path $repoRoot "01_Data\processed\retention_cohorts.csv"
+if (Test-Path $cohortCsv) {
+    $rel = Resolve-Path -Relative $cohortCsv
+    & git add -- "$rel" 2>$null
+}
+
+# Cohort / analysis figures (e.g., cohort_retention.png, clv_top20.png later)
+$figDir = Join-Path $repoRoot "03_Analysis\figures"
+if (Test-Path $figDir) {
+    $pngs = Get-ChildItem $figDir -Filter *.png -File -ErrorAction SilentlyContinue
+    foreach ($f in $pngs) {
+        $rel = Resolve-Path -Relative $f.FullName
+        & git add -- "$rel" 2>$null
+    }
+}
+# ===========================================================================
+
 # Commit if anything staged
 git diff --cached --quiet
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
