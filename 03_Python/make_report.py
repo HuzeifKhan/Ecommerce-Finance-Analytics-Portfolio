@@ -7,15 +7,25 @@ Pages
 2) Monthly Revenue + Top Products (Tableau exports)
 3) Customer Segmentation (RFM) title + chart
 4) Cohort Retention (cohort_retention.png)
+5) Customer Lifetime Value (Top 20)
+6) Customer Lifetime Value v1 – 12-Month Model
+7) CLV by Customer Segment
+8) RFM × CLV — Segment Insights (new)
 
 Inputs (CSV/XLSX tolerant):
 - 01_Data/processed/monthly_revenue.{csv|xlsx}
 - 01_Data/processed/top_products.{csv|xlsx}
 - 01_Data/processed/customer_rfm_segments.{csv|xlsx}
+- (optional) 01_Data/processed/rfm_clv_summary.csv
+- (optional) 01_Data/processed/rfm_clv_insights.csv
 
 Images:
 - 05_Tableau/exports/{dashboard_overview,monthly_revenue,top_products,customer_segments}.png
 - 03_Analysis/figures/cohort_retention.png
+- 03_Analysis/figures/clv_top20.png
+- 03_Analysis/figures/clv_by_segment.png
+- (optional) 03_Analysis/figures/rfm_clv_correlation.png
+- (optional) 03_Analysis/figures/rfm_clv_scatter.png
 
 Output:
 - 06_Reports/Ecommerce_Finance_Insights_Report.pdf
@@ -50,19 +60,22 @@ REPORT_DIR = BASE_DIR / "06_Reports"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_PATH = REPORT_DIR / "Ecommerce_Finance_Insights_Report.pdf"
 
+# (optional) RFM–CLV insights CSVs
+CSV_RFM_CLV_SUMMARY  = DATA_DIR / "rfm_clv_summary.csv"
+CSV_RFM_CLV_INSIGHTS = DATA_DIR / "rfm_clv_insights.csv"
+
 IMG_DIR = BASE_DIR / "05_Tableau" / "exports"
 IMG_DASH = IMG_DIR / "dashboard_overview.png"
 IMG_REV  = IMG_DIR / "monthly_revenue.png"
 IMG_TOP  = IMG_DIR / "top_products.png"
 IMG_RFM  = IMG_DIR / "customer_segments.png"
-IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
-IMG_CLV    = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
-IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
-IMG_CLV    = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
-IMG_CLV_SEGMENT = BASE_DIR / "03_Analysis" / "figures" / "clv_by_segment.png"
 
-# NEW: cohort heatmap from analysis
-IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
+# analysis figures
+IMG_COHORT       = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
+IMG_CLV          = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
+IMG_CLV_SEGMENT  = BASE_DIR / "03_Analysis" / "figures" / "clv_by_segment.png"
+IMG_RFM_CLV_CORR = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_correlation.png"
+IMG_RFM_CLV_SCAT = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_scatter.png"
 
 EXCEL_DIR = BASE_DIR / "04_Excel"
 EXCEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -223,6 +236,35 @@ avg_order_value = (total_revenue / total_customers) if total_customers else 0.0
 
 # UTC timestamp (for Excel & PDF footer)
 ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+# -------------------------
+# Optional: Load RFM–CLV CSV insights (for Page 8)
+# -------------------------
+rfm_clv_summary  = pd.read_csv(CSV_RFM_CLV_SUMMARY)  if CSV_RFM_CLV_SUMMARY.exists()  else pd.DataFrame()
+rfm_clv_insights = pd.read_csv(CSV_RFM_CLV_INSIGHTS) if CSV_RFM_CLV_INSIGHTS.exists() else pd.DataFrame()
+
+def bullets_from_insights(df: pd.DataFrame, max_rows: int = 4):
+    out = []
+    if df.empty:
+        return out
+    for _, r in df.head(max_rows).iterrows():
+        metric  = str(r.get("Metric", "")).strip()
+        insight = str(r.get("Insight", "")).strip()
+        if insight:
+            out.append(f"• {strong_cyan(metric)} — {insight}" if metric else f"• {insight}")
+    return out
+
+def bullets_from_summary(df: pd.DataFrame, max_rows: int = 4):
+    out = []
+    if df.empty:
+        return out
+    for _, r in df.head(max_rows).iterrows():
+        seg   = str(r.get("Segment","")).strip()
+        meanv = r.get("mean", None)
+        cnt   = r.get("count", None)
+        if seg and meanv is not None:
+            out.append(f"• {strong_cyan(seg)} — avg CLV €{float(meanv):,.0f} (n={int(cnt) if pd.notna(cnt) else '—'})")
+    return out
 
 # -------------------------
 # Excel: KPI_Snapshot.xlsx
@@ -538,16 +580,14 @@ else:
         styles["SmallGrey"]
     ))
 
-    # === Page 6 ===
+# === Page 6 — CLV v1 (12-Month Model) ===
 Story.append(PageBreak())
 Story.append(Paragraph("Customer Lifetime Value (CLV v1 – 12-Month Model)", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
-
 caption = ("Deterministic CLV v1: AOV × Purchase Frequency per Month × 12 Months. "
            "Shows your top-value customers based on average order value and repeat purchase rate.")
 Story.append(Paragraph(caption, styles["SmallGrey"]))
 Story.append(Spacer(1, 8))
-
 if IMG_CLV.exists():
     Story.append(fit_image_keep_ratio(IMG_CLV, max_w=16.5*cm, max_h=17*cm))
     Story.append(Spacer(1, 6))
@@ -558,18 +598,52 @@ else:
         styles["SmallGrey"]
     ))
 
-    # === Page 7 ===
+# === Page 7 — CLV by Segment ===
 Story.append(PageBreak())
 Story.append(Paragraph("CLV by Customer Segment", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
 caption = "Average predicted 12-month CLV for each RFM segment."
 Story.append(Paragraph(caption, styles["SmallGrey"]))
 Story.append(Spacer(1, 8))
-
 if IMG_CLV_SEGMENT.exists():
     Story.append(fit_image_keep_ratio(IMG_CLV_SEGMENT, max_w=16.5*cm, max_h=17*cm))
 else:
     Story.append(Paragraph("CLV segment chart not found (expected 03_Analysis/figures/clv_by_segment.png).", styles["SmallGrey"]))
+
+# === Page 8 — RFM × CLV Insights (NEW) ===
+Story.append(PageBreak())
+Story.append(Paragraph("RFM × CLV — Segment Insights", styles["Heading2Cyan"]))
+Story.append(Spacer(1, 6))
+intro = ("How lifetime value varies by customer segment, and how it correlates with Recency, "
+         "Frequency and Monetary (RFM).")
+Story.append(Paragraph(intro, styles["SmallGrey"]))
+Story.append(Spacer(1, 8))
+
+# Bullet points from optional CSVs
+ins_bullets = bullets_from_insights(rfm_clv_insights, max_rows=4)
+sum_bullets = bullets_from_summary(rfm_clv_summary,  max_rows=4)
+for bl in (ins_bullets + sum_bullets):
+    Story.append(Paragraph(bl, styles["BodyGrey"]))
+if not (ins_bullets or sum_bullets):
+    Story.append(Paragraph("No RFM–CLV insights CSVs found yet.", styles["SmallGrey"]))
+Story.append(Spacer(1, 10))
+
+# Correlation heatmap
+Story.append(Paragraph("RFM–CLV Correlation", styles["Heading3Cyan"]))
+if IMG_RFM_CLV_CORR.exists():
+    Story.append(fit_image_keep_ratio(IMG_RFM_CLV_CORR, max_w=16.5*cm, max_h=8.5*cm))
+else:
+    Story.append(Paragraph("Correlation heatmap not found (expected 03_Analysis/figures/rfm_clv_correlation.png).",
+                           styles["SmallGrey"]))
+Story.append(Spacer(1, 10))
+
+# Scatter plot
+Story.append(Paragraph("CLV vs RFM (example scatter)", styles["Heading3Cyan"]))
+if IMG_RFM_CLV_SCAT.exists():
+    Story.append(fit_image_keep_ratio(IMG_RFM_CLV_SCAT, max_w=16.5*cm, max_h=8.5*cm))
+else:
+    Story.append(Paragraph("Scatter not found (expected 03_Analysis/figures/rfm_clv_scatter.png).",
+                           styles["SmallGrey"]))
 
 # background + timestamp footer on every page
 def _on_page(canvas, doc):
