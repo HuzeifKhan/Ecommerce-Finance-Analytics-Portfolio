@@ -57,6 +57,8 @@ IMG_TOP  = IMG_DIR / "top_products.png"
 IMG_RFM  = IMG_DIR / "customer_segments.png"
 IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
 IMG_CLV    = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
+IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
+IMG_CLV    = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
 
 # NEW: cohort heatmap from analysis
 IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
@@ -532,6 +534,26 @@ if IMG_CLV.exists():
 else:
     Story.append(Paragraph(
         "CLV figure not found (expected 03_Analysis/figures/clv_top20.png).",
+        styles["SmallGrey"]
+    ))
+
+    # === Page 6 ===
+Story.append(PageBreak())
+Story.append(Paragraph("Customer Lifetime Value (CLV v1 – 12-Month Model)", styles["Heading2Cyan"]))
+Story.append(Spacer(1, 6))
+
+caption = ("Deterministic CLV v1: AOV × Purchase Frequency per Month × 12 Months. "
+           "Shows your top-value customers based on average order value and repeat purchase rate.")
+Story.append(Paragraph(caption, styles["SmallGrey"]))
+Story.append(Spacer(1, 8))
+
+if IMG_CLV.exists():
+    Story.append(fit_image_keep_ratio(IMG_CLV, max_w=16.5*cm, max_h=17*cm))
+    Story.append(Spacer(1, 6))
+    Story.append(Paragraph(f"Last updated (UTC): {ts_utc}", styles['SmallGrey']))
+else:
+    Story.append(Paragraph(
+        "CLV chart not found (expected 03_Analysis/figures/clv_top20.png).",
         styles["SmallGrey"]
     ))
 
