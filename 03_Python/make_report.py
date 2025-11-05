@@ -59,6 +59,7 @@ IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
 IMG_CLV    = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
 IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
 IMG_CLV    = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
+IMG_CLV_SEGMENT = BASE_DIR / "03_Analysis" / "figures" / "clv_by_segment.png"
 
 # NEW: cohort heatmap from analysis
 IMG_COHORT = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
@@ -556,6 +557,19 @@ else:
         "CLV chart not found (expected 03_Analysis/figures/clv_top20.png).",
         styles["SmallGrey"]
     ))
+
+    # === Page 7 ===
+Story.append(PageBreak())
+Story.append(Paragraph("CLV by Customer Segment", styles["Heading2Cyan"]))
+Story.append(Spacer(1, 6))
+caption = "Average predicted 12-month CLV for each RFM segment."
+Story.append(Paragraph(caption, styles["SmallGrey"]))
+Story.append(Spacer(1, 8))
+
+if IMG_CLV_SEGMENT.exists():
+    Story.append(fit_image_keep_ratio(IMG_CLV_SEGMENT, max_w=16.5*cm, max_h=17*cm))
+else:
+    Story.append(Paragraph("CLV segment chart not found (expected 03_Analysis/figures/clv_by_segment.png).", styles["SmallGrey"]))
 
 # background + timestamp footer on every page
 def _on_page(canvas, doc):
