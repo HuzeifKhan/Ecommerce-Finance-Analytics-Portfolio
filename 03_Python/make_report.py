@@ -6,7 +6,8 @@ Changes in this version:
 - Replaced Page 2–3 charts with the same logic/visuals used in ecommerce_analysis.ipynb:
     * Monthly Revenue Trend  (returns excluded, same YearMonth build, neon style)
     * Top 10 Products        (returns excluded, Description-based, neon style)
-    * Customer Segmentation  (RFM rebuilt from raw if needed, same emoji segments, neon style)
+    * Customer Segmentation  (RFM rebuilt from raw if needed, same emoji segments, NEON STYLE)
+- RFM chart is now a **pie chart** (to match ecommerce_analysis.ipynb).
 - No other sections changed.
 
 Pages
@@ -433,7 +434,7 @@ def make_top_products_chart(df: pd.DataFrame, out_path: Path):
 
 def make_rfm_chart(df: pd.DataFrame, out_path: Path):
     """
-    Match ecommerce_analysis.ipynb:
+    Match ecommerce_analysis.ipynb (PIE CHART):
     - If segment column exists, plot it.
     - Else, rebuild RFM from raw:
         Recency = (max InvoiceDate - last purchase) in days
@@ -442,6 +443,7 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
       Score each on 1..5 (quantiles) and sum → RFM_Score.
       Segment with same thresholds/labels (with emojis) as notebook.
     - Neon styling.
+    - Render as a PIE chart (not bar).
     """
     if df.empty:
         return
@@ -459,9 +461,8 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
         inv_col  = next((c for c in ["InvoiceNo", "Invoice", "Invoice_Number", "invoiceno", "InvoiceID"] if c in cols), None)
 
         if not (cust_col and date_col and amt_col):
-            # Fall back to count-only bar if nothing usable
-            tmp = pd.DataFrame({"Segment": ["No RFM Segments Found"], "Count": [len(work)]})
-            seg_plot = tmp
+            # Fallback: dummy single slice
+            seg_plot = pd.DataFrame({"Segment": ["No RFM Segments Found"], "Count": [len(work)]})
             seg_name = "Segment"
         else:
             # Filter for monetary = exclude returns
@@ -500,28 +501,46 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
                     return "⚠️ At Risk / Lost"
 
             rfm_built["Segment"] = rfm_built["RFM_Score"].apply(segment_customer)
-            seg_plot = rfm_built.groupby("Segment").size().reset_index(name="Count").sort_values("Count", ascending=True)
+            seg_plot = rfm_built.groupby("Segment").size().reset_index(name="Count").sort_values("Count", ascending=False)
             seg_name = "Segment"
     else:
-        seg_plot = work.groupby(seg_col).size().reset_index(name="Count").sort_values("Count", ascending=True)
+        seg_plot = work.groupby(seg_col).size().reset_index(name="Count").sort_values("Count", ascending=False)
         seg_name = seg_col
 
-    fig, ax = plt.subplots(figsize=(10, 5.5), facecolor=_BG)
-    _style_axes(ax)
+    # ---- PIE CHART (matches notebook) ----
+    fig, ax = plt.subplots(figsize=(9.5, 6.5), facecolor=_BG)
+    ax.set_facecolor(_BG)
 
-    y_labels = seg_plot[seg_name]
-    vals     = seg_plot["Count"]
-    # Color cycle across segments
-    colors = (_NEON_PALETTE * (len(vals)//len(_NEON_PALETTE) + 1))[:len(vals)]
-    bars = ax.barh(y_labels, vals, height=0.7, color=colors)
+    sizes  = seg_plot["Count"].values
+    labels = seg_plot[seg_name].astype(str).values
 
-    for b in bars:
-        ax.text(b.get_width(), b.get_y() + b.get_height()/2,
-                f" {int(b.get_width()):,}", va="center", ha="left", color=_AX, fontsize=9)
+    # Consistent neon palette
+    colors = (_NEON_PALETTE * (len(sizes)//len(_NEON_PALETTE) + 1))[:len(sizes)]
+
+    # Slightly explode "Champions" slice for emphasis (if present)
+    explode = [0.08 if ("Champions" in str(lbl)) else 0.02 for lbl in labels]
+
+    wedges, texts, autotexts = ax.pie(
+        sizes,
+        labels=None,               # labels in legend to keep plot clean
+        autopct="%1.1f%%",
+        startangle=140,
+        explode=explode,
+        colors=colors,
+        wedgeprops={"linewidth": 1.0, "edgecolor": _BG},
+        pctdistance=0.75
+    )
+
+    # Donut hole (common in notebook visual styles)
+    centre_circle = plt.Circle((0, 0), 0.48, fc=_BG)
+    fig.gca().add_artist(centre_circle)
+
+    # Legend with names + counts
+    legend_labels = [f"{lbl} — {cnt:,}" for lbl, cnt in zip(labels, sizes)]
+    ax.legend(wedges, legend_labels, title="Segments", loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=9)
 
     ax.set_title("👥 Customer Segmentation (RFM)", color=_TITLE, fontsize=14, fontweight="bold", pad=14)
-    ax.set_xlabel("Customers", color=_AX, fontsize=11)
-    ax.set_ylabel("Segment",   color=_AX, fontsize=11)
+    ax.axis("equal")  # Equal aspect ratio ensures the pie is circular.
 
     plt.tight_layout()
     plt.savefig(out_path, dpi=200, bbox_inches="tight")
