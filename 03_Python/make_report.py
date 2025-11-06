@@ -790,19 +790,24 @@ kpi_lines = [
 for line in kpi_lines:
     Story.append(Paragraph("• " + line, styles["BodyGrey"]))
 
-    Story.append(Spacer(1, 30))
+# ✅ Add clear space *after* all KPIs — not after each KPI
+Story.append(Spacer(1, 40))  # increased from 30 to 40 for nicer balance
 
 Story.append(Paragraph("Visual Summary", styles["Heading2Cyan"]))
-Story.append(Spacer(1, 10))
+Story.append(Spacer(1, 6))
 
 if IMG_REV_PY.exists():
     Story.append(Paragraph("Monthly Revenue Trend", styles["Heading3Cyan"]))
     Story.append(fit_image_keep_ratio(IMG_REV_PY, max_w=16.5*cm, max_h=8.8*cm))
     Story.append(Spacer(1, 10))
 else:
-    Story.append(Paragraph("Monthly revenue chart not found (expected 03_Analysis/figures/monthly_revenue_py.png).", styles["SmallGrey"]))
+    Story.append(Paragraph(
+        "Monthly revenue chart not found (expected 03_Analysis/figures/monthly_revenue_py.png).",
+        styles["SmallGrey"]
+    ))
 
 Story.append(PageBreak())
+
 
 # === Page 2 === (PY charts)
 Story.append(Paragraph("Top 10 Products by Revenue", styles["Heading2Cyan"]))
