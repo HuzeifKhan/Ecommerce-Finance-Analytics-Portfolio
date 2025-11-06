@@ -78,6 +78,7 @@ IMG_RFM_CLV_SCAT = FIG_DIR / "rfm_clv_scatter.png"
 IMG_REV_PY = FIG_DIR / "monthly_revenue_py.png"
 IMG_TOP_PY = FIG_DIR / "top_products_py.png"
 IMG_RFM_PY = FIG_DIR / "rfm_segments_py.png"
+IMG_FORECAST = BASE_DIR / "03_Analysis" / "figures" / "revenue_forecast_12m.png"
 
 EXCEL_DIR = BASE_DIR / "04_Excel"
 EXCEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -743,6 +744,23 @@ if IMG_COHORT.exists():
     Story.append(fit_image_keep_ratio(IMG_COHORT, max_w=16.5*cm, max_h=17*cm))
 else:
     Story.append(Paragraph("Cohort heatmap not found (expected 03_Analysis/figures/cohort_retention.png).", styles["SmallGrey"]))
+
+    # === Page X — Revenue Forecast (12 months) ===
+Story.append(PageBreak())
+Story.append(Paragraph("Revenue Forecast (Next 12 Months)", styles["Heading2Cyan"]))
+Story.append(Spacer(1, 6))
+caption = ("SARIMAX forecast with 80% confidence band. "
+           "Use this to plan inventory, marketing budgets, and hiring.")
+Story.append(Paragraph(caption, styles["SmallGrey"]))
+Story.append(Spacer(1, 8))
+
+if IMG_FORECAST.exists():
+    Story.append(fit_image_keep_ratio(IMG_FORECAST, max_w=16.5*cm, max_h=17*cm))
+else:
+    Story.append(Paragraph(
+        "Forecast image not found (expected 03_Analysis/figures/revenue_forecast_12m.png).",
+        styles["SmallGrey"]
+    ))
 
 # === Page 5 — CLV (Top 20) ===
 Story.append(PageBreak())
