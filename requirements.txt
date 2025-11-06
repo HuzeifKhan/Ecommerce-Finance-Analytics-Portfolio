@@ -4,7 +4,6 @@ reportlab
 seaborn
 openpyxl
 xlsxwriter
-pmdarima
 prophet
 numpy
 
