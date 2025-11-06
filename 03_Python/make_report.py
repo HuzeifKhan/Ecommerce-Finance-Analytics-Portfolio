@@ -681,7 +681,7 @@ for line in kpi_lines:
 Story.append(PageBreak())
 
 # === Page 2 === (PY charts)
-Story.append(Paragraph("Visual Summary (Python Charts)", styles["Heading2Cyan"]))
+Story.append(Paragraph("Visual Summary", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
 
 if IMG_REV_PY.exists():
