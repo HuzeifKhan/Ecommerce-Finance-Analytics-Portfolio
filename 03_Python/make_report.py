@@ -3,12 +3,11 @@
 Ecommerce & Finance – Insights Report (Cyan headings, dark-grey text, soft light-grey background)
 
 Changes in this version:
-- Removed Dashboard section from Page 1 (no preview image, no Tableau link)
-- Page 2–3 charts now generated via Python from 01_Data/processed:
-    * Monthly Revenue Trend  -> 03_Analysis/figures/monthly_revenue_py.png
-    * Top 10 Products        -> 03_Analysis/figures/top_products_py.png
-    * Customer Segmentation  -> 03_Analysis/figures/rfm_segments_py.png
-- Excel notes no longer include "Dashboard Overview" row.
+- Replaced Page 2–3 charts with the same logic/visuals used in ecommerce_analysis.ipynb:
+    * Monthly Revenue Trend  (returns excluded, same YearMonth build, neon style)
+    * Top 10 Products        (returns excluded, Description-based, neon style)
+    * Customer Segmentation  (RFM rebuilt from raw if needed, same emoji segments, neon style)
+- No other sections changed.
 
 Pages
 1) Title + KPIs (no dashboard)
@@ -91,7 +90,7 @@ IMG_CLV_SEGMENT  = FIG_DIR / "clv_by_segment.png"
 IMG_RFM_CLV_CORR = FIG_DIR / "rfm_clv_correlation.png"
 IMG_RFM_CLV_SCAT = FIG_DIR / "rfm_clv_scatter.png"
 
-# Python-generated chart targets (NEW)
+# Python-generated chart targets
 IMG_REV_PY = FIG_DIR / "monthly_revenue_py.png"
 IMG_TOP_PY = FIG_DIR / "top_products_py.png"
 IMG_RFM_PY = FIG_DIR / "rfm_segments_py.png"
@@ -286,151 +285,246 @@ def bullets_from_summary(df: pd.DataFrame, max_rows: int = 4):
     return out
 
 # -------------------------
-# PY CHARTS — Generate from processed data
+# PY CHARTS — Generate from processed data (MATCHING NOTEBOOK)
 # -------------------------
 def _ensure_numeric(series):
     return pd.to_numeric(series, errors="coerce")
 
+# — Neon style (as used in the notebook) —
+_BG      = "#E8E8E8"
+_GRID    = "#494949"
+_AX      = "#383B3E"
+_TITLE   = "#1B1B1B"
+_CYAN    = "#10DCC4"
+_PINK    = "#0087A2"
+_ORANGE  = "#FF7F0E"
+_PURPLE  = "#5302A9"
+_NEON_PALETTE = [_PURPLE, _PINK, _ORANGE, _CYAN]
+
+def _style_axes(ax):
+    ax.set_facecolor(_BG)
+    for spine in ax.spines.values():
+        spine.set_color(_GRID)
+        spine.set_linewidth(1.2)
+    ax.tick_params(colors=_AX, labelsize=10)
+    ax.grid(True, color=_GRID, linewidth=0.8, alpha=0.6)
+
+def _maybe_parse_dates(s):
+    try:
+        return pd.to_datetime(s, errors="coerce")
+    except Exception:
+        return s
+
 def make_monthly_revenue_chart(df: pd.DataFrame, out_path: Path):
+    """
+    Match ecommerce_analysis.ipynb:
+    - If raw columns exist: exclude returns (IsReturn==0), group by InvoiceYear/InvoiceMonth -> YearMonth.
+    - Otherwise, honor pre-aggregated monthly_revenue file (YearMonth + LineAmount).
+    - Neon styling + emoji title.
+    """
     if df.empty:
         return
-    # Flexible column names
-    df = df.copy()
-    # expected: YearMonth + LineAmount (from your pipeline)
-    ym_col = None
-    for cand in ["YearMonth", "Year_Month", "Month", "yearmonth", "year_month"]:
-        if cand in df.columns:
-            ym_col = cand
-            break
-    amt_col = None
-    for cand in ["LineAmount", "Line Amount", "Revenue", "Amount", "Line_Amount", "lineamount"]:
-        if cand in df.columns:
-            amt_col = cand
-            break
-    if ym_col is None or amt_col is None:
-        return
 
-    # Parse YearMonth
-    # Accept formats like "2024-01", "Jan-2024", full dates, etc.
-    try:
-        ym = pd.to_datetime(df[ym_col], errors="coerce")
-        # If it looks like end-of-month dates, normalize to Month Start for sorting
-        ym = ym.dt.to_period("M").dt.to_timestamp()
-    except Exception:
-        # Fallback: leave as-is
-        ym = df[ym_col]
+    work = df.copy()
 
-    amt = _ensure_numeric(df[amt_col])
-    tmp = pd.DataFrame({"YearMonth": ym, "Revenue": amt}).dropna().groupby("YearMonth", as_index=False)["Revenue"].sum()
-    tmp = tmp.sort_values("YearMonth")
+    # Prefer raw → rebuild like in notebook
+    raw_cols = set(work.columns)
+    has_raw = {"InvoiceYear", "InvoiceMonth", "LineAmount"}.issubset(raw_cols)
+    if has_raw:
+        # Exclude returns if present
+        if "IsReturn" in raw_cols:
+            work = work[work["IsReturn"] == 0].copy()
+        grouped = (
+            work.groupby(["InvoiceYear", "InvoiceMonth"], as_index=False)["LineAmount"]
+                .sum()
+        )
+        grouped["YearMonth"] = (
+            grouped["InvoiceYear"].astype(str) + "-" + grouped["InvoiceMonth"].astype(str).str.zfill(2)
+        )
+        x = pd.to_datetime(grouped["YearMonth"], errors="coerce").dt.to_period("M").dt.to_timestamp()
+        y = _ensure_numeric(grouped["LineAmount"])
+    else:
+        # Use provided processed table
+        ym_col = next((c for c in ["YearMonth", "Year_Month", "Month", "yearmonth", "year_month"] if c in work.columns), None)
+        amt_col = next((c for c in ["LineAmount", "Line Amount", "Revenue", "Amount", "lineamount"] if c in work.columns), None)
+        if ym_col is None or amt_col is None:
+            return
+        x = pd.to_datetime(work[ym_col], errors="coerce").dt.to_period("M").dt.to_timestamp()
+        y = _ensure_numeric(work[amt_col])
 
-    plt.figure(figsize=(9, 4.5), dpi=200)
-    plt.plot(tmp["YearMonth"], tmp["Revenue"], linewidth=2)
-    plt.title("Monthly Revenue Trend")
-    plt.xlabel("Month")
-    plt.ylabel("Revenue")
-    plt.grid(True, alpha=0.3)
+        # If the processed file still has raw row-level data, aggregate
+        tmp = pd.DataFrame({"YearMonth": x, "Revenue": y}).dropna().groupby("YearMonth", as_index=False)["Revenue"].sum()
+        x, y = tmp["YearMonth"], tmp["Revenue"]
+
+    order = np.argsort(pd.to_datetime(x))
+    x, y = x.iloc[order], y.iloc[order]
+
+    fig, ax = plt.subplots(figsize=(10, 5), facecolor=_BG)
+    _style_axes(ax)
+
+    ax.plot(x, y,
+            linewidth=2.4,
+            color=_PINK,
+            marker="o",
+            markersize=5,
+            markerfacecolor=_PINK,
+            markeredgecolor=_BG)
+
+    ax.set_title("📈 Monthly Revenue Trend", color=_TITLE, fontsize=14, fontweight="bold", pad=14)
+    ax.set_xlabel("Month",  color=_AX, fontsize=11)
+    ax.set_ylabel("Revenue (€)", color=_AX, fontsize=11)
+    plt.xticks(rotation=45, ha="right")
+
     plt.tight_layout()
-    plt.savefig(out_path)
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
     plt.close()
 
 def make_top_products_chart(df: pd.DataFrame, out_path: Path):
+    """
+    Match ecommerce_analysis.ipynb:
+    - Exclude returns (IsReturn==0) when raw columns present
+    - Group by Description (fallbacks to other name fields)
+    - Top 10 by LineAmount
+    - Neon styling + emoji title
+    """
     if df.empty:
         return
-    df = df.copy()
-    # expected: Product + LineAmount (or pre-aggregated)
-    prod_col = None
-    for cand in ["Product", "ProductName", "Item", "SKU", "product", "Product Name"]:
-        if cand in df.columns:
-            prod_col = cand
-            break
-    amt_col = None
-    for cand in ["LineAmount", "TotalRevenue", "Revenue", "Line Amount", "Amount", "lineamount"]:
-        if cand in df.columns:
-            amt_col = cand
-            break
 
-    if prod_col is None:
-        # maybe already in columns: 'Product' derived name like 'Description'
-        for cand in ["Description", "Name", "Title"]:
-            if cand in df.columns:
-                prod_col = cand
-                break
+    work = df.copy()
+    raw_cols = set(work.columns)
+    amt_col = next((c for c in ["LineAmount", "TotalRevenue", "Revenue", "Line Amount", "Amount", "lineamount"] if c in raw_cols), None)
+
+    # Try notebook's 'Description' first
+    prod_col = next((c for c in ["Description", "Product", "ProductName", "Item", "SKU", "Product Name", "Name", "Title", "product"] if c in raw_cols), None)
     if prod_col is None or amt_col is None:
         return
 
-    amt = _ensure_numeric(df[amt_col])
+    # Exclude returns if present (notebook behavior)
+    if "IsReturn" in raw_cols:
+        work = work[work["IsReturn"] == 0].copy()
+
     tmp = (
-        pd.DataFrame({prod_col: df[prod_col], "Revenue": amt})
-        .dropna(subset=[prod_col])
-        .groupby(prod_col, as_index=False)["Revenue"].sum()
-        .sort_values("Revenue", ascending=False)
-        .head(10)
+        work.groupby(prod_col, as_index=False)[amt_col]
+            .sum()
+            .rename(columns={amt_col: "Revenue"})
+            .sort_values("Revenue", ascending=False)
+            .head(10)
     )
 
-    plt.figure(figsize=(9, 5), dpi=200)
-    plt.barh(tmp[prod_col][::-1], tmp["Revenue"][::-1])
-    plt.title("Top 10 Products by Revenue")
-    plt.xlabel("Revenue")
-    plt.ylabel("Product")
+    fig, ax = plt.subplots(figsize=(10, 5.2), facecolor=_BG)
+    _style_axes(ax)
+
+    y_labels = tmp[prod_col][::-1]
+    vals     = tmp["Revenue"][::-1]
+    bars = ax.barh(y_labels, vals, height=0.7, color=_CYAN)
+
+    # Optional value labels at bar ends
+    for b in bars:
+        ax.text(b.get_width(), b.get_y() + b.get_height()/2,
+                f" {b.get_width():,.0f}", va="center", ha="left", color=_AX, fontsize=9)
+
+    ax.set_title("🏆 Top 10 Products by Revenue", color=_TITLE, fontsize=14, fontweight="bold", pad=14)
+    ax.set_xlabel("Revenue (€)", color=_AX, fontsize=11)
+    ax.set_ylabel("Product",     color=_AX, fontsize=11)
+
     plt.tight_layout()
-    plt.savefig(out_path)
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
     plt.close()
 
 def make_rfm_chart(df: pd.DataFrame, out_path: Path):
     """
-    Simple RFM Segments bar chart.
-    Accepts columns like:
-      - Segment OR RFM_Segment OR rfm_segment
-      - Or builds segments if Recency, Frequency, Monetary present (quantile-based)
+    Match ecommerce_analysis.ipynb:
+    - If segment column exists, plot it.
+    - Else, rebuild RFM from raw:
+        Recency = (max InvoiceDate - last purchase) in days
+        Frequency = number of invoices
+        Monetary = sum(LineAmount) with returns excluded
+      Score each on 1..5 (quantiles) and sum → RFM_Score.
+      Segment with same thresholds/labels (with emojis) as notebook.
+    - Neon styling.
     """
     if df.empty:
         return
-    df = df.copy()
 
-    # Try to detect segment column
-    seg_col = None
-    for cand in ["Segment", "RFM_Segment", "rfm_segment", "segment", "RFMGroup", "rfmgroup"]:
-        if cand in df.columns:
-            seg_col = cand
-            break
+    work = df.copy()
+    cols = set(work.columns)
 
+    # If already segmented
+    seg_col = next((c for c in ["Segment", "RFM_Segment", "rfm_segment", "segment", "RFMGroup", "rfmgroup"] if c in cols), None)
     if seg_col is None:
-        # Attempt to build segments if R/F/M present
-        r_col = next((c for c in ["Recency","recency","R"] if c in df.columns), None)
-        f_col = next((c for c in ["Frequency","frequency","F"] if c in df.columns), None)
-        m_col = next((c for c in ["Monetary","monetary","M","MonetaryValue","monetaryvalue"] if c in df.columns), None)
+        # Need raw columns to build RFM
+        cust_col = next((c for c in ["CustomerID", "Customer Id", "customerid"] if c in cols), None)
+        date_col = next((c for c in ["InvoiceDate", "invoice_date", "Date", "date"] if c in cols), None)
+        amt_col  = next((c for c in ["LineAmount", "Line Amount", "Amount", "Revenue", "lineamount"] if c in cols), None)
+        inv_col  = next((c for c in ["InvoiceNo", "Invoice", "Invoice_Number", "invoiceno", "InvoiceID"] if c in cols), None)
 
-        if r_col and f_col and m_col:
-            # Lower recency is better; higher freq & monetary are better
-            df["_R_q"] = pd.qcut(df[r_col].rank(method="first", ascending=True), 5, labels=[5,4,3,2,1]) # 1 best (recent), 5 worst
-            df["_F_q"] = pd.qcut(df[f_col].rank(method="first", ascending=False), 5, labels=[1,2,3,4,5])
-            df["_M_q"] = pd.qcut(df[m_col].rank(method="first", ascending=False), 5, labels=[1,2,3,4,5])
-            df["RFM_Score"] = df["_R_q"].astype(int) + df["_F_q"].astype(int) + df["_M_q"].astype(int)
+        if not (cust_col and date_col and amt_col):
+            # Fall back to count-only bar if nothing usable
+            tmp = pd.DataFrame({"Segment": ["No RFM Segments Found"], "Count": [len(work)]})
+            seg_plot = tmp
+            seg_name = "Segment"
+        else:
+            # Filter for monetary = exclude returns
+            if "IsReturn" in cols:
+                work = work[work["IsReturn"] == 0].copy()
 
-            # Simple mapping
-            def _seg(score):
-                if score <= 5:   return "Champions"
-                if score <= 7:   return "Loyal"
-                if score <= 9:   return "Potential Loyalists"
-                if score <= 11:  return "At Risk"
-                return "Hibernating"
-            df["Segment"] = df["RFM_Score"].apply(_seg)
-            seg_col = "Segment"
+            work[date_col] = _maybe_parse_dates(work[date_col])
+            latest_date = work[date_col].max()
 
-    if seg_col is None:
-        # Fall back to a placeholder count if no usable info
-        tmp = pd.DataFrame({"Segment": ["No RFM Segments Found"], "Count": [len(df)]})
+            freq_series = work.groupby(cust_col)[inv_col].nunique() if inv_col else work.groupby(cust_col)[date_col].count()
+            mon_series  = work.groupby(cust_col)[amt_col].sum()
+            rec_series  = (latest_date - work.groupby(cust_col)[date_col].max()).dt.days
+
+            rfm_built = pd.DataFrame({
+                "CustomerID": freq_series.index,
+                "Recency":    rec_series.values,
+                "Frequency":  freq_series.values,
+                "Monetary":   mon_series.loc[freq_series.index].values
+            })
+
+            # Score 1..5 via quantiles (1=best for Recency; 5=best for F/M)
+            r_rank = pd.qcut(rfm_built["Recency"].rank(method="first", ascending=True), 5, labels=[5,4,3,2,1]).astype(int)
+            f_rank = pd.qcut(rfm_built["Frequency"].rank(method="first", ascending=False), 5, labels=[1,2,3,4,5]).astype(int)
+            m_rank = pd.qcut(rfm_built["Monetary"].rank(method="first", ascending=False), 5, labels=[1,2,3,4,5]).astype(int)
+            rfm_built["RFM_Score"] = r_rank + f_rank + m_rank
+
+            # Same labels & thresholds as notebook
+            def segment_customer(score: int) -> str:
+                if score >= 12:
+                    return "💎 Champions"
+                elif score >= 9:
+                    return "💼 Loyal Customers"
+                elif score >= 6:
+                    return "🌱 Regular Buyers"
+                else:
+                    return "⚠️ At Risk / Lost"
+
+            rfm_built["Segment"] = rfm_built["RFM_Score"].apply(segment_customer)
+            seg_plot = rfm_built.groupby("Segment").size().reset_index(name="Count").sort_values("Count", ascending=True)
+            seg_name = "Segment"
     else:
-        tmp = df.groupby(seg_col).size().reset_index(name="Count").sort_values("Count", ascending=True)
+        seg_plot = work.groupby(seg_col).size().reset_index(name="Count").sort_values("Count", ascending=True)
+        seg_name = seg_col
 
-    plt.figure(figsize=(9, 5), dpi=200)
-    plt.barh(tmp[seg_col] if seg_col in tmp.columns else tmp["Segment"], tmp["Count"])
-    plt.title("Customer Segmentation (RFM)")
-    plt.xlabel("Customers")
-    plt.ylabel("Segment")
+    fig, ax = plt.subplots(figsize=(10, 5.5), facecolor=_BG)
+    _style_axes(ax)
+
+    y_labels = seg_plot[seg_name]
+    vals     = seg_plot["Count"]
+    # Color cycle across segments
+    colors = (_NEON_PALETTE * (len(vals)//len(_NEON_PALETTE) + 1))[:len(vals)]
+    bars = ax.barh(y_labels, vals, height=0.7, color=colors)
+
+    for b in bars:
+        ax.text(b.get_width(), b.get_y() + b.get_height()/2,
+                f" {int(b.get_width()):,}", va="center", ha="left", color=_AX, fontsize=9)
+
+    ax.set_title("👥 Customer Segmentation (RFM)", color=_TITLE, fontsize=14, fontweight="bold", pad=14)
+    ax.set_xlabel("Customers", color=_AX, fontsize=11)
+    ax.set_ylabel("Segment",   color=_AX, fontsize=11)
+
     plt.tight_layout()
-    plt.savefig(out_path)
+    plt.savefig(out_path, dpi=200, bbox_inches="tight")
     plt.close()
 
 # Build charts
@@ -599,7 +693,6 @@ try:
     write_timestamp(ws_dn, ts_utc)
     ws_dn.append([])
     ws_dn.append(["View","What it shows","How to read","Filters / Drilldowns"])
-    # Removed "Dashboard Overview" row (since we removed dashboard from report)
     ws_dn.append(["Monthly Revenue (PY)",
                   "Revenue trend by month.",
                   "Look for seasonality, spikes, and sustained trends.",
