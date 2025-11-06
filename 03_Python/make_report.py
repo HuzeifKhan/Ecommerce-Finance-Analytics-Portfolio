@@ -790,8 +790,10 @@ kpi_lines = [
 for line in kpi_lines:
     Story.append(Paragraph("• " + line, styles["BodyGrey"]))
 
+    Story.append(Spacer(1, 30))
+
 Story.append(Paragraph("Visual Summary", styles["Heading2Cyan"]))
-Story.append(Spacer(1, 6))
+Story.append(Spacer(1, 10))
 
 if IMG_REV_PY.exists():
     Story.append(Paragraph("Monthly Revenue Trend", styles["Heading3Cyan"]))
