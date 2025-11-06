@@ -790,9 +790,6 @@ kpi_lines = [
 for line in kpi_lines:
     Story.append(Paragraph("• " + line, styles["BodyGrey"]))
 
-Story.append(PageBreak())
-
-# === Page 2 === (PY charts)
 Story.append(Paragraph("Visual Summary", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
 
@@ -803,6 +800,10 @@ if IMG_REV_PY.exists():
 else:
     Story.append(Paragraph("Monthly revenue chart not found (expected 03_Analysis/figures/monthly_revenue_py.png).", styles["SmallGrey"]))
 
+Story.append(PageBreak())
+
+# === Page 2 === (PY charts)
+Story.append(Paragraph("Top 10 Products by Revenue", styles["Heading2Cyan"]))
 if IMG_TOP_PY.exists():
     Story.append(Paragraph("Top 10 Products by Revenue", styles["Heading3Cyan"]))
     Story.append(fit_image_keep_ratio(IMG_TOP_PY, max_w=16.5*cm, max_h=8.8*cm))
