@@ -1,0 +1,87 @@
+name: Build PDF previews for GitHub
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-previews:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Ensure docs/ folder (GitHub Pages)
+        run: |
+          mkdir -p docs
+
+      # Copy your latest PDF into docs/ so GitHub Pages can serve it
+      - name: Copy report PDF
+        run: |
+          src="06_Reports/Ecommerce_Finance_Insights_Report.pdf"
+          dest="docs/Ecommerce_Finance_Insights_Report.pdf"
+          if [ -f "$src" ]; then
+            cp "$src" "$dest"
+          else
+            echo "::warning::Report PDF not found at $src"
+          fi
+
+      # Convert PDF pages into PNGs (good for README preview)
+      # ImageMagick is preinstalled on ubuntu-latest
+      - name: Render PNG previews from PDF
+        run: |
+          set -e
+          pdf="docs/Ecommerce_Finance_Insights_Report.pdf"
+          if [ -f "$pdf" ]; then
+            # 200 DPI, white background (removes transparency issues), page images
+            magick -density 200 "$pdf" -background white -alpha remove -alpha off docs/report_page-%02d.png
+          else
+            echo "::warning::No PDF found to render."
+          fi
+
+      # Optional: create a lightweight HTML viewer page that embeds the PDF
+      - name: Create simple HTML viewer
+        run: |
+          cat > docs/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <title>Ecommerce & Finance Report</title>
+            <style>
+              body{background:#0d1117;color:#e6edf3;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
+              .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+              h1{color:#03C4A1;margin:0 0 12px}
+              .btn{display:inline-block;margin:12px 0;padding:10px 14px;border:1px solid #30363d;border-radius:8px;color:#e6edf3;text-decoration:none}
+              .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+              .grid img{width:100%;border-radius:10px;border:1px solid #30363d;background:#161b22}
+              iframe{width:100%;height:80vh;border:1px solid #30363d;border-radius:10px;background:#161b22}
+            </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <h1>E-commerce & Finance Insights Report</h1>
+              <a class="btn" href="./Ecommerce_Finance_Insights_Report.pdf">Download PDF</a>
+              <h2 style="color:#03C4A1">Live Preview (PDF)</h2>
+              <iframe src="./Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
+              <h2 style="color:#03C4A1">Page Previews (PNG)</h2>
+              <div class="grid">
+                <!-- Image list auto-filled by README, but keep 1–2 as examples -->
+                <img src="./report_page-00.png" alt="Page 1 preview" />
+                <img src="./report_page-01.png" alt="Page 2 preview" />
+              </div>
+            </div>
+          </body>
+          </html>
+          HTML
+
+      - name: Commit docs/ to repo
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "docs"
+          message: "ci: build PDF previews for GitHub Pages"
