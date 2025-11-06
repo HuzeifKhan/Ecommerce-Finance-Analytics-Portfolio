@@ -2,10 +2,18 @@
 """
 Ecommerce & Finance – Insights Report (Cyan headings, dark-grey text, soft light-grey background)
 
+Changes in this version:
+- Removed Dashboard section from Page 1 (no preview image, no Tableau link)
+- Page 2–3 charts now generated via Python from 01_Data/processed:
+    * Monthly Revenue Trend  -> 03_Analysis/figures/monthly_revenue_py.png
+    * Top 10 Products        -> 03_Analysis/figures/top_products_py.png
+    * Customer Segmentation  -> 03_Analysis/figures/rfm_segments_py.png
+- Excel notes no longer include "Dashboard Overview" row.
+
 Pages
-1) Title + KPIs + Live Tableau link
-2) Monthly Revenue + Top Products (Tableau exports)
-3) Customer Segmentation (RFM) title + chart
+1) Title + KPIs (no dashboard)
+2) Monthly Revenue + Top Products (PY charts)
+3) Customer Segmentation (RFM) (PY chart)
 4) Cohort Retention (cohort_retention.png)
 5) Customer Lifetime Value (Top 20)
 6) Customer Lifetime Value v1 – 12-Month Model
@@ -19,8 +27,10 @@ Inputs (CSV/XLSX tolerant):
 - (optional) 01_Data/processed/rfm_clv_summary.csv
 - (optional) 01_Data/processed/rfm_clv_insights.csv
 
-Images:
-- 05_Tableau/exports/{dashboard_overview,monthly_revenue,top_products,customer_segments}.png
+Images (auto-generated + existing):
+- 03_Analysis/figures/monthly_revenue_py.png
+- 03_Analysis/figures/top_products_py.png
+- 03_Analysis/figures/rfm_segments_py.png
 - 03_Analysis/figures/cohort_retention.png
 - 03_Analysis/figures/clv_top20.png
 - 03_Analysis/figures/clv_by_segment.png
@@ -37,7 +47,9 @@ Output:
 from pathlib import Path
 from datetime import datetime, timezone
 import pandas as pd
+import numpy as np
 
+# ReportLab
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib import colors
@@ -50,6 +62,11 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font, Alignment, PatternFill
+
+# Matplotlib (for Python charts)
+import matplotlib
+matplotlib.use("Agg")  # headless
+import matplotlib.pyplot as plt
 
 # -------------------------
 # Paths
@@ -64,24 +81,26 @@ OUTPUT_PATH = REPORT_DIR / "Ecommerce_Finance_Insights_Report.pdf"
 CSV_RFM_CLV_SUMMARY  = DATA_DIR / "rfm_clv_summary.csv"
 CSV_RFM_CLV_INSIGHTS = DATA_DIR / "rfm_clv_insights.csv"
 
-IMG_DIR = BASE_DIR / "05_Tableau" / "exports"
-IMG_DASH = IMG_DIR / "dashboard_overview.png"
-IMG_REV  = IMG_DIR / "monthly_revenue.png"
-IMG_TOP  = IMG_DIR / "top_products.png"
-IMG_RFM  = IMG_DIR / "customer_segments.png"
+# Analysis figures (existing optional)
+FIG_DIR = BASE_DIR / "03_Analysis" / "figures"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-# analysis figures
-IMG_COHORT       = BASE_DIR / "03_Analysis" / "figures" / "cohort_retention.png"
-IMG_CLV          = BASE_DIR / "03_Analysis" / "figures" / "clv_top20.png"
-IMG_CLV_SEGMENT  = BASE_DIR / "03_Analysis" / "figures" / "clv_by_segment.png"
-IMG_RFM_CLV_CORR = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_correlation.png"
-IMG_RFM_CLV_SCAT = BASE_DIR / "03_Analysis" / "figures" / "rfm_clv_scatter.png"
+IMG_COHORT       = FIG_DIR / "cohort_retention.png"
+IMG_CLV          = FIG_DIR / "clv_top20.png"
+IMG_CLV_SEGMENT  = FIG_DIR / "clv_by_segment.png"
+IMG_RFM_CLV_CORR = FIG_DIR / "rfm_clv_correlation.png"
+IMG_RFM_CLV_SCAT = FIG_DIR / "rfm_clv_scatter.png"
+
+# Python-generated chart targets (NEW)
+IMG_REV_PY = FIG_DIR / "monthly_revenue_py.png"
+IMG_TOP_PY = FIG_DIR / "top_products_py.png"
+IMG_RFM_PY = FIG_DIR / "rfm_segments_py.png"
 
 EXCEL_DIR = BASE_DIR / "04_Excel"
 EXCEL_DIR.mkdir(parents=True, exist_ok=True)
-KPI_XLSX       = EXCEL_DIR / "KPI_Snapshot.xlsx"
-OVERVIEW_XLSX  = EXCEL_DIR / "01_Data_Overview.xlsx"
-NOTES_XLSX     = EXCEL_DIR / "Dashboard_Notes.xlsx"
+KPI_XLSX      = EXCEL_DIR / "KPI_Snapshot.xlsx"
+OVERVIEW_XLSX = EXCEL_DIR / "01_Data_Overview.xlsx"
+NOTES_XLSX    = EXCEL_DIR / "Dashboard_Notes.xlsx"
 
 # -------------------------
 # Theme
@@ -238,7 +257,7 @@ avg_order_value = (total_revenue / total_customers) if total_customers else 0.0
 ts_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 # -------------------------
-# Optional: Load RFM–CLV CSV insights (for Page 8)
+# OPTIONAL: Load RFM–CLV CSV insights (for Page 8)
 # -------------------------
 rfm_clv_summary  = pd.read_csv(CSV_RFM_CLV_SUMMARY)  if CSV_RFM_CLV_SUMMARY.exists()  else pd.DataFrame()
 rfm_clv_insights = pd.read_csv(CSV_RFM_CLV_INSIGHTS) if CSV_RFM_CLV_INSIGHTS.exists() else pd.DataFrame()
@@ -265,6 +284,163 @@ def bullets_from_summary(df: pd.DataFrame, max_rows: int = 4):
         if seg and meanv is not None:
             out.append(f"• {strong_cyan(seg)} — avg CLV €{float(meanv):,.0f} (n={int(cnt) if pd.notna(cnt) else '—'})")
     return out
+
+# -------------------------
+# PY CHARTS — Generate from processed data
+# -------------------------
+def _ensure_numeric(series):
+    return pd.to_numeric(series, errors="coerce")
+
+def make_monthly_revenue_chart(df: pd.DataFrame, out_path: Path):
+    if df.empty:
+        return
+    # Flexible column names
+    df = df.copy()
+    # expected: YearMonth + LineAmount (from your pipeline)
+    ym_col = None
+    for cand in ["YearMonth", "Year_Month", "Month", "yearmonth", "year_month"]:
+        if cand in df.columns:
+            ym_col = cand
+            break
+    amt_col = None
+    for cand in ["LineAmount", "Line Amount", "Revenue", "Amount", "Line_Amount", "lineamount"]:
+        if cand in df.columns:
+            amt_col = cand
+            break
+    if ym_col is None or amt_col is None:
+        return
+
+    # Parse YearMonth
+    # Accept formats like "2024-01", "Jan-2024", full dates, etc.
+    try:
+        ym = pd.to_datetime(df[ym_col], errors="coerce")
+        # If it looks like end-of-month dates, normalize to Month Start for sorting
+        ym = ym.dt.to_period("M").dt.to_timestamp()
+    except Exception:
+        # Fallback: leave as-is
+        ym = df[ym_col]
+
+    amt = _ensure_numeric(df[amt_col])
+    tmp = pd.DataFrame({"YearMonth": ym, "Revenue": amt}).dropna().groupby("YearMonth", as_index=False)["Revenue"].sum()
+    tmp = tmp.sort_values("YearMonth")
+
+    plt.figure(figsize=(9, 4.5), dpi=200)
+    plt.plot(tmp["YearMonth"], tmp["Revenue"], linewidth=2)
+    plt.title("Monthly Revenue Trend")
+    plt.xlabel("Month")
+    plt.ylabel("Revenue")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(out_path)
+    plt.close()
+
+def make_top_products_chart(df: pd.DataFrame, out_path: Path):
+    if df.empty:
+        return
+    df = df.copy()
+    # expected: Product + LineAmount (or pre-aggregated)
+    prod_col = None
+    for cand in ["Product", "ProductName", "Item", "SKU", "product", "Product Name"]:
+        if cand in df.columns:
+            prod_col = cand
+            break
+    amt_col = None
+    for cand in ["LineAmount", "TotalRevenue", "Revenue", "Line Amount", "Amount", "lineamount"]:
+        if cand in df.columns:
+            amt_col = cand
+            break
+
+    if prod_col is None:
+        # maybe already in columns: 'Product' derived name like 'Description'
+        for cand in ["Description", "Name", "Title"]:
+            if cand in df.columns:
+                prod_col = cand
+                break
+    if prod_col is None or amt_col is None:
+        return
+
+    amt = _ensure_numeric(df[amt_col])
+    tmp = (
+        pd.DataFrame({prod_col: df[prod_col], "Revenue": amt})
+        .dropna(subset=[prod_col])
+        .groupby(prod_col, as_index=False)["Revenue"].sum()
+        .sort_values("Revenue", ascending=False)
+        .head(10)
+    )
+
+    plt.figure(figsize=(9, 5), dpi=200)
+    plt.barh(tmp[prod_col][::-1], tmp["Revenue"][::-1])
+    plt.title("Top 10 Products by Revenue")
+    plt.xlabel("Revenue")
+    plt.ylabel("Product")
+    plt.tight_layout()
+    plt.savefig(out_path)
+    plt.close()
+
+def make_rfm_chart(df: pd.DataFrame, out_path: Path):
+    """
+    Simple RFM Segments bar chart.
+    Accepts columns like:
+      - Segment OR RFM_Segment OR rfm_segment
+      - Or builds segments if Recency, Frequency, Monetary present (quantile-based)
+    """
+    if df.empty:
+        return
+    df = df.copy()
+
+    # Try to detect segment column
+    seg_col = None
+    for cand in ["Segment", "RFM_Segment", "rfm_segment", "segment", "RFMGroup", "rfmgroup"]:
+        if cand in df.columns:
+            seg_col = cand
+            break
+
+    if seg_col is None:
+        # Attempt to build segments if R/F/M present
+        r_col = next((c for c in ["Recency","recency","R"] if c in df.columns), None)
+        f_col = next((c for c in ["Frequency","frequency","F"] if c in df.columns), None)
+        m_col = next((c for c in ["Monetary","monetary","M","MonetaryValue","monetaryvalue"] if c in df.columns), None)
+
+        if r_col and f_col and m_col:
+            # Lower recency is better; higher freq & monetary are better
+            df["_R_q"] = pd.qcut(df[r_col].rank(method="first", ascending=True), 5, labels=[5,4,3,2,1]) # 1 best (recent), 5 worst
+            df["_F_q"] = pd.qcut(df[f_col].rank(method="first", ascending=False), 5, labels=[1,2,3,4,5])
+            df["_M_q"] = pd.qcut(df[m_col].rank(method="first", ascending=False), 5, labels=[1,2,3,4,5])
+            df["RFM_Score"] = df["_R_q"].astype(int) + df["_F_q"].astype(int) + df["_M_q"].astype(int)
+
+            # Simple mapping
+            def _seg(score):
+                if score <= 5:   return "Champions"
+                if score <= 7:   return "Loyal"
+                if score <= 9:   return "Potential Loyalists"
+                if score <= 11:  return "At Risk"
+                return "Hibernating"
+            df["Segment"] = df["RFM_Score"].apply(_seg)
+            seg_col = "Segment"
+
+    if seg_col is None:
+        # Fall back to a placeholder count if no usable info
+        tmp = pd.DataFrame({"Segment": ["No RFM Segments Found"], "Count": [len(df)]})
+    else:
+        tmp = df.groupby(seg_col).size().reset_index(name="Count").sort_values("Count", ascending=True)
+
+    plt.figure(figsize=(9, 5), dpi=200)
+    plt.barh(tmp[seg_col] if seg_col in tmp.columns else tmp["Segment"], tmp["Count"])
+    plt.title("Customer Segmentation (RFM)")
+    plt.xlabel("Customers")
+    plt.ylabel("Segment")
+    plt.tight_layout()
+    plt.savefig(out_path)
+    plt.close()
+
+# Build charts
+try:
+    make_monthly_revenue_chart(monthly, IMG_REV_PY)
+    make_top_products_chart(top, IMG_TOP_PY)
+    make_rfm_chart(rfm, IMG_RFM_PY)
+    print("✅ Python charts saved in 03_Analysis/figures/")
+except Exception as e:
+    print(f"⚠️ Chart generation skipped: {e}")
 
 # -------------------------
 # Excel: KPI_Snapshot.xlsx
@@ -423,19 +599,16 @@ try:
     write_timestamp(ws_dn, ts_utc)
     ws_dn.append([])
     ws_dn.append(["View","What it shows","How to read","Filters / Drilldowns"])
-    ws_dn.append(["Dashboard Overview",
-                  "Executive overview combining KPIs and key charts.",
-                  "Scan KPIs (top) → trend (left) → product mix (right).",
-                  "Date range, country/region (if available)."])
-    ws_dn.append(["Monthly Revenue",
+    # Removed "Dashboard Overview" row (since we removed dashboard from report)
+    ws_dn.append(["Monthly Revenue (PY)",
                   "Revenue trend by month.",
                   "Look for seasonality, spikes, and sustained trends.",
-                  "Month picker or date range."])
-    ws_dn.append(["Top Products",
+                  "Month picker or date range (if available)."])
+    ws_dn.append(["Top Products (PY)",
                   "Top 10 products by total revenue.",
                   "Compare bars by length; hover for totals.",
                   "Category / product filter."])
-    ws_dn.append(["Customer Segments (RFM)",
+    ws_dn.append(["Customer Segments (RFM) (PY)",
                   "Customer clusters by Recency, Frequency, Monetary.",
                   "Focus on ‘Champions’ and ‘Loyal’ groups for upsell.",
                   "RFM score sliders / segment filter."])
@@ -453,7 +626,7 @@ try:
     ws_kpi.append(["Total Customers","Distinct count of Customer ID", f"{total_customers:,}"])
     ws_kpi.append(["Average Order Value","Revenue / Customers (or Orders where applicable)", f"{avg_order_value:,.2f}"])
 
-    # Links
+    # Links (kept minimal; no dashboard link)
     if "Links" in nwb.sheetnames:
         ws_l = nwb["Links"]
         ws_l.delete_rows(1, ws_l.max_row)
@@ -461,10 +634,8 @@ try:
         ws_l = nwb.create_sheet("Links")
     write_timestamp(ws_l, ts_utc)
     ws_l.append([])
-    tableau_url = "https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard"
     pdf_url = "06_Reports/Ecommerce_Finance_Insights_Report.pdf"
     ws_l.append(["Asset","URL"])
-    ws_l.append(["Live Tableau Dashboard", tableau_url])
     ws_l.append(["Latest PDF Report (repo path)", pdf_url])
     ws_l.append(["Last Refreshed (UTC)", ts_utc])
 
@@ -475,9 +646,9 @@ try:
             pass
 
     nwb.save(NOTES_XLSX)
-    print(f"📝 Dashboard Notes updated at {NOTES_XLSX}")
+    print(f"📝 Notes updated at {NOTES_XLSX}")
 except Exception as e:
-    print(f"⚠️ Dashboard Notes update skipped: {e}")
+    print(f"⚠️ Notes update skipped: {e}")
 
 # -------------------------
 # Build PDF document
@@ -490,17 +661,10 @@ doc = SimpleDocTemplate(
 
 Story = []
 
-# === Page 1 ===
+# === Page 1 === (NO Dashboard)
 Story.append(Paragraph("E-Commerce & Finance Insights Report", styles["CyanTitle"]))
 Story.append(Paragraph(
     "Generated via Python ReportLab • Author: Huzeif Khan",
-    styles["BodyGrey"]
-))
-Story.append(Spacer(1, 8))
-
-tableau_url = "https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard"
-Story.append(Paragraph(
-    f'Live Dashboard: <a href="{tableau_url}" color="#00DDD8">{strong_cyan("Open in Tableau Public")}</a>',
     styles["BodyGrey"]
 ))
 Story.append(Spacer(1, 14))
@@ -513,40 +677,38 @@ kpi_lines = [
 ]
 for line in kpi_lines:
     Story.append(Paragraph("• " + line, styles["BodyGrey"]))
-Story.append(Spacer(1, 10))
-
-if IMG_DASH.exists():
-    Story.append(Paragraph("Dashboard Preview", styles["Heading3Cyan"]))
-    Story.append(fit_image_keep_ratio(IMG_DASH, max_w=16.5*cm, max_h=8.5*cm))
-    Story.append(Spacer(1, 8))
 
 Story.append(PageBreak())
 
-# === Page 2 ===
-Story.append(Paragraph("Visual Summary (Tableau Exports)", styles["Heading2Cyan"]))
+# === Page 2 === (PY charts)
+Story.append(Paragraph("Visual Summary (Python Charts)", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
 
-if IMG_REV.exists():
+if IMG_REV_PY.exists():
     Story.append(Paragraph("Monthly Revenue Trend", styles["Heading3Cyan"]))
-    Story.append(fit_image_keep_ratio(IMG_REV, max_w=16.5*cm, max_h=8.8*cm))
+    Story.append(fit_image_keep_ratio(IMG_REV_PY, max_w=16.5*cm, max_h=8.8*cm))
     Story.append(Spacer(1, 10))
+else:
+    Story.append(Paragraph("Monthly revenue chart not found (expected 03_Analysis/figures/monthly_revenue_py.png).", styles["SmallGrey"]))
 
-if IMG_TOP.exists():
+if IMG_TOP_PY.exists():
     Story.append(Paragraph("Top 10 Products by Revenue", styles["Heading3Cyan"]))
-    Story.append(fit_image_keep_ratio(IMG_TOP, max_w=16.5*cm, max_h=8.8*cm))
+    Story.append(fit_image_keep_ratio(IMG_TOP_PY, max_w=16.5*cm, max_h=8.8*cm))
     Story.append(Spacer(1, 6))
+else:
+    Story.append(Paragraph("Top products chart not found (expected 03_Analysis/figures/top_products_py.png).", styles["SmallGrey"]))
 
 Story.append(PageBreak())
 
-# === Page 3 ===
+# === Page 3 === (PY RFM)
 Story.append(Paragraph("Customer Segmentation (RFM Model)", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
-if IMG_RFM.exists():
-    Story.append(fit_image_keep_ratio(IMG_RFM, max_w=16.5*cm, max_h=17*cm))
+if IMG_RFM_PY.exists():
+    Story.append(fit_image_keep_ratio(IMG_RFM_PY, max_w=16.5*cm, max_h=17*cm))
 else:
-    Story.append(Paragraph("RFM chart not found in 05_Tableau/exports/", styles["SmallGrey"]))
+    Story.append(Paragraph("RFM chart not found (expected 03_Analysis/figures/rfm_segments_py.png).", styles["SmallGrey"]))
 
-# === Page 4 — Cohort Retention (NEW) ===
+# === Page 4 — Cohort Retention (existing) ===
 Story.append(PageBreak())
 Story.append(Paragraph("Cohort Retention", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
@@ -620,8 +782,9 @@ Story.append(Paragraph(intro, styles["SmallGrey"]))
 Story.append(Spacer(1, 8))
 
 # Bullet points from optional CSVs
-ins_bullets = bullets_from_insights(rfm_clv_insights, max_rows=4)
-sum_bullets = bullets_from_summary(rfm_clv_summary,  max_rows=4)
+def _safe_list(x): return x if x is not None else []
+ins_bullets = _safe_list(bullets_from_insights(rfm_clv_insights, max_rows=4))
+sum_bullets = _safe_list(bullets_from_summary(rfm_clv_summary,  max_rows=4))
 for bl in (ins_bullets + sum_bullets):
     Story.append(Paragraph(bl, styles["BodyGrey"]))
 if not (ins_bullets or sum_bullets):
