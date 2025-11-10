@@ -33,6 +33,12 @@
 
 ---
 
+<!-- RUN-SUMMARY:START -->
+> ✅ Last successful refresh: _pending…_
+<!-- RUN-SUMMARY:END -->
+
+---
+
 **Last refreshed (UTC):** see the footer in the latest PDF and the “Last Updated (UTC)” column in  
 📊 `04_Excel/KPI_Snapshot.xlsx`
 
