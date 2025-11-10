@@ -41,16 +41,16 @@
 ---
 
 <p align="center">
-  <strong>📊 Live Dashboard:</strong><br>
+  <strong>📄 Live Report (HTML):</strong><br>
   <a href="https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/">
-    🌐 View Interactive Dashboard
+    🌐 View Live Ecommerce & Finance Analytics Report
   </a>
 </p>
 
 <p align="center">
-  <strong>📄 Live Report (v2):</strong><br>
+  <strong>📘 Downloadable Report (PDF v2):</strong><br>
   <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/raw/main/06_Reports/Ecommerce_Finance_Insights_Report.pdf">
-    🟢 Download / View Updated Ecommerce & Finance Insights Report (PDF)
+    🟢 Download / View Updated PDF Report
   </a>
 </p>
 
