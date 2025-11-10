@@ -438,13 +438,13 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
 
             def segment_customer(score: int) -> str:
                 if score >= 12:
-                    return "ðŸ’Ž Champions"
+                    return "💎 Champions"
                 elif score >= 9:
-                    return "ðŸ’¼ Loyal Customers"
+                    return "💠 Loyal Customers"
                 elif score >= 6:
-                    return "ðŸŒ± Regular Buyers"
+                    return "🌱 Regular Buyers"
                 else:
-                    return "âš ï¸ At Risk / Lost"
+                    return "⚠️ At Risk / Lost"
 
             rfm_built["Segment"] = rfm_built["RFM_Score"].apply(segment_customer)
             seg_plot = rfm_built.groupby("Segment").size().reset_index(name="Count").sort_values("Count", ascending=False)
@@ -460,31 +460,42 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
     sizes  = seg_plot["Count"].values
     labels = seg_plot[seg_name].astype(str).values
 
-    # Palette: cyan lead + steel/teal tints
-    palette = [
-        HEX_CYAN, "#00a88f", "#6ee7d4", "#8be8dd", "#3da392", "#2e8174", "#5ac7b4"
-    ]
-    colors = (palette * (len(sizes)//len(palette) + 1))[:len(sizes)]
+    # Base palette
+    palette = [HEX_CYAN, "#00a88f", "#6ee7d4", "#8be8dd", "#3da392", "#2e8174", "#5ac7b4"]
+    colors_list = (palette * (len(sizes)//len(palette) + 1))[:len(sizes)]
+
+    # Force "At Risk" slice to #e21c68
+    for i, lbl in enumerate(labels):
+        if "at risk" in lbl.lower():
+            colors_list[i] = "#e21c68"
+
     explode = [0.06 if ("Champions" in str(lbl)) else 0.02 for lbl in labels]
 
     wedges, texts, autotexts = ax.pie(
         sizes, labels=None, autopct="%1.1f%%", startangle=140,
-        explode=explode, colors=colors,
+        explode=explode, colors=colors_list,
         wedgeprops={"linewidth":1.0, "edgecolor":_PANEL_BG},
         pctdistance=0.76
     )
+
     # Donut hole
     centre_circle = plt.Circle((0,0), 0.48, fc=_PANEL_BG)
     fig.gca().add_artist(centre_circle)
 
-    legend_labels = [f"{lbl} â€” {cnt:,}" for lbl, cnt in zip(labels, sizes)]
-    leg = ax.legend(wedges, legend_labels, title="Segments",
-                    loc="center left", bbox_to_anchor=(1.0, 0.5),
-                    fontsize=9, facecolor=_PANEL_BG, edgecolor=_GRID)
+    # Legend (segment + count) → white text
+    legend_labels = [f"{lbl} — {cnt:,}" for lbl, cnt in zip(labels, sizes)]
+    leg = ax.legend(
+        wedges, legend_labels, title="Segments",
+        loc="center left", bbox_to_anchor=(1.0, 0.5),
+        fontsize=9, facecolor=_PANEL_BG, edgecolor=_GRID
+    )
     plt.setp(leg.get_title(), color=_ACCENT)
+    for txt in leg.get_texts():
+        txt.set_color("#ffffff")  # segment names + counts → white
 
+    # Percent labels inside slices → black
     for t in autotexts:
-        t.set_color(HEX_TEXT)
+        t.set_color("#000000")
         t.set_fontsize(9)
         t.set_weight("bold")
 
@@ -494,6 +505,7 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
     plt.tight_layout()
     plt.savefig(out_path, dpi=220, facecolor=HEX_BG, bbox_inches="tight")
     plt.close()
+
 
 # Build charts
 try:
