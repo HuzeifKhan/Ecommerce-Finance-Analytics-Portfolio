@@ -39,8 +39,10 @@
 </p>
 
 <p align="center">
-  <strong>📄 Live Report:</strong>
-  <a href="https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/">https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/</a>
+  <strong>📄 Live Report (v2):</strong><br>
+  <a href="https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/06_Reports/Ecommerce_Finance_Insights_Report.pdf?nocache=20251111">
+    🟢 View Updated Ecommerce & Finance Insights Report (PDF)
+  </a>
 </p>
 
 ---
