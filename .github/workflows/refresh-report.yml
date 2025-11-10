@@ -2,8 +2,11 @@ name: Refresh PDF report
 
 on:
   workflow_dispatch:
+  # Nightly at 02:00 UTC (= 03:00 CET, 04:00 CEST)
   schedule:
-    - cron: "0 6 1 * *"   # Auto-run monthly
+    - cron: "0 2 * * *"
+    # Keep your original monthly run (1st day 06:00 UTC)
+    - cron: "0 6 1 * *"
   push:
     paths:
       - "03_Python/**"
@@ -11,11 +14,18 @@ on:
       - "requirements.txt"
       - ".github/workflows/refresh-report.yml"
 
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-report
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    env:
+      START_TS: ${{ github.run_started_at }}
 
     steps:
       - name: Checkout repository
@@ -25,6 +35,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -40,40 +51,49 @@ jobs:
           mkdir -p docs/assets/tableau
           cp -f 05_Tableau/exports/*.png docs/assets/tableau/ || true
 
-      - name: Commit artifacts (PDF + Excel + Tableau)
+      # --- NEW: Update README "Last Run Summary" block ---
+      - name: Update README – Last Run Summary
+        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
+          set -e
+          # Duration since job start
+          start_epoch=$(date -u -d "${START_TS}" +%s)
+          now_epoch=$(date -u +%s)
+          dur=$(( now_epoch - start_epoch ))
+          mins=$(( dur / 60 ))
+          secs=$(( dur % 60 ))
+
+          utc_now="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          berlin_now="$(TZ=Europe/Berlin date +'%Y-%m-%d %H:%M %Z')"
+
+          summary_line="> ✅ Last successful refresh: **${berlin_now}**  \n> ⏱️ Duration: **${mins} min ${secs} sec**  \n> 🌍 UTC: **${utc_now}**"
+
+          tmp_file="$(mktemp)"
+          awk -v repl="$summary_line" '
+            /<!-- RUN-SUMMARY:START -->/ { print; print repl; skip=1; next }
+            /<!-- RUN-SUMMARY:END -->/   { skip=0 }
+            skip!=1 { print }
+          ' README.md > "$tmp_file"
+          mv "$tmp_file" README.md
+
+      # --- SINGLE commit step for everything ---
+      - name: Commit artifacts (PDF + Excel + Tableau + Cohort + README)
+        run: |
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Stage PDF
-          if ls 06_Reports/*.pdf 1>/dev/null 2>&1; then
-            git add 06_Reports/*.pdf
-          fi
+          # Stage artifacts (guard with || true so empty globs don't fail)
+          git add 06_Reports/*.pdf                           2>/dev/null || true
+          git add 04_Excel/*.xlsx                            2>/dev/null || true
+          git add docs/assets/tableau/*.png                  2>/dev/null || true
+          git add 01_Data/processed/retention_cohorts.csv    2>/dev/null || true
+          git add 03_Analysis/figures/*.png                  2>/dev/null || true
+          # Stage README summary
+          git add README.md                                  2>/dev/null || true
 
-          # Stage Excel
-          if ls 04_Excel/*.xlsx 1>/dev/null 2>&1; then
-            git add 04_Excel/*.xlsx
-          fi
-
-          # Stage Tableau exports
-          if ls docs/assets/tableau/*.png 1>/dev/null 2>&1; then
-            git add docs/assets/tableau/*.png
-          fi
-
-          # Commit if any changes
           if ! git diff --cached --quiet; then
-            git commit -m "ci: refresh reports + Excel + Tableau ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git commit -m "ci: refresh reports & README last-run summary ($(date -u +'%Y-%m-%d %H:%M UTC'))"
             git push
           else
-            echo "No artifact changes detected."
+            echo "No artifact/README changes detected."
           fi
-
-      - name: Commit cohort artifacts (CSV + PNG)
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add 01_Data/processed/retention_cohorts.csv 2>/dev/null || true
-          git add 03_Analysis/figures/*.png 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "ci(cohort): update retention CSV/figure ($(date -u +'%Y-%m-%d %H:%M UTC'))"
-          git push
-
