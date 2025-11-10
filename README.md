@@ -19,16 +19,28 @@
 
 <!-- Badges (centered) -->
 <p align="center">
+  <!-- Nightly build status -->
   <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/refresh-report.yml?branch=main&label=%F0%9F%95%90%20Nightly%20Build&cacheSeconds=300" alt="Nightly Build Status">
   </a>
+  <!-- Refresh workflow badge (GitHub-hosted) -->
   <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml">
     <img src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main" alt="Refresh PDF report">
   </a>
+  <!-- PDF previews workflow badge -->
+  <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml">
+    <img src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml/badge.svg?branch=main" alt="PDF Previews workflow">
+  </a>
+  <!-- Meta badges -->
   <img src="https://img.shields.io/github/last-commit/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=%F0%9F%97%93%EF%B8%8F%20Last%20updated&cacheSeconds=300" alt="Last Commit">
   <img src="https://img.shields.io/badge/Python-3.13%20%7C%203.11-3776AB?logo=python&logoColor=white&cacheSeconds=300" alt="Python Version">
-  <img src="https://img.shields.io/github/license/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=%F0%9F%94%92%20License&cacheSeconds=300" alt="License">
   <img src="https://img.shields.io/github/repo-size/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=%F0%9F%93%A6%20Repo%20Size&cacheSeconds=300" alt="Repo Size">
+  <img src="https://img.shields.io/github/license/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=%F0%9F%94%92%20License&cacheSeconds=300" alt="License">
+</p>
+
+<p align="center">
+  <strong>📄 Live Report:</strong>
+  <a href="https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/">https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/</a>
 </p>
 
 ---
