@@ -19,6 +19,7 @@
 
 <!-- Badges -->
 [![Nightly Refresh](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main)](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/refresh-report.yml?branch=main&label=Nightly%20Build)](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions)
 ![Last updated](https://img.shields.io/github/last-commit/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=Last%20updated)
 ![Python](https://img.shields.io/badge/Python-3.13%20%7C%203.11-blue?logo=python)
 ![License](https://img.shields.io/github/license/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio)
