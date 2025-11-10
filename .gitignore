@@ -260,3 +260,8 @@ env/
 !06_Reports/*.pdf
 !04_Excel/*.xlsx
 
+
+# Tableau temp files
+*.twbr
+~*
+
