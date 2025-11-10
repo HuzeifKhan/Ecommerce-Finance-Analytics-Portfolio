@@ -34,7 +34,9 @@
 ---
 
 <!-- RUN-SUMMARY:START -->
-> ✅ Last successful refresh: _pending…_
+> ✅ Last successful refresh: **2025-11-10 20:40 CET**  
+> ⏱️ Duration: **1180 min 23 sec**  
+> 🌍 UTC: **2025-11-10 19:40 UTC**
 <!-- RUN-SUMMARY:END -->
 
 ---
