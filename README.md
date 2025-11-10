@@ -18,13 +18,18 @@
 ---
 
 <!-- Badges -->
-[![Nightly Refresh](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main)](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/refresh-report.yml?branch=main&label=Nightly%20Build)](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions)
-![Last updated](https://img.shields.io/github/last-commit/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=Last%20updated)
-![Python](https://img.shields.io/badge/Python-3.13%20%7C%203.11-blue?logo=python)
-![License](https://img.shields.io/github/license/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio)
-![Repo size](https://img.shields.io/github/repo-size/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio)
-![Open issues](https://img.shields.io/github/issues/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio)
+<p align="center">
+  <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/refresh-report.yml?branch=main&label=🕐%20Nightly%20Build&color=brightgreen" alt="Nightly Build Status">
+  </a>
+  <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml">
+    <img src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main" alt="Refresh PDF report">
+  </a>
+  <img src="https://img.shields.io/github/last-commit/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=🗓️%20Last%20updated&color=blue" alt="Last Commit">
+  <img src="https://img.shields.io/badge/Python-3.13%20%7C%203.11-3776AB?logo=python&logoColor=white" alt="Python Version">
+  <img src="https://img.shields.io/github/license/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=🔒%20License" alt="License">
+  <img src="https://img.shields.io/github/repo-size/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=📦%20Repo%20Size" alt="Repo Size">
+</p>
 
 ---
 
