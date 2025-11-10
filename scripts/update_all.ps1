@@ -6,13 +6,32 @@ $ErrorActionPreference = "Stop"
 function Say($msg, $color='Gray') { Write-Host $msg -ForegroundColor $color }
 
 # Resolve repo root (one level above /scripts)
-$repoRoot    = Split-Path -Parent $PSScriptRoot
+$repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
 # Paths
 $reportScript = Join-Path $repoRoot "03_Python\make_report.py"
 $pdfDir       = Join-Path $repoRoot "06_Reports"
 $excelDir     = Join-Path $repoRoot "04_Excel"
+
+# --- Interpreter selection (no activation; avoids ExecutionPolicy issues)
+$VenvPy  = Join-Path $repoRoot ".venv\Scripts\python.exe"  # your local 3.13.7 venv
+$Py      = $null
+$PyArgs  = @()
+
+if (Test-Path $VenvPy) {
+    $Py = $VenvPy
+    Say "Using venv Python: $Py" "DarkGray"
+}
+elseif (Get-Command py -ErrorAction SilentlyContinue) {
+    $Py = "py"
+    $PyArgs = @("-3.11")   # aligned with your GitHub Actions runner
+    Say "Using Python via launcher: py $($PyArgs -join ' ')" "DarkGray"
+}
+else {
+    $Py = "python"
+    Say "Using system Python on PATH" "DarkGray"
+}
 
 # Basic checks
 if (-not (Test-Path ".git")) { throw "Not a git repository: $repoRoot" }
@@ -54,9 +73,15 @@ if ($conflicted) {
     Say "Rebase completed after conflict resolution." "Green"
 }
 
+# Log interpreter info (helpful for debugging)
+& $Py @PyArgs "-c" "import sys, platform; print('Python used:', sys.version.replace('\n',' ')); print('Platform:', platform.platform())"
+
 # Build artifacts
 Say "Building report and Excel snapshot..." "Cyan"
-py -3.13 "$reportScript"
+& $Py @PyArgs "$reportScript"
+if ($LASTEXITCODE -ne 0) {
+    throw "Report build failed with exit code $LASTEXITCODE"
+}
 
 # Stage artifacts using explicit relative paths (avoid wildcard issues)
 # PDFs
@@ -69,7 +94,6 @@ if (Test-Path $pdfDir) {
 }
 
 # Excel
-$excels = @()
 if (Test-Path $excelDir) {
     $excels = Get-ChildItem $excelDir -Filter *.xlsx -File -ErrorAction SilentlyContinue
     foreach ($f in $excels) {
@@ -78,7 +102,6 @@ if (Test-Path $excelDir) {
     }
 }
 
-# ========================= NEW: Cohort artifacts ============================
 # Cohort CSV
 $cohortCsv = Join-Path $repoRoot "01_Data\processed\retention_cohorts.csv"
 if (Test-Path $cohortCsv) {
@@ -86,7 +109,7 @@ if (Test-Path $cohortCsv) {
     & git add -- "$rel" 2>$null
 }
 
-# Cohort / analysis figures (e.g., cohort_retention.png, clv_top20.png later)
+# Analysis figures (PNGs)
 $figDir = Join-Path $repoRoot "03_Analysis\figures"
 if (Test-Path $figDir) {
     $pngs = Get-ChildItem $figDir -Filter *.png -File -ErrorAction SilentlyContinue
@@ -95,7 +118,6 @@ if (Test-Path $figDir) {
         & git add -- "$rel" 2>$null
     }
 }
-# ===========================================================================
 
 # Commit if anything staged
 git diff --cached --quiet
