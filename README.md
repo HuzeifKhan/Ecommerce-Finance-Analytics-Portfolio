@@ -38,11 +38,26 @@
   <img src="https://img.shields.io/github/license/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=%F0%9F%94%92%20License&cacheSeconds=300" alt="License">
 </p>
 
+---
+
+<p align="center">
+  <strong>📊 Live Dashboard:</strong><br>
+  <a href="https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/">
+    🌐 View Interactive Dashboard
+  </a>
+</p>
+
 <p align="center">
   <strong>📄 Live Report (v2):</strong><br>
-  <a href="https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/06_Reports/Ecommerce_Finance_Insights_Report.pdf?nocache=20251111">
-    🟢 View Updated Ecommerce & Finance Insights Report (PDF)
+  <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/raw/main/06_Reports/Ecommerce_Finance_Insights_Report.pdf">
+    🟢 Download / View Updated Ecommerce & Finance Insights Report (PDF)
   </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Live%20Report%20Updated-brightgreen?style=for-the-badge&logo=github" alt="Live Report Status"/>
+  <img src="https://img.shields.io/badge/Version-v2.0-blue?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Last_Update-2025--11--11-cyan?style=for-the-badge"/>
 </p>
 
 ---
