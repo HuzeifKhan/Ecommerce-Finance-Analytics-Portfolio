@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Ecommerce & Finance – Insights Report (Dark + Cyan theme to match index.html)
+Ecommerce & Finance â€“ Insights Report (Dark + Cyan theme to match index.html)
 
 Visuals aligned with index.html (NOT layout):
 - Dark background (#1b1b1b)
@@ -16,9 +16,9 @@ Pages (unchanged layout):
 3) Customer Segmentation (RFM)
 4) Cohort Retention
 5) CLV (Top 20)
-6) CLV v1 – 12-Month Model
+6) CLV v1 â€“ 12-Month Model
 7) CLV by Customer Segment
-8) RFM × CLV — Segment Insights
+8) RFM Ã— CLV â€” Segment Insights
 
 Outputs:
 - 03_Analysis/figures/* (PNG charts)
@@ -60,7 +60,7 @@ REPORT_DIR = BASE_DIR / "06_Reports"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_PATH = REPORT_DIR / "Ecommerce_Finance_Insights_Report.pdf"
 
-# (optional) RFM–CLV insights CSVs
+# (optional) RFMâ€“CLV insights CSVs
 CSV_RFM_CLV_SUMMARY  = DATA_DIR / "rfm_clv_summary.csv"
 CSV_RFM_CLV_INSIGHTS = DATA_DIR / "rfm_clv_insights.csv"
 
@@ -174,7 +174,7 @@ def draw_footer(canvas, stamp_text: str):
     # subtle separator line
     canvas.setLineWidth(0.6)
     canvas.line(2*cm, 1.35*cm, A4[0]-2*cm, 1.35*cm)
-    footer = f"{stamp_text}  •  Page {canvas.getPageNumber()}"
+    footer = f"{stamp_text}  â€¢  Page {canvas.getPageNumber()}"
     canvas.drawRightString(A4[0] - 2*cm, 1.0*cm, footer)
     canvas.restoreState()
 
@@ -269,7 +269,7 @@ def bullets_from_insights(df: pd.DataFrame, max_rows: int = 4):
         metric  = str(r.get("Metric", "")).strip()
         insight = str(r.get("Insight", "")).strip()
         if insight:
-            out.append(f"• {strong_cyan(metric)} — {insight}" if metric else f"• {insight}")
+            out.append(f"â€¢ {strong_cyan(metric)} â€” {insight}" if metric else f"â€¢ {insight}")
     return out
 
 def bullets_from_summary(df: pd.DataFrame, max_rows: int = 4):
@@ -281,7 +281,7 @@ def bullets_from_summary(df: pd.DataFrame, max_rows: int = 4):
         meanv = r.get("mean", None)
         cnt   = r.get("count", None)
         if seg and meanv is not None:
-            out.append(f"• {strong_cyan(seg)} — avg CLV €{float(meanv):,.0f} (n={int(cnt) if pd.notna(cnt) else '—'})")
+            out.append(f"â€¢ {strong_cyan(seg)} â€” avg CLV â‚¬{float(meanv):,.0f} (n={int(cnt) if pd.notna(cnt) else 'â€”'})")
     return out
 
 # -------------------------
@@ -438,13 +438,13 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
 
             def segment_customer(score: int) -> str:
                 if score >= 12:
-                    return "💎 Champions"
+                    return "ðŸ’Ž Champions"
                 elif score >= 9:
-                    return "💼 Loyal Customers"
+                    return "ðŸ’¼ Loyal Customers"
                 elif score >= 6:
-                    return "🌱 Regular Buyers"
+                    return "ðŸŒ± Regular Buyers"
                 else:
-                    return "⚠️ At Risk / Lost"
+                    return "âš ï¸ At Risk / Lost"
 
             rfm_built["Segment"] = rfm_built["RFM_Score"].apply(segment_customer)
             seg_plot = rfm_built.groupby("Segment").size().reset_index(name="Count").sort_values("Count", ascending=False)
@@ -477,7 +477,7 @@ def make_rfm_chart(df: pd.DataFrame, out_path: Path):
     centre_circle = plt.Circle((0,0), 0.48, fc=_PANEL_BG)
     fig.gca().add_artist(centre_circle)
 
-    legend_labels = [f"{lbl} — {cnt:,}" for lbl, cnt in zip(labels, sizes)]
+    legend_labels = [f"{lbl} â€” {cnt:,}" for lbl, cnt in zip(labels, sizes)]
     leg = ax.legend(wedges, legend_labels, title="Segments",
                     loc="center left", bbox_to_anchor=(1.0, 0.5),
                     fontsize=9, facecolor=_PANEL_BG, edgecolor=_GRID)
@@ -500,9 +500,9 @@ try:
     make_monthly_revenue_chart(monthly, IMG_REV_PY)
     make_top_products_chart(top, IMG_TOP_PY)
     make_rfm_chart(rfm, IMG_RFM_PY)
-    print("✅ Python charts saved in 03_Analysis/figures/ (dark theme)")
+    print("âœ… Python charts saved in 03_Analysis/figures/ (dark theme)")
 except Exception as e:
-    print(f"⚠️ Chart generation skipped: {e}")
+    print(f"âš ï¸ Chart generation skipped: {e}")
 
 # -------------------------
 # Excel: KPI_Snapshot.xlsx
@@ -525,9 +525,9 @@ try:
     for row in data:
         ws.append(row)
     wb.save(KPI_XLSX)
-    print(f"💾 Excel KPI snapshot updated at {KPI_XLSX}")
+    print(f"ðŸ’¾ Excel KPI snapshot updated at {KPI_XLSX}")
 except Exception as e:
-    print(f"⚠️ Excel KPI snapshot skipped: {e}")
+    print(f"âš ï¸ Excel KPI snapshot skipped: {e}")
 
 # -------------------------
 # Excel: 01_Data_Overview.xlsx
@@ -615,9 +615,9 @@ try:
         except Exception: pass
 
     owb.save(OVERVIEW_XLSX)
-    print(f"💾 Data Overview updated at {OVERVIEW_XLSX}")
+    print(f"ðŸ’¾ Data Overview updated at {OVERVIEW_XLSX}")
 except Exception as e:
-    print(f"⚠️ Data Overview update skipped: {e}")
+    print(f"âš ï¸ Data Overview update skipped: {e}")
 
 # -------------------------
 # Excel: Dashboard_Notes.xlsx
@@ -636,7 +636,7 @@ try:
     ws_dn.append(["View","What it shows","How to read","Filters / Drilldowns"])
     ws_dn.append(["Monthly Revenue (PY)","Revenue trend by month.","Look for seasonality, spikes, and sustained trends.","Date range."])
     ws_dn.append(["Top Products (PY)","Top 10 products by total revenue.","Compare bars by length.","Category/Product filter."])
-    ws_dn.append(["Customer Segments (RFM) (PY)","RFM-based clusters.","Focus on ‘Champions’ and ‘Loyal’.","RFM score sliders."])
+    ws_dn.append(["Customer Segments (RFM) (PY)","RFM-based clusters.","Focus on â€˜Championsâ€™ and â€˜Loyalâ€™.","RFM score sliders."])
 
     if "KPI_Definitions" in nwb.sheetnames:
         ws_kpi = nwb["KPI_Definitions"]; ws_kpi.delete_rows(1, ws_kpi.max_row)
@@ -644,7 +644,7 @@ try:
         ws_kpi = nwb.create_sheet("KPI_Definitions")
     write_timestamp(ws_kpi, ts_utc); ws_kpi.append([])
     ws_kpi.append(["KPI","Definition","Current Value"])
-    ws_kpi.append(["Total Revenue","Σ(LineAmount) over selected period", f"{total_revenue:,.2f}"])
+    ws_kpi.append(["Total Revenue","Î£(LineAmount) over selected period", f"{total_revenue:,.2f}"])
     ws_kpi.append(["Total Customers","Distinct count of Customer ID", f"{total_customers:,}"])
     ws_kpi.append(["Average Order Value","Revenue / Customers (or Orders)", f"{avg_order_value:,.2f}"])
 
@@ -663,9 +663,9 @@ try:
         except Exception: pass
 
     nwb.save(NOTES_XLSX)
-    print(f"📝 Notes updated at {NOTES_XLSX}")
+    print(f"ðŸ“ Notes updated at {NOTES_XLSX}")
 except Exception as e:
-    print(f"⚠️ Notes update skipped: {e}")
+    print(f"âš ï¸ Notes update skipped: {e}")
 
 # -------------------------
 # Build PDF document (dark page)
@@ -684,7 +684,7 @@ def divider():
 
 # === Page 1 ===
 Story.append(Paragraph("E-commerce & Finance Insights Report", styles["CyanTitle"]))
-Story.append(Paragraph("Generated via Python ReportLab • Author: Huzeif Khan", styles["SmallGrey"]))
+Story.append(Paragraph("Generated via Python ReportLab â€¢ Author: Huzeif Khan", styles["SmallGrey"]))
 Story.append(divider())
 
 Story.append(Paragraph("Key Performance Indicators (KPIs)", styles["Heading2Cyan"]))
@@ -694,7 +694,7 @@ kpi_lines = [
     f'{strong_cyan("Average Order Value")}: {avg_order_value:,.2f}',
 ]
 for line in kpi_lines:
-    Story.append(Paragraph("• " + line, styles["BodyGrey"]))
+    Story.append(Paragraph("â€¢ " + line, styles["BodyGrey"]))
 
 # Clear space before visual summary
 Story.append(Spacer(1, 40))
@@ -732,7 +732,7 @@ if IMG_RFM_PY.exists():
 else:
     Story.append(Paragraph("RFM chart not found (expected 03_Analysis/figures/rfm_segments_py.png).", styles["SmallGrey"]))
 
-# === Page 4 — Cohort Retention ===
+# === Page 4 â€” Cohort Retention ===
 Story.append(PageBreak())
 Story.append(Paragraph("Cohort Retention", styles["Heading2Cyan"]))
 Story.append(divider())
@@ -745,7 +745,7 @@ if IMG_COHORT.exists():
 else:
     Story.append(Paragraph("Cohort heatmap not found (expected 03_Analysis/figures/cohort_retention.png).", styles["SmallGrey"]))
 
-    # === Page X — Revenue Forecast (12 months) ===
+    # === Page X â€” Revenue Forecast (12 months) ===
 Story.append(PageBreak())
 Story.append(Paragraph("Revenue Forecast (Next 12 Months)", styles["Heading2Cyan"]))
 Story.append(Spacer(1, 6))
@@ -762,12 +762,12 @@ else:
         styles["SmallGrey"]
     ))
 
-# === Page 5 — CLV (Top 20) ===
+# === Page 5 â€” CLV (Top 20) ===
 Story.append(PageBreak())
-Story.append(Paragraph("Customer Lifetime Value (CLV) – 6-Month Outlook", styles["Heading2Cyan"]))
+Story.append(Paragraph("Customer Lifetime Value (CLV) â€“ 6-Month Outlook", styles["Heading2Cyan"]))
 Story.append(divider())
 Story.append(Paragraph(
-    "We estimate a simple 6-month CLV as AOV × (avg monthly repeat probability) × 6, "
+    "We estimate a simple 6-month CLV as AOV Ã— (avg monthly repeat probability) Ã— 6, "
     "added to the historical revenue. Top 20 customers shown.",
     styles["SmallGrey"]
 ))
@@ -777,11 +777,11 @@ if IMG_CLV.exists():
 else:
     Story.append(Paragraph("CLV figure not found (expected 03_Analysis/figures/clv_top20.png).", styles["SmallGrey"]))
 
-# === Page 6 — CLV v1 (12-Month) ===
+# === Page 6 â€” CLV v1 (12-Month) ===
 Story.append(PageBreak())
-Story.append(Paragraph("Customer Lifetime Value (CLV v1 – 12-Month Model)", styles["Heading2Cyan"]))
+Story.append(Paragraph("Customer Lifetime Value (CLV v1 â€“ 12-Month Model)", styles["Heading2Cyan"]))
 Story.append(divider())
-caption = ("Deterministic CLV v1: AOV × Purchase Frequency per Month × 12 Months. "
+caption = ("Deterministic CLV v1: AOV Ã— Purchase Frequency per Month Ã— 12 Months. "
            "Shows your top-value customers based on average order value and repeat purchase rate.")
 Story.append(Paragraph(caption, styles["SmallGrey"]))
 Story.append(Spacer(1, 8))
@@ -792,7 +792,7 @@ if IMG_CLV.exists():
 else:
     Story.append(Paragraph("CLV chart not found (expected 03_Analysis/figures/clv_top20.png).", styles["SmallGrey"]))
 
-# === Page 7 — CLV by Segment ===
+# === Page 7 â€” CLV by Segment ===
 Story.append(PageBreak())
 Story.append(Paragraph("CLV by Customer Segment", styles["Heading2Cyan"]))
 Story.append(divider())
@@ -803,9 +803,9 @@ if IMG_CLV_SEGMENT.exists():
 else:
     Story.append(Paragraph("CLV segment chart not found (expected 03_Analysis/figures/clv_by_segment.png).", styles["SmallGrey"]))
 
-# === Page 8 — RFM × CLV Insights ===
+# === Page 8 â€” RFM Ã— CLV Insights ===
 Story.append(PageBreak())
-Story.append(Paragraph("RFM × CLV — Segment Insights", styles["Heading2Cyan"]))
+Story.append(Paragraph("RFM Ã— CLV â€” Segment Insights", styles["Heading2Cyan"]))
 Story.append(divider())
 intro = ("How lifetime value varies by customer segment, and how it correlates with Recency, "
          "Frequency and Monetary (RFM).")
@@ -818,10 +818,10 @@ sum_bullets = _safe_list(bullets_from_summary(rfm_clv_summary,  max_rows=4))
 for bl in (ins_bullets + sum_bullets):
     Story.append(Paragraph(bl, styles["BodyGrey"]))
 if not (ins_bullets or sum_bullets):
-    Story.append(Paragraph("No RFM–CLV insights CSVs found yet.", styles["SmallGrey"]))
+    Story.append(Paragraph("No RFMâ€“CLV insights CSVs found yet.", styles["SmallGrey"]))
 Story.append(Spacer(1, 10))
 
-Story.append(Paragraph("RFM–CLV Correlation", styles["Heading3Cyan"]))
+Story.append(Paragraph("RFMâ€“CLV Correlation", styles["Heading3Cyan"]))
 if IMG_RFM_CLV_CORR.exists():
     Story.append(fit_image_keep_ratio(IMG_RFM_CLV_CORR, max_w=16.5*cm, max_h=8.5*cm))
 else:
@@ -841,4 +841,4 @@ def _on_page(canvas, doc):
 
 doc.build(Story, onFirstPage=_on_page, onLaterPages=_on_page)
 
-print(f"\n✅ Report saved to {OUTPUT_PATH}\n")
+print(f"\nâœ… Report saved to {OUTPUT_PATH}\n")
