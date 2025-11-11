@@ -1,37 +1,93 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>E-commerce & Finance Report</title>
-  <style>
-    body{background:#0d1117;color:#e6edf3;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto;margin:0}
-    .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-    h1{color:#03C4A1;margin:0 0 12px}
-    .btn{display:inline-block;margin:12px 0;padding:10px 14px;border:1px solid #30363d;border-radius:8px;color:#e6edf3;text-decoration:none}
-    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-    .grid img{width:100%;border-radius:10px;border:1px solid #30363d;background:#161b22}
-    iframe{width:100%;height:80vh;border:1px solid #30363d;border-radius:10px;background:#161b22}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>E-commerce & Finance — Huzeif Khan</title>
+<style>
+  :root{
+    --bg:#1b1b1b; --panel:#222; --text:#d3d3d3; --muted:#9aa0a6;
+    --line:#2b2b2b; --cyan:#03C4A1; --cyan2:#00a88f; --accent:#e21c68;
+    --glow: 0 0 18px rgba(3,196,161,.35);
+  }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Roboto,Arial,sans-serif}
+  .wrap{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  aside{background:linear-gradient(180deg,#191919 0%,#202020 100%);border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh}
+  .brand{color:#fff;font-weight:700;letter-spacing:.4px;margin:2px 6px 16px;font-size:16px}
+  .nav{display:flex;flex-direction:column;gap:12px}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;
+    transition:.18s ease; box-shadow:0 0 0 rgba(0,0,0,0); cursor:pointer
+  }
+  .card:hover{transform:translateX(4px); box-shadow:var(--glow); border-color:#2e2e2e}
+  .card h4{margin:.2rem 0 .15rem;color:var(--cyan)}
+  .card p{margin:0;color:var(--muted);font-size:.92rem}
+  main{padding:26px;max-width:1200px;margin:0 auto}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:0 0 20px rgba(3,196,161,.08)}
+  h2{color:var(--cyan);margin:0 0 10px;text-shadow:0 0 6px rgba(3,196,161,.25)}
+  .btns{display:flex;gap:10px;margin:10px 0 16px}
+  .btn{
+    display:inline-block;padding:.55rem .9rem;border-radius:10px;font-weight:700;text-decoration:none
+  }
+  .btn-view{background:linear-gradient(90deg,var(--cyan),var(--cyan2)); color:#111; box-shadow:0 0 12px rgba(3,196,161,.28)}
+  .btn-download{background:#2a2a2a;color:#eaeaea;border:1px solid #3a3a3a}
+  iframe{width:100%;height:72vh;border:none;border-radius:12px;background:#111}
+  footer{text-align:center;color:var(--muted);padding:22px 10px}
+  @media (max-width:1000px){.wrap{grid-template-columns:1fr} aside{position:static;height:auto}}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>E-commerce & Finance Insights Report</h1>
-    <a class="btn" href="./Ecommerce_Finance_Insights_Report.pdf">Download PDF</a>
-    <h2 style="color:#03C4A1">Live Preview (PDF)</h2>
-    <iframe src="./Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
-    <h2 style="color:#03C4A1">Page Previews (PNG)</h2>
-    <div class="grid">
-                <img src="previews/report_page-01.png" alt="Report page preview" />
-                <img src="previews/report_page-02.png" alt="Report page preview" />
-                <img src="previews/report_page-03.png" alt="Report page preview" />
-                <img src="previews/report_page-04.png" alt="Report page preview" />
-                <img src="previews/report_page-05.png" alt="Report page preview" />
-                <img src="previews/report_page-06.png" alt="Report page preview" />
-                <img src="previews/report_page-07.png" alt="Report page preview" />
-                <img src="previews/report_page-08.png" alt="Report page preview" />
-                <img src="previews/report_page-09.png" alt="Report page preview" />
+<div class="wrap">
+  <aside>
+    <div class="brand">📊 E-commerce & Finance</div>
+    <div class="nav">
+      <div class="card" onclick="scrollToEl('viz')">
+        <h4>Live Tableau View</h4><p>Auto-updates from Tableau Public</p>
+      </div>
+      <div class="card" onclick="scrollToEl('report')">
+        <h4>Reports</h4><p>View (HTML) & Download (PDF)</p>
+      </div>
     </div>
-  </div>
+  </aside>
+
+  <main>
+    <!-- Tableau block -->
+    <section id="viz" class="panel">
+      <h2>Interactive Tableau (Auto)</h2>
+      <div class="btns">
+        <a class="btn btn-view" target="_blank" rel="noopener"
+           href="https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard">
+           View Directly on Tableau
+        </a>
+      </div>
+      <!-- Embed (automated) -->
+      <iframe
+        src="https://public.tableau.com/views/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard?:showVizHome=no&:embed=y&:toolbar=top"
+        title="E-commerce & Finance Dashboard">
+      </iframe>
+    </section>
+
+    <!-- Reports block -->
+    <section id="report" class="panel" style="margin-top:18px">
+      <h2>Reports</h2>
+      <p style="margin:6px 0 12px;color:#cfcfcf">
+        View the HTML report or download the latest PDF generated from Python.
+      </p>
+      <div class="btns">
+        <!-- HTML report in docs/ (this page is your HTML live report) -->
+        <a class="btn btn-view" href="#viz">View Report</a>
+        <!-- PDF hosted by Pages (docs/report/...) -->
+        <a class="btn btn-download" target="_blank" rel="noopener"
+           href="report/Ecommerce_Finance_Insights_Report.pdf">Download PDF</a>
+      </div>
+    </section>
+
+    <footer>© 2025 Huzeif Khan — SQL • Python • Tableau • GitHub Pages</footer>
+  </main>
+</div>
+
+<script>
+  function scrollToEl(id){ document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+</script>
 </body>
 </html>
