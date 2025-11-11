@@ -100,7 +100,7 @@
     }
     .card:hover{transform:translateY(-2px);box-shadow:var(--glow-strong)}
     .card h2{color:#F0FFFA}
-    .hint{color:var(--muted);opacity:.9;font-size:.95rem}
+    .hint{color:#E6EDF3;opacity:.9;font-size:.95rem}
 
     /* Embeds — bigger, fixed, fully interactive */
     .embed{
@@ -124,14 +124,14 @@
     code.inline{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0f1418;color:#fff}
   </style>
 
-  <!-- CONFIG: exact sheet paths (converted from your authoring links to embeddable views) -->
+  <!-- CONFIG: exact sheet paths (embeddable views) -->
   <script>
     window.TAB = {
       base: "https://public.tableau.com/views/Book1_17618490659490/",
       overview: "E-commerceFinanceAnalyticsDashboard",
       monthly:  "MonthlyRevenueTrend",
-      topprod:  "TopProductsbyRevenue",          // from your link
-      rfm:      "CustomerSegmentationRFMModel",  // from your link
+      topprod:  "TopProductsbyRevenue",          // from your authoring link
+      rfm:      "CustomerSegmentationRFMModel",  // from your authoring link
       kpi:      "KPIOverviewDynamicSelector"
     };
     function tabURL(sheet){
@@ -235,7 +235,7 @@
       <div class="card">
         <h2>Report Page Previews (PNG)</h2>
         <div id="previews" class="grid grid-2"></div>
-        <p id="previews-note" class="hint" style="display:none">Only pages found in <code class="inline">docs/previews/</code>.</p>
+        <p id="previews-note" class="hint" style="display:none">Only pages found in <code class="inline">docs/previews/</code> (or fallback folders).</p>
       </div>
     </section>
 
@@ -292,20 +292,50 @@
       } catch { el.textContent = 'Unable to load.'; }
     })();
 
-    // Previews: docs/previews/report_page-00.png … -29
+    // --- Robust preview finder: tries multiple paths + patterns ---
     (async () => {
-      const box = document.getElementById('previews');
+      const box  = document.getElementById('previews');
       const note = document.getElementById('previews-note');
-      const imgs = [];
-      for(let i=0;i<30;i++){
-        const p = String(i).padStart(2,'0');
-        const url = `./previews/report_page-${p}.png`;
-        try{ const h = await fetch(url,{method:'HEAD',cache:'no-store'}); if(h.ok) imgs.push(url);}catch{}
+
+      // where to search and how the files might be named
+      const roots = ['./previews/', './report/previews/', './roport/previews/']; // last two are fallbacks
+      const patterns = [
+        i => `report_page-${String(i).padStart(2,'0')}.png`,  // report_page-00.png
+        i => `page-${i+1}.png`,                               // page-1.png
+        i => `report-${i+1}.png`                              // report-1.png
+      ];
+
+      // probe up to 40 pages just in case
+      const found = [];
+      for (let i=0; i<40; i++){
+        let url = null;
+        for (const root of roots){
+          for (const pat of patterns){
+            const candidate = root + pat(i);
+            try {
+              const h = await fetch(candidate, {method:'HEAD', cache:'no-store'});
+              if (h.ok) { url = candidate; break; }
+            } catch {}
+          }
+          if (url) break;
+        }
+        if (!url) break;       // stop at first miss in the sequence
+        found.push(url);
       }
-      if(!imgs.length){ note.style.display='block'; return; }
-      imgs.forEach(u=>{
-        const im=new Image(); im.loading='lazy'; im.src=u; im.className='thumb'; im.alt='Report page';
-        box.appendChild(im);
+
+      if (!found.length){ note.style.display='block'; return; }
+
+      // render thumbs with the same hover scale + cyan glow
+      found.forEach(u => {
+        const a  = document.createElement('a');
+        a.href   = u; a.target = "_blank"; a.rel = "noopener";
+        const im = new Image();
+        im.loading = 'lazy';
+        im.src = u;
+        im.alt = 'Report page preview';
+        im.className = 'thumb';
+        a.appendChild(im);
+        box.appendChild(a);
       });
     })();
 
