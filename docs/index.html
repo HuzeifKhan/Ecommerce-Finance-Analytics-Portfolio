@@ -5,66 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>E-commerce & Finance Report</title>
   <style>
- HEAD
-    :root {
-      --bg: #0d1117;
-      --bg-soft: #0f141b;
-      --panel: #111827;
-      --panel-2: #161b22;
-      --text: #e6edf3;
-      --muted: #9aa4b2;
-      --line: #30363d;
-      --brand: #03C4A1;
-      --brand-2: #00e3c0;
-      --link: #58a6ff;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-    }
-    * { box-sizing: border-box }
-    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji"; }
-    a { color: var(--link); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 56px; }
-    header { display:flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-    .title { display:flex; flex-direction: column; gap: 6px; }
-    h1 { margin: 0; font-weight: 700; font-size: clamp(20px, 3vw, 28px); color: var(--brand); letter-spacing: 0.2px; }
-    .subtitle { color: var(--muted) }
-    .badge-row { display:flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .badge-row img { height: 20px; border-radius: 4px; background: #111; }
-    .actions { display:flex; flex-wrap: wrap; gap: 10px; }
-    .btn {
-      display:inline-flex; gap:8px; align-items:center; padding: 10px 14px;
-      border: 1px solid var(--line); border-radius: 10px; background: linear-gradient(180deg, var(--panel), var(--panel-2));
-      color: var(--text); text-decoration: none; font-weight: 600;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.02) inset;
-      transition: 120ms ease;
-    }
-    .btn:hover { border-color: #3a424a; transform: translateY(-1px); }
-    .btn.brand { border-color: rgba(3,196,161,.35); color: #eafffb; }
-    .btn small { color: var(--muted); font-weight: 500; }
-
-    .panel { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-    .kicker { text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-size: 12px; }
-    h2 { margin: 8px 0 12px; font-size: 20px; }
-    .grid { display:grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-    .preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--line); background: #0b0f14; display:block; }
-    .pdf-embed { width: 100%; height: 78vh; border: 1px solid var(--line); border-radius: 10px; background: #0b0f14; }
-    .muted { color: var(--muted) }
-
-    .cards { display:grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    .card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-    .card img { width: 100%; display:block; background:#0a0f14; border-bottom: 1px solid var(--line); }
-    .card .body { padding: 12px 14px; }
-    .card h3 { margin: 0 0 6px; font-size: 16px; }
-    .ok { color: var(--ok) }
-    .warn { color: var(--warn) }
-
-    footer { margin-top: 28px; display:flex; flex-wrap: wrap; gap: 10px; align-items:center; justify-content: space-between; color: var(--muted) }
-    code.inline { padding: 1px 6px; border:1px solid var(--line); border-radius: 6px; background: #0a0f14; color: #e2e8f0 }
-    .sr { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
-
-    @media (max-width: 640px) { .pdf-embed { height: 65vh; } }
-=======
     body{background:#0d1117;color:#e6edf3;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto;margin:0}
     .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
     h1{color:#03C4A1;margin:0 0 12px}
@@ -72,142 +12,10 @@
     .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
     .grid img{width:100%;border-radius:10px;border:1px solid #30363d;background:#161b22}
     iframe{width:100%;height:80vh;border:1px solid #30363d;border-radius:10px;background:#161b22}
->>>>>>> 69cf8b7c505ef011d33d3b5cbda5fcf13b4d5a26
   </style>
 </head>
 <body>
   <div class="wrap">
- HEAD
-    <header>
-      <div class="title">
-        <h1>E-commerce & Finance Analytics — Live Report</h1>
-        <div class="subtitle">SQL · Python · Tableau · CI/CD — nightly auto-refresh</div>
-        <div class="badge-row">
-          <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml">
-            <img alt="Nightly Refresh" src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main" />
-          </a>
-          <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml">
-            <img alt="PDF Previews" src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml/badge.svg?branch=main" />
-          </a>
-          <img alt="Python" src="https://img.shields.io/badge/Python-3.13%20%7C%203.11-3776AB?logo=python&logoColor=white" />
-          <img alt="Repo size" src="https://img.shields.io/github/repo-size/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio?label=Repo%20Size" />
-        </div>
-      </div>
-
-      <nav class="actions">
-        <a class="btn brand" href="./report/Ecommerce_Finance_Insights_Report.pdf" download>
-          📄 Download PDF
-        </a>
-        <a class="btn" href="https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard" target="_blank" rel="noopener">
-          📊 Live Tableau
-        </a>
-        <a class="btn" href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio" target="_blank" rel="noopener">
-          🧰 View on GitHub
-        </a>
-      </nav>
-    </header>
-
-    <section class="panel" id="run-summary">
-      <div class="kicker">Automation</div>
-      <h2>Last Run Summary</h2>
-      <div id="run-summary-body" class="muted">Fetching latest status…</div>
-    </section>
-
-    <section class="panel">
-      <div class="kicker">Report</div>
-      <h2>Embedded PDF</h2>
-      <iframe class="pdf-embed" src="./report/Ecommerce_Finance_Insights_Report.pdf#view=FitH" title="Ecommerce & Finance – PDF"></iframe>
-      <p class="muted" style="margin-top:10px">Tip: open in a new tab if your browser’s PDF viewer is blocked by extensions.</p>
-    </section>
-
-    <section class="panel">
-      <div class="kicker">Previews</div>
-      <h2>Page Thumbnails (auto)</h2>
-      <div id="previews" class="grid" aria-live="polite"></div>
-      <p id="previews-note" class="muted" style="margin-top:8px; display:none;">Showing available pages only.</p>
-    </section>
-
-    <section class="panel">
-      <div class="kicker">Phase 8</div>
-      <h2>Advanced Analytics (CLV · Forecast · Cohorts)</h2>
-      <div class="cards" id="phase8-cards" aria-live="polite"></div>
-      <p class="muted" id="phase8-note" style="margin-top:8px; display:none;">Cards appear automatically when images are present in <code class="inline">docs/previews/</code> or <code class="inline">docs/assets/figures/</code>.</p>
-    </section>
-
-    <footer>
-      <div>© <span id="year"></span> Huzeif Khan — Berlin</div>
-      <div>Nightly refresh via <code class="inline">GitHub Actions</code> & <code class="inline">Task Scheduler</code></div>
-    </footer>
-  </div>
-
-  <script>
-    // Footer year
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Load last run summary from README markers
-    (async function injectLastRun() {
-      const el = document.getElementById('run-summary-body');
-      try {
-        const resp = await fetch('https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/README.md', { cache: 'no-store' });
-        if (!resp.ok) throw new Error('README fetch failed');
-        const md = await resp.text();
-        const start = md.indexOf('<!-- RUN-SUMMARY:START -->');
-        const end   = md.indexOf('<!-- RUN-SUMMARY:END -->');
-        if (start !== -1 && end !== -1 && end > start) {
-          const block = md.slice(start, end).split('\n').slice(1).join('\n').trim();
-          const html = block.replace(/^> /gm, '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
-          el.innerHTML = html;
-        } else {
-          el.innerHTML = '<span class="warn">RUN-SUMMARY markers not found in README.</span>';
-        }
-      } catch { el.innerHTML = '<span class="warn">Could not load latest summary. See README.</span>'; }
-    })();
-
-    // Previews from docs/previews/report_page-00.png, -01.png, ...
-    (async function loadPreviews() {
-      const container = document.getElementById('previews');
-      const note = document.getElementById('previews-note');
-      const maxPages = 30, items = [];
-      for (let i = 0; i < maxPages; i++) {
-        const idx = String(i).padStart(2, '0');
-        const url = `./previews/report_page-${idx}.png`;
-        if (await imageExists(url)) items.push(url);
-      }
-      if (items.length === 0) { container.innerHTML = '<p class="muted">No previews available yet. They will appear here after the next build.</p>'; return; }
-      items.forEach(src => { const img = new Image(); img.src = src; img.alt='Report page preview'; img.className='preview-img'; container.appendChild(img); });
-      note.style.display = 'block';
-    })();
-
-    async function imageExists(url) { try { const r = await fetch(url, { method:'HEAD', cache:'no-store' }); return r.ok; } catch { return false; } }
-
-    // Phase 8 cards (auto-detect assets)
-    (async function phase8() {
-      const cardsEl = document.getElementById('phase8-cards');
-      const noteEl  = document.getElementById('phase8-note');
-      const candidates = [
-        { title: 'CLV — Top 20 Customers',  guesses: ['./assets/figures/clv_top20.png','./previews/clv_top20.png','./previews/CLV_top20.png']},
-        { title: 'Revenue Forecast (12 months)', guesses: ['./assets/figures/revenue_forecast_12m.png','./previews/revenue_forecast_12m.png','./previews/revenue-forecast-12m.png']},
-        { title: 'Cohort Retention', guesses: ['./assets/figures/cohort_retention.png','./previews/cohort_retention.png','./previews/cohort-retention.png']},
-      ];
-      let shown = 0;
-      for (const c of candidates) {
-        let src = null;
-        for (const g of c.guesses) { if (await imageExists(g)) { src = g; break; } }
-        if (src) { cardsEl.appendChild(makeCard(c.title, src)); shown++; }
-      }
-      if (shown === 0) noteEl.style.display = 'block';
-    })();
-
-    function makeCard(title, imgSrc) {
-      const card = document.createElement('div'); card.className = 'card';
-      const img = document.createElement('img'); img.src = imgSrc; img.alt = title;
-      const body = document.createElement('div'); body.className = 'body';
-      const h3 = document.createElement('h3'); h3.textContent = title;
-      const p  = document.createElement('p');  p.className = 'muted'; p.textContent = 'Auto-detected from build artifacts.';
-      body.appendChild(h3); body.appendChild(p); card.appendChild(img); card.appendChild(body); return card;
-    }
-  </script>
-=======
     <h1>E-commerce & Finance Insights Report</h1>
     <a class="btn" href="./Ecommerce_Finance_Insights_Report.pdf">Download PDF</a>
     <h2 style="color:#03C4A1">Live Preview (PDF)</h2>
@@ -225,6 +33,5 @@
                 <img src="previews/report_page-09.png" alt="Report page preview" />
     </div>
   </div>
->>>>>>> 69cf8b7c505ef011d33d3b5cbda5fcf13b4d5a26
 </body>
 </html>
