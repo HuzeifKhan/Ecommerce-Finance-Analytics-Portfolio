@@ -130,12 +130,12 @@
       base: "https://public.tableau.com/views/Book1_17618490659490/",
       overview: "E-commerceFinanceAnalyticsDashboard",
       monthly:  "MonthlyRevenueTrend",
-      topprod:  "TopProductsbyRevenue",          // from your authoring link
-      rfm:      "CustomerSegmentationRFMModel",  // from your authoring link
+      topprod:  "TopProductsbyRevenue",
+      rfm:      "CustomerSegmentationRFMModel",
       kpi:      "KPIOverviewDynamicSelector"
     };
     function tabURL(sheet){
-      return ${TAB.base}${sheet}?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top;
+      return `${TAB.base}${sheet}?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top`;
     }
   </script>
 </head>
@@ -223,10 +223,10 @@
       <div class="card">
         <h2>Python Report — Auto-generated PDF</h2>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-          <a class="btn" href="./report/Ecommerce_Finance_Insights_Report.pdf" target="_blank" rel="noopener">View / Download PDF</a>
+          <a id="pdfBtn" class="btn" href="#" target="_blank" rel="noopener">View / Download PDF</a>
           <a class="btn-ghost" href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio" target="_blank" rel="noopener">View Repo</a>
         </div>
-        <iframe class="embed embed-overview" loading="lazy" title="PDF Report" src="./report/Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
+        <iframe id="pdfFrame" class="embed embed-overview" loading="lazy" title="PDF Report" src=""></iframe>
         <p class="hint">Rebuilt by workflow — previews & status below update automatically.</p>
       </div>
     </section>
@@ -236,16 +236,16 @@
       <div class="card">
         <h2>Tableau PNGs</h2>
         <div id="tableau-png-grid" class="grid grid-2"></div>
-        <p id="tableau-png-note" class="hint" style="display:none">Place PNGs in <code class="inline">docs/assets/tableau/</code> (e.g., <code>dashboard_overview.png</code>, <code>monthly_revenue.png</code>, <code>top_products.png</code>, <code>customer_segments.png</code>, or <code>tableau-01.png</code> …).</p>
+        <p id="tableau-png-note" class="hint" style="display:none">Place PNGs in <code class="inline">docs/assets/tableau/</code> (e.g., <code>dashboard_overview.png</code>, <code>monthly_revenue.png</code>, <code>top_products.png</code>, <code>customer_segments.png</code> …).</p>
       </div>
     </section>
 
-    <!-- 8) PNG previews (right after report; also searches assets/tableau as fallback) -->
+    <!-- 8) PNG previews (after report; also searches assets/tableau as fallback) -->
     <section class="section">
       <div class="card">
         <h2>Report Page Previews (PNG)</h2>
         <div id="previews" class="grid grid-2"></div>
-        <p id="previews-note" class="hint" style="display:none">PNG previews not found. Put them under <code class="inline">docs/previews/</code> (or <code>docs/assets/tableau/</code> as fallback) using patterns like <code>report_page-00.png</code>, <code>page-1.png</code>, or <code>report-1.png</code>.</p>
+        <p id="previews-note" class="hint" style="display:none">PNG previews not found. Put them under <code class="inline">docs/previews/</code> (or <code>docs/assets/tableau/</code>).</p>
       </div>
     </section>
 
@@ -285,6 +285,32 @@
     setSrc('rfmFrame',      TAB.rfm);
     setSrc('kpiFrame',      TAB.kpi);
 
+    /* PDF: choose local vs Pages + fallback to raw if needed */
+    (async () => {
+      const isLocal = location.protocol === 'file:' || location.hostname === 'localhost';
+      const localPath   = "./report/Ecommerce_Finance_Insights_Report.pdf";
+      const pagesPath   = "/Ecommerce-Finance-Analytics-Portfolio/report/Ecommerce_Finance_Insights_Report.pdf";
+      const rawFallback = "https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/docs/report/Ecommerce_Finance_Insights_Report.pdf";
+
+      const btn   = document.getElementById('pdfBtn');
+      const frame = document.getElementById('pdfFrame');
+
+      if (isLocal) {
+        btn.href  = localPath;
+        frame.src = localPath + "#view=FitH";
+        return;
+      }
+      btn.href  = pagesPath;
+      frame.src = pagesPath + "#view=FitH";
+
+      try {
+        const res = await fetch(pagesPath, { method:"HEAD", cache:"no-store" });
+        if (!res.ok) { btn.href = rawFallback; frame.src = rawFallback + "#view=FitH"; }
+      } catch {
+        btn.href = rawFallback; frame.src = rawFallback + "#view=FitH";
+      }
+    })();
+
     /* Last run summary from README markers */
     (async () => {
       const el = document.getElementById('run-summary');
@@ -294,9 +320,8 @@
         const s = md.indexOf('<!-- RUN-SUMMARY:START -->');
         const e = md.indexOf('<!-- RUN-SUMMARY:END -->');
         if (s !== -1 && e !== -1 && e > s) {
-          const block = md.slice(s, e)
-            .split('\n').slice(1).join('\n').trim()
-            .replace(/^> /gm,'').replace(/\\(.+?)\\/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');
+          const block = md.slice(s, e).split('\n').slice(1).join('\n').trim()
+            .replace(/^> /gm,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');
           el.innerHTML = block;
         } else { el.textContent = 'No summary markers found.'; }
       } catch { el.textContent = 'Unable to load.'; }
@@ -308,23 +333,18 @@
       const note = document.getElementById('tableau-png-note');
       const root = './assets/tableau/';
 
-      // Try a manifest first (optional). If not present, probe common names.
       let files = [];
       try {
         const res = await fetch(root + 'manifest.json', {cache:'no-store'});
-        if (res.ok) {
-          files = await res.json(); // expects ["dashboard_overview.png", ...]
-        }
+        if (res.ok) { files = await res.json(); }
       } catch {}
 
       if (!files.length) {
         const candidates = [
           'dashboard_overview.png','monthly_revenue.png','top_products.png','customer_segments.png',
-          // tableaus exported with numbered scheme
-          ...Array.from({length:40},(_,i)=>tableau-${String(i+1).padStart(2,'0')}.png),
-          ...Array.from({length:40},(_,i)=>sheet-${String(i+1).padStart(2,'0')}.png)
+          ...Array.from({length:40},(_,i)=>`tableau-${String(i+1).padStart(2,'0')}.png`),
+          ...Array.from({length:40},(_,i)=>`sheet-${String(i+1).padStart(2,'0')}.png`)
         ];
-        // HEAD probe in order; keep unique & existing
         const seen = new Set();
         for (const f of candidates){
           try{
@@ -350,54 +370,59 @@
       });
     })();
 
-    /* --- Robust report preview finder ---
-       Tries multiple roots and filename patterns, including assets/tableau as a fallback. */
+    /* --- Report previews (PNG) — tolerant finder --- */
     (async () => {
       const box  = document.getElementById('previews');
       const note = document.getElementById('previews-note');
 
       const roots = [
-        './previews/',
+        './previews/',            // your folder on Pages
         './report/previews/',
         './roport/previews/',
-        './assets/tableau/'             // NEW: your provided folder as fallback
-      ];
-      const patterns = [
-        i => report_page-${String(i).padStart(2,'0')}.png,  // report_page-00.png
-        i => page-${i+1}.png,                               // page-1.png
-        i => report-${i+1}.png                              // report-1.png
+        './assets/tableau/'       // fallback
       ];
 
+      // Build a list of candidate names (does NOT assume continuous numbering)
+      const names = new Set();
+      for (let i=1;i<=60;i++){
+        names.add(`report_page-${String(i).padStart(2,'0')}.png`);
+        names.add(`report_page-${i}.png`);
+        names.add(`page-${i}.png`);
+        names.add(`report-${i}.png`);
+      }
+
       const found = [];
-      for (let i=0; i<40; i++){
-        let url = null;
-        for (const root of roots){
-          for (const pat of patterns){
-            const candidate = root + pat(i);
-            try {
-              const h = await fetch(candidate, {method:'HEAD', cache:'no-store'});
-              if (h.ok) { url = candidate; break; }
-            } catch {}
-          }
-          if (url) break;
+      const seen  = new Set();
+      for (const root of roots){
+        for (const name of names){
+          const url = root + name;
+          try {
+            const h = await fetch(url, {method:'HEAD', cache:'no-store'});
+            if (h.ok && !seen.has(url)) { seen.add(url); found.push(url); }
+          } catch {}
         }
-        if (!url) break;     // stop when sequence breaks
-        found.push(url);
       }
 
       if (!found.length){ note.style.display='block'; return; }
 
-      found.forEach(u => {
+      // Natural sort by trailing number
+      found.sort((a,b)=>{
+        const na=(a.match(/(\d+)\.png$/)||[])[1]||'0';
+        const nb=(b.match(/(\d+)\.png$/)||[])[1]||'0';
+        return Number(na)-Number(nb);
+      });
+
+      for (const u of found){
         const a  = document.createElement('a');
         a.href   = u; a.target = "_blank"; a.rel = "noopener";
         const im = new Image();
         im.loading = 'lazy';
-        im.src = u;
-        im.alt = 'Report page preview';
+        im.src  = u;
+        im.alt  = 'Report page preview';
         im.className = 'thumb';
         a.appendChild(im);
         box.appendChild(a);
-      });
+      }
     })();
 
     /* Phase 8 cards */
