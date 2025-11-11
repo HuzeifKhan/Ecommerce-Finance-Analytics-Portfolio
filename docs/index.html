@@ -110,7 +110,7 @@
     .embed-overview{height:880px;min-height:880px}   /* Dashboard bigger */
     .embed-sheet{height:800px;min-height:800px}      /* Sheets bigger */
 
-    /* Previews grid + hover glow */
+    /* Grids + thumbnails (hover glow) */
     .grid{display:grid;gap:var(--gap)}
     .grid-2{grid-template-columns:repeat(auto-fit,minmax(420px,1fr))}
     .thumb{
@@ -163,6 +163,7 @@
       <a class="chip" href="#rfm">Customer Segmentation</a>
       <a class="chip" href="#kpi">KPI Overview</a>
       <a class="chip" href="#report">Python Report</a>
+      <a class="chip" href="#tableau-pngs">Tableau PNGs</a>
       <a class="chip" href="#automation">Automation</a>
     </nav>
   </header>
@@ -230,16 +231,25 @@
       </div>
     </section>
 
-    <!-- 7) PNG previews (directly below report, with hover glow) -->
+    <!-- 7) Tableau PNG gallery (from docs/assets/tableau) -->
+    <section id="tableau-pngs" class="section">
+      <div class="card">
+        <h2>Tableau PNGs</h2>
+        <div id="tableau-png-grid" class="grid grid-2"></div>
+        <p id="tableau-png-note" class="hint" style="display:none">Place PNGs in <code class="inline">docs/assets/tableau/</code> (e.g., <code>dashboard_overview.png</code>, <code>monthly_revenue.png</code>, <code>top_products.png</code>, <code>customer_segments.png</code>, or <code>tableau-01.png</code> …).</p>
+      </div>
+    </section>
+
+    <!-- 8) PNG previews (right after report; also searches assets/tableau as fallback) -->
     <section class="section">
       <div class="card">
         <h2>Report Page Previews (PNG)</h2>
         <div id="previews" class="grid grid-2"></div>
-        <p id="previews-note" class="hint" style="display:none">Only pages found in <code class="inline">docs/previews/</code> (or fallback folders).</p>
+        <p id="previews-note" class="hint" style="display:none">PNG previews not found. Put them under <code class="inline">docs/previews/</code> (or <code>docs/assets/tableau/</code> as fallback) using patterns like <code>report_page-00.png</code>, <code>page-1.png</code>, or <code>report-1.png</code>.</p>
       </div>
     </section>
 
-    <!-- 8) Automation summary -->
+    <!-- 9) Automation summary -->
     <section id="automation" class="section">
       <div class="card">
         <h2>Automation — Last Run Summary</h2>
@@ -247,7 +257,7 @@
       </div>
     </section>
 
-    <!-- 9) Phase 8 – Advanced Analytics -->
+    <!-- 10) Phase 8 – Advanced Analytics -->
     <section class="section">
       <div class="card">
         <h2>Phase 8 — Advanced Analytics</h2>
@@ -264,7 +274,7 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Tableau embed URLs (toolbar ON for all embeds)
+    /* Tableau embed URLs (toolbar ON for all embeds) */
     const setSrc = (id, sheet) => {
       const el = document.getElementById(id);
       if (el) el.src = tabURL(sheet);
@@ -275,7 +285,7 @@
     setSrc('rfmFrame',      TAB.rfm);
     setSrc('kpiFrame',      TAB.kpi);
 
-    // Last run summary from README markers
+    /* Last run summary from README markers */
     (async () => {
       const el = document.getElementById('run-summary');
       try {
@@ -292,20 +302,72 @@
       } catch { el.textContent = 'Unable to load.'; }
     })();
 
-    // --- Robust preview finder: tries multiple paths + patterns ---
+    /* --- Tableau PNG gallery loader (docs/assets/tableau) --- */
+    (async () => {
+      const grid = document.getElementById('tableau-png-grid');
+      const note = document.getElementById('tableau-png-note');
+      const root = './assets/tableau/';
+
+      // Try a manifest first (optional). If not present, probe common names.
+      let files = [];
+      try {
+        const res = await fetch(root + 'manifest.json', {cache:'no-store'});
+        if (res.ok) {
+          files = await res.json(); // expects ["dashboard_overview.png", ...]
+        }
+      } catch {}
+
+      if (!files.length) {
+        const candidates = [
+          'dashboard_overview.png','monthly_revenue.png','top_products.png','customer_segments.png',
+          // tableaus exported with numbered scheme
+          ...Array.from({length:40},(_,i)=>`tableau-${String(i+1).padStart(2,'0')}.png`),
+          ...Array.from({length:40},(_,i)=>`sheet-${String(i+1).padStart(2,'0')}.png`)
+        ];
+        // HEAD probe in order; keep unique & existing
+        const seen = new Set();
+        for (const f of candidates){
+          try{
+            const h = await fetch(root + f, {method:'HEAD', cache:'no-store'});
+            if (h.ok && !seen.has(f)) { files.push(f); seen.add(f); }
+          }catch{}
+        }
+      }
+
+      if (!files.length){ note.style.display='block'; return; }
+
+      files.forEach(f=>{
+        const url = root + f;
+        const a  = document.createElement('a');
+        a.href   = url; a.target = "_blank"; a.rel = "noopener";
+        const im = new Image();
+        im.loading = 'lazy';
+        im.src = url;
+        im.alt = f.replace(/[_-]/g,' ').replace(/\.png$/i,'');
+        im.className = 'thumb';
+        a.appendChild(im);
+        grid.appendChild(a);
+      });
+    })();
+
+    /* --- Robust report preview finder ---
+       Tries multiple roots and filename patterns, including assets/tableau as a fallback. */
     (async () => {
       const box  = document.getElementById('previews');
       const note = document.getElementById('previews-note');
 
-      // where to search and how the files might be named
-      const roots = ['./previews/', './report/previews/', './roport/previews/']; // last two are fallbacks
+      const roots = [
+        './previews/',
+        './report/previews/',
+        './roport/previews/',
+        './assets/tableau/'             // NEW: your provided folder as fallback
+      ];
       const patterns = [
         i => `report_page-${String(i).padStart(2,'0')}.png`,  // report_page-00.png
         i => `page-${i+1}.png`,                               // page-1.png
         i => `report-${i+1}.png`                              // report-1.png
       ];
 
-      // probe up to 40 pages just in case
       const found = [];
       for (let i=0; i<40; i++){
         let url = null;
@@ -319,13 +381,12 @@
           }
           if (url) break;
         }
-        if (!url) break;       // stop at first miss in the sequence
+        if (!url) break;     // stop when sequence breaks
         found.push(url);
       }
 
       if (!found.length){ note.style.display='block'; return; }
 
-      // render thumbs with the same hover scale + cyan glow
       found.forEach(u => {
         const a  = document.createElement('a');
         a.href   = u; a.target = "_blank"; a.rel = "noopener";
@@ -339,7 +400,7 @@
       });
     })();
 
-    // Phase 8 cards
+    /* Phase 8 cards */
     (async () => {
       const box = document.getElementById('phase8-cards');
       const note = document.getElementById('phase8-note');
