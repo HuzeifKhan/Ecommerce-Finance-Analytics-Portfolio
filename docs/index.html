@@ -22,10 +22,11 @@
       --muted:#E6EDF3;
       --cyan:#03C4A1;
       --cyan2:#00A88F;
-      --shadow:0 10px 26px rgba(0,0,0,.35);
-      --glow:0 8px 26px rgba(3,196,161,.20), 0 0 0 1px rgba(3,196,161,.25) inset;
-      --glow-strong:0 12px 38px rgba(3,196,161,.32), 0 0 0 2px rgba(3,196,161,.25);
+      --shadow:0 12px 30px rgba(0,0,0,.38);
+      --glow:0 10px 30px rgba(3,196,161,.22), 0 0 0 1px rgba(3,196,161,.28) inset;
+      --glow-strong:0 16px 44px rgba(3,196,161,.34), 0 0 0 2px rgba(3,196,161,.25);
       --radius:18px;
+      --gap:22px;
     }
 
     *{box-sizing:border-box}
@@ -38,30 +39,30 @@
       text-rendering:optimizeLegibility;
     }
     h1,h2,h3{font-family:Sora,Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#fff}
-    h1{font-size:34px;font-weight:800;margin:0;text-shadow:0 2px 18px rgba(0,0,0,.25)}
-    h2{font-size:22px;font-weight:800;margin:0 0 10px}
+    h1{font-size:36px;font-weight:800;margin:0;text-shadow:0 2px 18px rgba(0,0,0,.25)}
+    h2{font-size:24px;font-weight:800;margin:0 0 12px}
     h3{font-size:18px;font-weight:800;margin:8px 0 0}
     a{color:#fff;text-decoration:none}
     a:hover{text-decoration:underline}
 
-    /* Header (cyan) */
+    /* Header */
     header{
       background:linear-gradient(90deg,var(--cyan) 0%, var(--cyan2) 100%);
       color:#fff;
-      padding:18px 16px 10px;
+      padding:20px 16px 12px;
       box-shadow:0 10px 30px rgba(3,196,161,.25);
       position:sticky; top:0; z-index:50;
     }
-    .wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+    .wrap{max-width:1400px;margin:0 auto;padding:0 20px}
     .head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .badges{display:flex;gap:8px;flex-wrap:wrap}
     .badges img{height:20px;border-radius:4px;filter:drop-shadow(0 0 6px rgba(0,0,0,.25))}
 
-    /* Grey chips */
-    .subnav{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
+    /* Chips (grey) */
+    .subnav{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
     .chip{
       display:inline-flex;align-items:center;gap:8px;
-      padding:8px 12px;border-radius:999px;border:1px solid #354046;
+      padding:9px 14px;border-radius:999px;border:1px solid #354046;
       background:#2a2f33; color:#fff; font-weight:800;
       transition:transform .12s ease, box-shadow .12s ease;
       box-shadow:0 2px 10px rgba(0,0,0,.25);
@@ -71,7 +72,7 @@
     /* Buttons */
     .btn{
       display:inline-flex;align-items:center;gap:8px;
-      padding:10px 14px;border-radius:12px;border:1px solid transparent;
+      padding:11px 16px;border-radius:12px;border:1px solid transparent;
       background:linear-gradient(180deg,var(--cyan),var(--cyan2));
       color:#fff;font-weight:800;
       box-shadow:0 8px 22px rgba(3,196,161,.18);
@@ -80,67 +81,62 @@
     .btn:hover{transform:translateY(-1px);filter:saturate(1.05);box-shadow:var(--glow-strong)}
     .btn-ghost{
       background:#2a2f33;color:#fff;
-      border:1px solid #354046;border-radius:12px;padding:10px 14px;font-weight:800;
+      border:1px solid #354046;border-radius:12px;padding:11px 16px;font-weight:800;
       transition:transform .12s ease, box-shadow .12s ease;
     }
     .btn-ghost:hover{transform:translateY(-1px);box-shadow:var(--glow)}
 
     /* Sections / Cards */
-    main{padding-top:14px}
-    .section{padding:22px 0}
+    main{padding-top:16px}
+    .section{padding:34px 0}            /* more vertical spacing */
     .card{
       background:var(--panel);
       border:1px solid var(--line);
       border-radius:var(--radius);
-      padding:14px;
+      padding:18px;
       box-shadow:var(--shadow);
       overflow:hidden;
       transition:transform .12s ease, box-shadow .12s ease;
+      margin-bottom:6px;
     }
     .card:hover{transform:translateY(-2px);box-shadow:var(--glow-strong)}
     .card h2{color:#F0FFFA}
     .hint{color:var(--muted);opacity:.9;font-size:.95rem}
 
-    /* Grid */
-    .grid{display:grid;gap:16px}
-    .grid-2{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
-
-    /* Embeds — FIXED + STATIC */
+    /* Embeds — bigger, fixed; static for Tableau, scroll for PDF */
     .embed{
       display:block; width:100%; max-width:100%;
-      border:1px solid var(--line); border-radius:14px; background:#0e1114;
+      border:1px solid var(--line); border-radius:16px; background:#0e1114;
       overflow:hidden;
     }
-    /* Overview bigger but fixed */
-    .embed-overview{height:640px;min-height:640px}
-    /* Sheet previews smaller & consistent */
-    .embed-sheet{height:520px;min-height:520px}
-    /* Make them non-interactive so nothing “moves” */
-    .static{pointer-events:none}
+    .embed-overview{height:800px;min-height:800px}   /* Dashboard bigger */
+    .embed-sheet{height:720px;min-height:720px}      /* Sheets bigger */
+    .static{pointer-events:none}                     /* Tableau = static previews */
+    .scrollable{pointer-events:auto}                 /* PDF = scrollable */
 
-    /* Thumbnails (previews) with hover scale + cyan glow */
+    /* Previews grid + hover glow */
+    .grid{display:grid;gap:var(--gap)}
+    .grid-2{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
     .thumb{
-      width:100%;border-radius:14px;border:1px solid var(--line);background:#0f1418;
+      width:100%;border-radius:16px;border:1px solid var(--line);background:#0f1418;
       transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
       display:block;
     }
     .thumb:hover{transform:scale(1.02);box-shadow:var(--glow-strong);filter:saturate(1.05)}
 
-    footer{color:#e6eef3;opacity:.9;padding:28px 0;text-align:center}
+    footer{color:#e6eef3;opacity:.9;padding:32px 0;text-align:center}
     code.inline{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0f1418;color:#fff}
   </style>
 
-  <!-- ======= CONFIG: update these if a sheet path changes ======= -->
+  <!-- ===== CONFIG: update these if a sheet path changes ===== -->
   <script>
     window.TAB = {
       base: "https://public.tableau.com/views/Book1_17618490659490/",
       overview: "E-commerceFinanceAnalyticsDashboard",
-      monthly:  "MonthlyRevenueTrend",          // <- replace if your sheet name changed
-      topprod:  "TopProductsByRevenue",         // <- replace if your sheet name changed
-      rfm:      "CustomerSegmentationRFM",      // <- replace if your sheet name changed
-      kpi:      "KPIOverviewDynamicSelector"    // <- replace if your sheet name changed
+      monthly:  "MonthlyRevenueTrend",          // <-- replace if your sheet name changed
+      rfm:      "CustomerSegmentationRFM",      // <-- replace if your sheet name changed
+      kpi:      "KPIOverviewDynamicSelector"    // <-- replace if your sheet name changed
     };
-    // helper to build URLs with consistent flags
     function tabURL(sheet, toolbar){
       const t = toolbar ? "top" : "no";
       return `${TAB.base}${sheet}?:showVizHome=no&:embed=y&:tabs=no&:toolbar=${t}`;
@@ -166,7 +162,9 @@
 
     <nav class="wrap subnav" aria-label="Section navigation">
       <a class="chip" href="#overview">Overview</a>
-      <a class="chip" href="#sheets">Sheets</a>
+      <a class="chip" href="#monthly">Monthly Revenue</a>
+      <a class="chip" href="#rfm">Customer Segmentation</a>
+      <a class="chip" href="#kpi">KPI Overview</a>
       <a class="chip" href="#report">Python Report</a>
       <a class="chip" href="#automation">Automation</a>
     </nav>
@@ -174,70 +172,60 @@
 
   <main class="wrap">
 
-    <!-- ===== (1) Overview dashboard — static fit ===== -->
+    <!-- 1) Overview dashboard -->
     <section id="overview" class="section">
       <div class="card">
         <h2>Interactive Tableau — Overview</h2>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
           <a class="btn" target="_blank" rel="noopener"
              href="https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard">
             Open on Tableau
           </a>
           <a class="btn-ghost" href="#report">Jump to Python Report</a>
         </div>
-
-        <iframe
-          class="embed embed-overview static"
-          loading="lazy"
-          title="Tableau — Overview"
-          src=""
-          id="overviewFrame">
-        </iframe>
-        <p class="hint">Live from Tableau Public · Fixed preview on page (click button above to open interactive view).</p>
+        <iframe class="embed embed-overview static" loading="lazy" title="Tableau — Overview" src="" id="overviewFrame"></iframe>
+        <p class="hint">Fixed preview (click button to open the fully interactive view).</p>
       </div>
     </section>
 
-    <!-- ===== (2) Sheets grid — small, static, consistent ===== -->
-    <section id="sheets" class="section">
-      <div class="grid grid-2">
-
-        <div class="card">
-          <h2>Monthly Revenue Trend</h2>
-          <iframe class="embed embed-sheet static" loading="lazy" title="Monthly Revenue" src="" id="monthlyFrame"></iframe>
-        </div>
-
-        <div class="card">
-          <h2>Top Products by Revenue</h2>
-          <iframe class="embed embed-sheet static" loading="lazy" title="Top Products" src="" id="topprodFrame"></iframe>
-        </div>
-
-        <div class="card">
-          <h2>Customer Segmentation (RFM)</h2>
-          <iframe class="embed embed-sheet static" loading="lazy" title="RFM" src="" id="rfmFrame"></iframe>
-        </div>
-
-        <div class="card">
-          <h2>KPI Overview (Dynamic Selector)</h2>
-          <iframe class="embed embed-sheet static" loading="lazy" title="KPI Overview" src="" id="kpiFrame"></iframe>
-        </div>
-
+    <!-- 2) Monthly Revenue -->
+    <section id="monthly" class="section">
+      <div class="card">
+        <h2>Monthly Revenue Trend</h2>
+        <iframe class="embed embed-sheet static" loading="lazy" title="Monthly Revenue" src="" id="monthlyFrame"></iframe>
       </div>
     </section>
 
-    <!-- ===== (3) Python report ===== -->
+    <!-- 3) Customer Segmentation -->
+    <section id="rfm" class="section">
+      <div class="card">
+        <h2>Customer Segmentation (RFM)</h2>
+        <iframe class="embed embed-sheet static" loading="lazy" title="RFM" src="" id="rfmFrame"></iframe>
+      </div>
+    </section>
+
+    <!-- 4) KPI Overview -->
+    <section id="kpi" class="section">
+      <div class="card">
+        <h2>KPI Overview (Dynamic Selector)</h2>
+        <iframe class="embed embed-sheet static" loading="lazy" title="KPI Overview" src="" id="kpiFrame"></iframe>
+      </div>
+    </section>
+
+    <!-- 5) Python report (NON-static; scrollable) -->
     <section id="report" class="section">
       <div class="card">
         <h2>Python Report — Auto-generated PDF</h2>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
           <a class="btn" href="./report/Ecommerce_Finance_Insights_Report.pdf" target="_blank" rel="noopener">View / Download PDF</a>
           <a class="btn-ghost" href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio" target="_blank" rel="noopener">View Repo</a>
         </div>
-        <iframe class="embed embed-overview static" loading="lazy" title="PDF Report" src="./report/Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
+        <iframe class="embed embed-overview scrollable" loading="lazy" title="PDF Report" src="./report/Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
         <p class="hint">Rebuilt by workflow — previews & status below update automatically.</p>
       </div>
     </section>
 
-    <!-- ===== (4) Automation status ===== -->
+    <!-- 6) Automation summary -->
     <section id="automation" class="section">
       <div class="card">
         <h2>Automation — Last Run Summary</h2>
@@ -245,7 +233,7 @@
       </div>
     </section>
 
-    <!-- ===== (5) Page Previews (PNG) — back with hover glow ===== -->
+    <!-- 7) PNG previews (hover glow) -->
     <section class="section">
       <div class="card">
         <h2>Report Page Previews (PNG)</h2>
@@ -254,7 +242,7 @@
       </div>
     </section>
 
-    <!-- ===== (6) Phase 8 cards ===== -->
+    <!-- 8) Phase 8 – Advanced Analytics -->
     <section class="section">
       <div class="card">
         <h2>Phase 8 — Advanced Analytics</h2>
@@ -271,16 +259,15 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Build embed URLs from config (static previews)
+    // Build Tableau URLs from config (Overview toolbar on, sheets toolbar off)
     function setSrc(id, sheet, toolbar=false){
       const el = document.getElementById(id);
-      if (el) el.src = tabURL(sheet, toolbar);
+      if (el) el.src = `${TAB.base}${sheet}?:showVizHome=no&:embed=y&:tabs=no&:toolbar=${toolbar?'top':'no'}`;
     }
     setSrc('overviewFrame', TAB.overview, true);
-    setSrc('monthlyFrame',  TAB.monthly);
-    setSrc('topprodFrame',  TAB.topprod);
-    setSrc('rfmFrame',      TAB.rfm);
-    setSrc('kpiFrame',      TAB.kpi);
+    setSrc('monthlyFrame',  TAB.monthly, false);
+    setSrc('rfmFrame',      TAB.rfm,     false);
+    setSrc('kpiFrame',      TAB.kpi,     false);
 
     // Last run summary from README markers
     (async () => {
@@ -295,15 +282,11 @@
             .split('\n').slice(1).join('\n').trim()
             .replace(/^> /gm,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');
           el.innerHTML = block;
-        } else {
-          el.textContent = 'No summary markers found.';
-        }
-      } catch {
-        el.textContent = 'Unable to load.';
-      }
+        } else { el.textContent = 'No summary markers found.'; }
+      } catch { el.textContent = 'Unable to load.'; }
     })();
 
-    // Previews docs/previews/report_page-00.png … 29
+    // Previews: docs/previews/report_page-00.png … -29
     (async () => {
       const box = document.getElementById('previews');
       const note = document.getElementById('previews-note');
@@ -311,20 +294,10 @@
       for(let i=0;i<30;i++){
         const p = String(i).padStart(2,'0');
         const url = `./previews/report_page-${p}.png`;
-        try{
-          const h = await fetch(url,{method:'HEAD',cache:'no-store'});
-          if(h.ok) imgs.push(url);
-        }catch{}
+        try{ const h = await fetch(url,{method:'HEAD',cache:'no-store'}); if(h.ok) imgs.push(url);}catch{}
       }
       if(!imgs.length){ note.style.display='block'; return; }
-      imgs.forEach(u=>{
-        const im=new Image();
-        im.loading='lazy';
-        im.src=u;
-        im.className='thumb';
-        im.alt='Report page';
-        box.appendChild(im);
-      });
+      imgs.forEach(u=>{ const im=new Image(); im.loading='lazy'; im.src=u; im.className='thumb'; im.alt='Report page'; box.appendChild(im); });
     })();
 
     // Phase 8 cards
@@ -339,12 +312,7 @@
       let shown=0;
       for(const x of groups){
         let src=null;
-        for(const g of x.g){
-          try{
-            const h=await fetch(g,{method:'HEAD',cache:'no-store'});
-            if(h.ok){src=g;break;}
-          }catch{}
-        }
+        for(const g of x.g){ try{ const h=await fetch(g,{method:'HEAD',cache:'no-store'}); if(h.ok){src=g;break;} }catch{} }
         if(src){
           const card=document.createElement('div'); card.className='card';
           const img=new Image(); img.loading='lazy'; img.src=src; img.alt=x.t; img.className='thumb';
