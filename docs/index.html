@@ -2,36 +2,270 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>E-commerce & Finance Report</title>
+  <title>📊 E-commerce & Finance — Live Analytics (Tableau + Python)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Tableau dashboards first, then Python auto-report. Nightly automation kept intact." />
+
   <style>
-    body{background:#0d1117;color:#e6edf3;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto;margin:0}
-    .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-    h1{color:#03C4A1;margin:0 0 12px}
-    .btn{display:inline-block;margin:12px 0;padding:10px 14px;border:1px solid #30363d;border-radius:8px;color:#e6edf3;text-decoration:none}
-    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-    .grid img{width:100%;border-radius:10px;border:1px solid #30363d;background:#161b22}
-    iframe{width:100%;height:80vh;border:1px solid #30363d;border-radius:10px;background:#161b22}
+    :root{
+      --bg:#1f2124;         /* grey background */
+      --panel:#262a2f;
+      --panel2:#2c3137;
+      --line:#343a40;
+      --white:#ffffff;
+      --muted:#d7dde2;
+      --cyan:#03C4A1;
+      --cyan2:#00a88f;
+      --glow:0 0 18px rgba(3,196,161,.38), 0 0 2px rgba(3,196,161,.6) inset;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--white);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+    h1,h2,h3,p,li,small,strong,em,span,div{color:var(--white)}
+    a{color:var(--white);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Header block – cyan with white text */
+    header{
+      background:linear-gradient(90deg,var(--cyan) 0%, var(--cyan2) 100%);
+      color:var(--white);
+      padding:18px 16px;
+      box-shadow:0 10px 30px rgba(3,196,161,.25);
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+    .head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    h1{margin:0;font-weight:800;letter-spacing:.3px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badges img{height:20px;border-radius:4px;filter:drop-shadow(0 0 6px rgba(0,0,0,.25))}
+
+    /* Buttons – cyan with glow, white text */
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 14px;border-radius:10px;border:1px solid transparent;
+      background:linear-gradient(180deg,var(--cyan),var(--cyan2));
+      color:#fff;font-weight:800;letter-spacing:.15px;
+      box-shadow:var(--glow);
+      transition:transform .12s ease, filter .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);filter:saturate(1.04)}
+    .btn-ghost{
+      background:transparent;color:#fff;
+      border:1px solid var(--line);border-radius:10px;padding:10px 14px;
+    }
+    .btn-ghost:hover{border-color:#44505a;box-shadow:0 6px 22px rgba(0,0,0,.25)}
+
+    /* Cards / sections with subtle cyan illumination */
+    .section{padding:20px 0}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:16px;
+      box-shadow:0 0 26px rgba(3,196,161,.10);
+    }
+    .card h2{margin:0 0 10px;color:#bffff4;text-shadow:0 0 10px rgba(3,196,161,.35)}
+    .hint{color:#f1f4f6;opacity:.8;font-size:.95rem}
+
+    /* Embeds — fixed responsive sizes to avoid horizontal slide */
+    iframe{width:100%;max-width:100%;border:1px solid var(--line);border-radius:12px;background:#0e1114}
+    .tableau-embed{height:72vh;min-height:560px;box-shadow:var(--glow)}
+    .pdf-embed{height:78vh;min-height:620px}
+
+    /* Two-column grid without overflow */
+    .grid{display:grid;gap:12px}
+    @media(min-width:1150px){ .grid-2{grid-template-columns:1fr 1fr} }
+    .thumb{width:100%;border-radius:10px;border:1px solid var(--line);background:#0f1418}
+
+    footer{color:#e6eef3;opacity:.85;padding:24px 0;text-align:center}
+    code.inline{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0f1418;color:#fff}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>E-commerce & Finance Insights Report</h1>
-    <a class="btn" href="./Ecommerce_Finance_Insights_Report.pdf">Download PDF</a>
-    <h2 style="color:#03C4A1">Live Preview (PDF)</h2>
-    <iframe src="./Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
-    <h2 style="color:#03C4A1">Page Previews (PNG)</h2>
-    <div class="grid">
-                <img src="previews/report_page-01.png" alt="Report page preview" />
-                <img src="previews/report_page-02.png" alt="Report page preview" />
-                <img src="previews/report_page-03.png" alt="Report page preview" />
-                <img src="previews/report_page-04.png" alt="Report page preview" />
-                <img src="previews/report_page-05.png" alt="Report page preview" />
-                <img src="previews/report_page-06.png" alt="Report page preview" />
-                <img src="previews/report_page-07.png" alt="Report page preview" />
-                <img src="previews/report_page-08.png" alt="Report page preview" />
-                <img src="previews/report_page-09.png" alt="Report page preview" />
+
+  <!-- ===== Header ===== -->
+  <header>
+    <div class="wrap head-row">
+      <h1>📊 E-commerce & Finance — Live Analytics</h1>
+      <div class="badges">
+        <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml">
+          <img alt="Nightly Refresh" src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main">
+        </a>
+        <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml">
+          <img alt="PDF Previews" src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml/badge.svg?branch=main">
+        </a>
+        <img alt="Python" src="https://img.shields.io/badge/Python-3.13%20%7C%203.11-3776AB?logo=python&logoColor=white">
+      </div>
     </div>
-  </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- ===== (1) Tableau FIRST: Overview dashboard ===== -->
+    <section class="section">
+      <div class="card">
+        <h2>Interactive Tableau — Overview</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <a class="btn" target="_blank" rel="noopener"
+             href="https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard">
+            Open on Tableau
+          </a>
+          <a class="btn-ghost" href="#report">Jump to Python Report</a>
+        </div>
+        <iframe
+          class="tableau-embed"
+          title="Tableau — Overview"
+          src="https://public.tableau.com/views/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard?:showVizHome=no&:embed=y&:toolbar=top">
+        </iframe>
+        <p class="hint">Live from Tableau Public · toolbar enabled · hover for details.</p>
+      </div>
+    </section>
+
+    <!-- ===== (1b) Tableau SHEETS (not dashboard) ===== -->
+    <section class="section">
+      <div class="grid grid-2">
+
+        <!-- Monthly Revenue Trend (Sheet) -->
+        <div class="card">
+          <h2>Monthly Revenue Trend</h2>
+          <iframe
+            class="tableau-embed"
+            title="Monthly Revenue Trend"
+            src="https://public.tableau.com/views/Book1_17618490659490/MonthlyRevenueTrend?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top">
+          </iframe>
+        </div>
+
+        <!-- Top Products by Revenue (Sheet) -->
+        <div class="card">
+          <h2>Top Products by Revenue</h2>
+          <iframe
+            class="tableau-embed"
+            title="Top Products by Revenue"
+            src="https://public.tableau.com/views/Book1_17618490659490/TopProductsByRevenue?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top">
+          </iframe>
+        </div>
+
+        <!-- Customer Segmentation (RFM) (Sheet) -->
+        <div class="card">
+          <h2>Customer Segmentation (RFM)</h2>
+          <iframe
+            class="tableau-embed"
+            title="Customer Segmentation (RFM)"
+            src="https://public.tableau.com/views/Book1_17618490659490/CustomerSegmentationRFGModel?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top">
+          </iframe>
+        </div>
+
+        <!-- KPI Overview (Dynamic Selector) (Sheet) -->
+        <div class="card">
+          <h2>KPI Overview (Dynamic Selector)</h2>
+          <iframe
+            class="tableau-embed"
+            title="KPI Overview (Dynamic Selector)"
+            src="https://public.tableau.com/views/Book1_17618490659490/KPIOverviewDynamicSelector?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top">
+          </iframe>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== (2) Python report — SINGLE section (embed + download) ===== -->
+    <section id="report" class="section">
+      <div class="card">
+        <h2>Python Report — Auto-generated PDF</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <a class="btn" href="./report/Ecommerce_Finance_Insights_Report.pdf" target="_blank" rel="noopener">View / Download PDF</a>
+          <a class="btn-ghost" href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio" target="_blank" rel="noopener">View Repo</a>
+        </div>
+        <iframe class="pdf-embed" title="PDF Report" src="./report/Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
+        <p class="hint">Rebuilt by workflow — previews & status below update automatically.</p>
+      </div>
+    </section>
+
+    <!-- ===== (3) Automation status + thumbnails (unchanged logic) ===== -->
+    <section class="section">
+      <div class="card">
+        <h2>Automation — Last Run Summary</h2>
+        <div id="run-summary" class="hint">Fetching latest…</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h2>Report Page Previews</h2>
+        <div id="previews" class="grid grid-2"></div>
+        <p id="previews-note" class="hint" style="display:none">Only pages found in <code class="inline">docs/previews/</code>.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h2>Phase 8 — Advanced Analytics</h2>
+        <div id="phase8-cards" class="grid grid-2"></div>
+        <p id="phase8-note" class="hint" style="display:none">Cards appear when assets exist in <code class="inline">docs/assets/figures/</code> or <code class="inline">docs/previews/</code>.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>© <span id="year"></span> Huzeif Khan · Berlin — SQL · Python · Tableau</footer>
+
+  <!-- ===== Automation JS (kept) ===== -->
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Last run summary from README markers
+    (async () => {
+      const el = document.getElementById('run-summary');
+      try {
+        const r = await fetch('https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/README.md', {cache:'no-store'});
+        const md = await r.text();
+        const s = md.indexOf('<!-- RUN-SUMMARY:START -->');
+        const e = md.indexOf('<!-- RUN-SUMMARY:END -->');
+        if (s !== -1 && e !== -1 && e > s) {
+          const block = md.slice(s, e).split('\n').slice(1).join('\n').trim()
+            .replace(/^> /gm,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');
+          el.innerHTML = block;
+        } else { el.innerHTML = 'No summary markers found.'; }
+      } catch { el.textContent = 'Unable to load.'; }
+    })();
+
+    // Previews docs/previews/report_page-00.png …
+    (async () => {
+      const box = document.getElementById('previews');
+      const note = document.getElementById('previews-note');
+      const imgs = [];
+      for(let i=0;i<30;i++){
+        const p = String(i).padStart(2,'0');
+        const url = `./previews/report_page-${p}.png`;
+        try{ const h = await fetch(url,{method:'HEAD',cache:'no-store'}); if(h.ok) imgs.push(url);}catch{}
+      }
+      if(!imgs.length){ note.style.display='block'; return; }
+      imgs.forEach(u=>{ const im=new Image(); im.src=u; im.className='thumb'; im.alt='Report page'; box.appendChild(im); });
+    })();
+
+    // Phase 8 Cards
+    (async () => {
+      const box = document.getElementById('phase8-cards');
+      const note = document.getElementById('phase8-note');
+      const groups = [
+        {t:'CLV — Top 20 Customers',  g:['./assets/figures/clv_top20.png','./previews/clv_top20.png']},
+        {t:'Revenue Forecast (12 months)', g:['./assets/figures/revenue_forecast_12m.png','./previews/revenue_forecast_12m.png']},
+        {t:'Cohort Retention', g:['./assets/figures/cohort_retention.png','./previews/cohort_retention.png']},
+      ];
+      let shown=0;
+      for(const x of groups){
+        let src=null;
+        for(const g of x.g){ try{ const h=await fetch(g,{method:'HEAD',cache:'no-store'}); if(h.ok){src=g;break;} }catch{} }
+        if(src){
+          const card=document.createElement('div'); card.className='card';
+          const img=new Image(); img.src=src; img.alt=x.t; img.className='thumb';
+          const title=document.createElement('h3'); title.textContent=x.t; title.style.margin='10px 0 0';
+          card.appendChild(img); card.appendChild(title);
+          box.appendChild(card); shown++;
+        }
+      }
+      if(!shown) note.style.display='block';
+    })();
+  </script>
 </body>
 </html>
