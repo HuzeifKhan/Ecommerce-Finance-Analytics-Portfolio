@@ -2,276 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>📊 E-commerce & Finance — Live Analytics (Tableau + Python)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="description" content="Interactive Tableau dashboards and auto-generated Python report for e-commerce revenue analytics." />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
-
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>E-commerce & Finance Report</title>
   <style>
-    :root {
-      --bg:#1b1b1b;
-      --panel:#222628;
-      --line:#2f363b;
-      --white:#ffffff;
-      --cyan:#03C4A1;
-      --cyan2:#00A88F;
-      --shadow:0 12px 30px rgba(0,0,0,.38);
-      --glow:0 10px 30px rgba(3,196,161,.22), 0 0 0 1px rgba(3,196,161,.28) inset;
-      --glow-strong:0 16px 44px rgba(3,196,161,.34), 0 0 0 2px rgba(3,196,161,.25);
-      --radius:18px;
-      --gap:26px;
-    }
-
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--white);
-      font: 16px/1.6 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    h1, h2, h3 {
-      font-family: Sora, Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color: #fff;
-    }
-    h1 { font-size: 36px; font-weight: 800; margin: 0; }
-    h2 { font-size: 24px; font-weight: 800; margin: 0 0 12px; }
-    h3 { font-size: 18px; font-weight: 800; margin: 8px 0 0; }
-
-    a { color: #fff; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    header {
-      background: linear-gradient(90deg, var(--cyan) 0%, var(--cyan2) 100%);
-      color: #fff;
-      padding: 22px 16px 14px;
-      box-shadow: 0 10px 30px rgba(3,196,161,.25);
-      position: sticky; top: 0; z-index: 50;
-    }
-
-    .wrap { max-width: 1475px; margin: 0 auto; padding: 0 20px; }
-    .head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-
-    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
-    .badges img { height: 20px; border-radius: 4px; filter: drop-shadow(0 0 6px rgba(0,0,0,.25)); }
-
-    .subnav { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 9px 14px; border-radius: 999px;
-      border: 1px solid #354046; background: #2a2f33; color: #fff;
-      font-weight: 800; transition: transform .12s ease, box-shadow .12s ease;
-      box-shadow: 0 2px 10px rgba(0,0,0,.25);
-    }
-    .chip:hover { transform: scale(1.02); box-shadow: var(--glow); }
-
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 16px; border-radius: 12px;
-      background: linear-gradient(180deg,var(--cyan),var(--cyan2));
-      color: #fff; font-weight: 800; box-shadow: 0 8px 22px rgba(3,196,161,.18);
-      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: var(--glow-strong); filter: saturate(1.05); }
-
-    .btn-ghost {
-      background: #2a2f33; color: #fff;
-      border: 1px solid #354046; border-radius: 12px;
-      padding: 11px 16px; font-weight: 800;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-    .btn-ghost:hover { transform: translateY(-1px); box-shadow: var(--glow); }
-
-    main { padding-top: 18px; }
-    .section { padding: 48px 0; }
-    .card {
-      background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 18px;
-      box-shadow: var(--shadow); transition: all .15s ease;
-    }
-    .card:hover { transform: translateY(-2px); box-shadow: var(--glow-strong); }
-
-    .embed {
-      display: block; width: 100%; border: 1px solid var(--line);
-      border-radius: 16px; background: #0e1114;
-    }
-    .embed-overview { height: 880px; }
-    .embed-sheet { height: 800px; }
-
-    .grid { display: grid; gap: var(--gap); }
-    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
-
-    .thumb {
-      width: 100%; border-radius: 16px; border: 1px solid var(--line);
-      background: #0f1418; transition: transform .12s, box-shadow .12s, filter .12s;
-      display: block;
-    }
-    .thumb:hover { transform: scale(1.02); box-shadow: var(--glow-strong); filter: saturate(1.05); }
-
-    footer { color: #e6eef3; opacity: .9; padding: 32px 0; text-align: center; }
-    code.inline { padding: 1px 6px; border: 1px solid var(--line);
-      border-radius: 6px; background: #0f1418; color: #fff; }
+    body{background:#0d1117;color:#e6edf3;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto;margin:0}
+    .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+    h1{color:#03C4A1;margin:0 0 12px}
+    .btn{display:inline-block;margin:12px 0;padding:10px 14px;border:1px solid #30363d;border-radius:8px;color:#e6edf3;text-decoration:none}
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .grid img{width:100%;border-radius:10px;border:1px solid #30363d;background:#161b22}
+    iframe{width:100%;height:80vh;border:1px solid #30363d;border-radius:10px;background:#161b22}
   </style>
-
-  <script>
-    window.TAB = {
-      base: "https://public.tableau.com/views/Book1_17618490659490/",
-      overview: "E-commerceFinanceAnalyticsDashboard",
-      monthly:  "MonthlyRevenueTrend",
-      topprod:  "TopProductsbyRevenue",
-      rfm:      "CustomerSegmentationRFMModel",
-      kpi:      "KPIOverviewDynamicSelector"
-    };
-    function tabURL(sheet){ return `${TAB.base}${sheet}?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top`; }
-  </script>
 </head>
 <body>
-<header>
-  <div class="wrap head-row">
-    <h1>📊 E-commerce & Finance — Live Analytics</h1>
-    <div class="badges">
-      <img src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main" alt="Refresh Status">
-      <img src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml/badge.svg?branch=main" alt="Previews">
-      <img src="https://img.shields.io/badge/Python-3.13|3.11-3776AB?logo=python&logoColor=white" alt="Python">
+  <div class="wrap">
+    <h1>E-commerce & Finance Insights Report</h1>
+    <a class="btn" href="./Ecommerce_Finance_Insights_Report.pdf">Download PDF</a>
+    <h2 style="color:#03C4A1">Live Preview (PDF)</h2>
+    <iframe src="./Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
+    <h2 style="color:#03C4A1">Page Previews (PNG)</h2>
+    <div class="grid">
+                <img src="previews/report_page-01.png" alt="Report page preview" />
+                <img src="previews/report_page-02.png" alt="Report page preview" />
+                <img src="previews/report_page-03.png" alt="Report page preview" />
+                <img src="previews/report_page-04.png" alt="Report page preview" />
+                <img src="previews/report_page-05.png" alt="Report page preview" />
+                <img src="previews/report_page-06.png" alt="Report page preview" />
+                <img src="previews/report_page-07.png" alt="Report page preview" />
+                <img src="previews/report_page-08.png" alt="Report page preview" />
+                <img src="previews/report_page-09.png" alt="Report page preview" />
     </div>
   </div>
-  <nav class="wrap subnav">
-    <a class="chip" href="#overview">Overview</a>
-    <a class="chip" href="#monthly">Monthly Revenue</a>
-    <a class="chip" href="#topprod">Top Products</a>
-    <a class="chip" href="#rfm">Customer Segmentation</a>
-    <a class="chip" href="#kpi">KPI Overview</a>
-    <a class="chip" href="#report">Python Report</a>
-    <a class="chip" href="#tableau-pngs">Tableau PNGs</a>
-    <a class="chip" href="#automation">Automation</a>
-  </nav>
-</header>
-
-<main class="wrap">
-  <section id="overview" class="section">
-    <div class="card">
-      <h2>Interactive Tableau — Overview</h2>
-      <iframe id="overviewFrame" class="embed embed-overview" loading="lazy"></iframe>
-    </div>
-  </section>
-
-  <section id="monthly" class="section">
-    <div class="card"><h2>Monthly Revenue Trend</h2>
-      <iframe id="monthlyFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
-
-  <section id="topprod" class="section">
-    <div class="card"><h2>Top Products by Revenue</h2>
-      <iframe id="topprodFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
-
-  <section id="rfm" class="section">
-    <div class="card"><h2>Customer Segmentation (RFM)</h2>
-      <iframe id="rfmFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
-
-  <section id="kpi" class="section">
-    <div class="card"><h2>KPI Overview (Dynamic Selector)</h2>
-      <iframe id="kpiFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
-
-  <section id="report" class="section">
-    <div class="card">
-      <h2>Python Report — Auto-generated PDF</h2>
-      <a id="pdfBtn" class="btn" href="#">View / Download PDF</a>
-      <iframe id="pdfFrame" class="embed embed-overview" loading="lazy"></iframe>
-    </div>
-  </section>
-
-  <section id="tableau-pngs" class="section">
-    <div class="card">
-      <h2>Tableau PNGs</h2>
-      <div id="tableau-png-grid" class="grid grid-2"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="card">
-      <h2>Report Page Previews (PNG)</h2>
-      <div id="previews" class="grid grid-2"></div>
-      <p id="previews-note" class="hint" style="display:none">PNG previews not found. Place them under <code class="inline">docs/previews/</code>.</p>
-    </div>
-  </section>
-
-  <section id="automation" class="section">
-    <div class="card"><h2>Automation — Last Run Summary</h2>
-      <div id="run-summary" class="hint">Loading…</div>
-    </div>
-  </section>
-</main>
-
-<footer>© <span id="year"></span> Huzeif Khan · Berlin</footer>
-
-<script>
-document.getElementById('year').textContent = new Date().getFullYear();
-const setSrc = (id,sheet)=>{const e=document.getElementById(id);if(e)e.src=tabURL(sheet);}
-setSrc('overviewFrame',TAB.overview);
-setSrc('monthlyFrame',TAB.monthly);
-setSrc('topprodFrame',TAB.topprod);
-setSrc('rfmFrame',TAB.rfm);
-setSrc('kpiFrame',TAB.kpi);
-
-/* PDF loading (local vs live) */
-(async()=>{
-  const isLocal=location.protocol==='file:'||location.hostname==='localhost';
-  const local="./report/Ecommerce_Finance_Insights_Report.pdf";
-  const pages="/Ecommerce-Finance-Analytics-Portfolio/report/Ecommerce_Finance_Insights_Report.pdf";
-  const raw="https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/docs/report/Ecommerce_Finance_Insights_Report.pdf";
-  const btn=document.getElementById('pdfBtn');
-  const frame=document.getElementById('pdfFrame');
-  const path=isLocal?local:pages;
-  btn.href=path; frame.src=path+"#view=FitH";
-  try{const r=await fetch(path,{method:'HEAD',cache:'no-store'});if(!r.ok){btn.href=raw;frame.src=raw;}}catch{btn.href=raw;frame.src=raw;}
-})();
-
-/* --- Report previews (PNG) — ultra-tolerant loader --- */
-(async()=>{
-  const box=document.getElementById('previews'),note=document.getElementById('previews-note');
-  const roots=['./previews/','./report/previews/','./roport/previews/','./assets/tableau/'];
-  const makeNames=()=>{const s=new Set();for(let i=1;i<=60;i++){const d2=String(i).padStart(2,'0');
-  s.add(`report_page-${d2}.png`);s.add(`report_page-${d2}.PNG`);
-  s.add(`report_page-${i}.png`);s.add(`report_page-${i}.PNG`);
-  s.add(`page-${i}.png`);s.add(`page-${i}.PNG`);
-  s.add(`report-${i}.png`);s.add(`report-${i}.PNG`);}return[...s];}
-  const tryLoad=(url)=>new Promise(res=>{const im=new Image();let done=false;
-  const t=setTimeout(()=>{if(!done){done=true;res(false)}},8000);
-  im.onload=()=>{if(!done){done=true;clearTimeout(t);res(true)}};
-  im.onerror=()=>{if(!done){done=true;clearTimeout(t);res(false)}};
-  im.src=url+`?v=${Date.now()}`});
-  const names=makeNames();const found=[];const seen=new Set();
-  for(const r of roots){for(const n of names){const u=r+n;if(seen.has(u))continue;
-  // eslint-disable-next-line no-await-in-loop
-  const ok=await tryLoad(u);if(ok){seen.add(u);found.push(u);}}}
-  if(!found.length){note.style.display='block';return;}
-  found.sort((a,b)=>{const na=(a.match(/(\d+)\.png$/i)||[])[1]||'0';const nb=(b.match(/(\d+)\.png$/i)||[])[1]||'0';return na-nb;});
-  for(const u of found){const a=document.createElement('a');a.href=u;a.target="_blank";const i=new Image();
-  i.loading='lazy';i.src=u;i.className='thumb';a.appendChild(i);box.appendChild(a);}
-})();
-
-/* Automation summary from README */
-(async()=>{
-  const el=document.getElementById('run-summary');
-  try{const r=await fetch('https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/README.md',{cache:'no-store'});
-  const t=await r.text();const s=t.indexOf('<!-- RUN-SUMMARY:START -->'),e=t.indexOf('<!-- RUN-SUMMARY:END -->');
-  if(s!==-1&&e!==-1){el.innerHTML=t.slice(s,e).replace(/^> /gm,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');}
-  else el.textContent='No summary found';}catch{el.textContent='Unable to load';}
-})();
-</script>
 </body>
 </html>
