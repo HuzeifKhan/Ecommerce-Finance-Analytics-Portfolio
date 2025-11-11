@@ -16,16 +16,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Install tools to render PDF -> PNG.
-      # We prefer Ghostscript because ImageMagick's PDF may be blocked by policy.
+      # Install tools to render PDF -> PNG (prefer Ghostscript).
       - name: Install Ghostscript (and ImageMagick as fallback)
         run: |
           sudo apt-get update
           sudo apt-get install -y ghostscript imagemagick
 
-      - name: Ensure docs/ folder (GitHub Pages)
+      # Ensure Pages folder structure and disable Jekyll
+      - name: Ensure docs/ folder and .nojekyll
         run: |
           mkdir -p docs/previews
+          touch docs/.nojekyll
 
       # Copy your latest PDF into docs/ so GitHub Pages can serve it
       - name: Copy report PDF
@@ -38,7 +39,7 @@ jobs:
             echo "::warning::Report PDF not found at $src"
           fi
 
-      # Render PNG previews from the PDF using Ghostscript (robust on runners)
+      # Render PNG previews from the PDF using Ghostscript
       - name: Render PNG previews from PDF (via Ghostscript)
         run: |
           set -e
@@ -47,54 +48,20 @@ jobs:
             # -dSAFER: secure mode
             # -sDEVICE=png16m: full-color PNG
             # -r200: 200 DPI
-            # -o docs/previews/report_page-%02d.png: page-numbered outputs (00, 01, ...)
+            # -o docs/previews/report_page-%02d.png: page-numbered outputs
             gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -r200 -o docs/previews/report_page-%02d.png "$pdf"
           else
             echo "::warning::No PDF found to render."
           fi
 
-      # Lightweight HTML viewer for Pages
-      - name: Create simple HTML viewer
-        run: |
-          cat > docs/index.html <<'HTML'
-          <!doctype html>
-          <html lang="en">
-          <head>
-            <meta charset="utf-8" />
-            <meta name="viewport" content="width=device-width,initial-scale=1" />
-            <title>E-commerce & Finance Report</title>
-            <style>
-              body{background:#0d1117;color:#e6edf3;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto;margin:0}
-              .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-              h1{color:#03C4A1;margin:0 0 12px}
-              .btn{display:inline-block;margin:12px 0;padding:10px 14px;border:1px solid #30363d;border-radius:8px;color:#e6edf3;text-decoration:none}
-              .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-              .grid img{width:100%;border-radius:10px;border:1px solid #30363d;background:#161b22}
-              iframe{width:100%;height:80vh;border:1px solid #30363d;border-radius:10px;background:#161b22}
-            </style>
-          </head>
-          <body>
-            <div class="wrap">
-              <h1>E-commerce & Finance Insights Report</h1>
-              <a class="btn" href="./Ecommerce_Finance_Insights_Report.pdf">Download PDF</a>
-              <h2 style="color:#03C4A1">Live Preview (PDF)</h2>
-              <iframe src="./Ecommerce_Finance_Insights_Report.pdf#view=FitH"></iframe>
-              <h2 style="color:#03C4A1">Page Previews (PNG)</h2>
-              <div class="grid">
-          HTML
-          # Auto-list all generated PNGs
-          for img in docs/previews/*.png; do
-            echo "                <img src=\"previews/$(basename "$img")\" alt=\"Report page preview\" />" >> docs/index.html
-          done
-          cat >> docs/index.html <<'HTML'
-              </div>
-            </div>
-          </body>
-          </html>
-          HTML
+      # IMPORTANT: Do NOT create or modify docs/index.html here.
+      # Your custom homepage stays intact.
 
-      - name: Commit docs/ to repo
+      - name: Commit previews and PDF only
         uses: EndBug/add-and-commit@v9
         with:
-          add: "docs"
-          message: "ci(previews): update PDF previews for GitHub Pages"
+          add: |
+            docs/previews
+            docs/Ecommerce_Finance_Insights_Report.pdf
+            docs/.nojekyll
+          message: "ci(previews): refresh previews + PDF (no homepage changes)"
