@@ -5,7 +5,7 @@
   <title>📊 E-commerce & Finance — Live Analytics (Tableau + Python)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
-  <meta name="description" content="Interactive Tableau dashboards and auto-generated Python report for e-commerce revenue analytics." />
+  <meta name="description" content="Tableau dashboards first, then Python auto-report. Nightly automation kept intact." />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,11 +13,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root {
+    :root{
       --bg:#1b1b1b;
       --panel:#222628;
       --line:#2f363b;
       --white:#ffffff;
+      --muted:#E6EDF3;
       --cyan:#03C4A1;
       --cyan2:#00A88F;
       --shadow:0 12px 30px rgba(0,0,0,.38);
@@ -27,99 +28,103 @@
       --gap:26px;
     }
 
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--white);
-      font: 16px/1.6 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      background:var(--bg);
+      color:var(--white);
+      font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
     }
+    h1,h2,h3{font-family:Sora,Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#fff}
+    h1{font-size:36px;font-weight:800;margin:0;text-shadow:0 2px 18px rgba(0,0,0,.25)}
+    h2{font-size:24px;font-weight:800;margin:0 0 12px}
+    h3{font-size:18px;font-weight:800;margin:8px 0 0}
+    a{color:#fff;text-decoration:none}
+    a:hover{text-decoration:underline}
 
-    h1, h2, h3 {
-      font-family: Sora, Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color: #fff;
+    /* Header */
+    header{
+      background:linear-gradient(90deg,var(--cyan) 0%, var(--cyan2) 100%);
+      color:#fff;
+      padding:22px 16px 14px;
+      box-shadow:0 10px 30px rgba(3,196,161,.25);
+      position:sticky; top:0; z-index:50;
     }
-    h1 { font-size: 36px; font-weight: 800; margin: 0; }
-    h2 { font-size: 24px; font-weight: 800; margin: 0 0 12px; }
-    h3 { font-size: 18px; font-weight: 800; margin: 8px 0 0; }
+    .wrap{max-width:1475px;margin:0 auto;padding:0 20px}
+    .head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badges img{height:20px;border-radius:4px;filter:drop-shadow(0 0 6px rgba(0,0,0,.25))}
 
-    a { color: #fff; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    header {
-      background: linear-gradient(90deg, var(--cyan) 0%, var(--cyan2) 100%);
-      color: #fff;
-      padding: 22px 16px 14px;
-      box-shadow: 0 10px 30px rgba(3,196,161,.25);
-      position: sticky; top: 0; z-index: 50;
+    /* Chips (grey) */
+    .subnav{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 14px;border-radius:999px;border:1px solid #354046;
+      background:#2a2f33; color:#fff; font-weight:800;
+      transition:transform .12s ease, box-shadow .12s ease;
+      box-shadow:0 2px 10px rgba(0,0,0,.25);
     }
+    .chip:hover{transform:scale(1.02);box-shadow:var(--glow)}
 
-    .wrap { max-width: 1475px; margin: 0 auto; padding: 0 20px; }
-    .head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-
-    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
-    .badges img { height: 20px; border-radius: 4px; filter: drop-shadow(0 0 6px rgba(0,0,0,.25)); }
-
-    .subnav { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 9px 14px; border-radius: 999px;
-      border: 1px solid #354046; background: #2a2f33; color: #fff;
-      font-weight: 800; transition: transform .12s ease, box-shadow .12s ease;
-      box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    /* Buttons */
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:11px 16px;border-radius:12px;border:1px solid transparent;
+      background:linear-gradient(180deg,var(--cyan),var(--cyan2));
+      color:#fff;font-weight:800;
+      box-shadow:0 8px 22px rgba(3,196,161,.18);
+      transition:transform .12s ease, filter .12s ease, box-shadow .12s ease;
     }
-    .chip:hover { transform: scale(1.02); box-shadow: var(--glow); }
-
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 16px; border-radius: 12px;
-      background: linear-gradient(180deg,var(--cyan),var(--cyan2));
-      color: #fff; font-weight: 800; box-shadow: 0 8px 22px rgba(3,196,161,.18);
-      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+    .btn:hover{transform:translateY(-1px);filter:saturate(1.05);box-shadow:var(--glow-strong)}
+    .btn-ghost{
+      background:#2a2f33;color:#fff;
+      border:1px solid #354046;border-radius:12px;padding:11px 16px;font-weight:800;
+      transition:transform .12s ease, box-shadow .12s ease;
     }
-    .btn:hover { transform: translateY(-1px); box-shadow: var(--glow-strong); filter: saturate(1.05); }
+    .btn-ghost:hover{transform:translateY(-1px);box-shadow:var(--glow)}
 
-    .btn-ghost {
-      background: #2a2f33; color: #fff;
-      border: 1px solid #354046; border-radius: 12px;
-      padding: 11px 16px; font-weight: 800;
-      transition: transform .12s ease, box-shadow .12s ease;
+    /* Sections / Cards */
+    main{padding-top:18px}
+    .section{padding:44px 0}            /* more spacing between blocks */
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      transition:transform .12s ease, box-shadow .12s ease;
+      margin-bottom:10px;
     }
-    .btn-ghost:hover { transform: translateY(-1px); box-shadow: var(--glow); }
+    .card:hover{transform:translateY(-2px);box-shadow:var(--glow-strong)}
+    .card h2{color:#F0FFFA}
+    .hint{color:#E6EDF3;opacity:.9;font-size:.95rem}
 
-    main { padding-top: 18px; }
-    .section { padding: 48px 0; }
-    .card {
-      background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 18px;
-      box-shadow: var(--shadow); transition: all .15s ease;
+    /* Embeds — bigger, fixed, fully interactive */
+    .embed{
+      display:block; width:100%; max-width:100%;
+      border:1px solid var(--line); border-radius:16px; background:#0e1114;
     }
-    .card:hover { transform: translateY(-2px); box-shadow: var(--glow-strong); }
+    .embed-overview{height:880px;min-height:880px}   /* Dashboard bigger */
+    .embed-sheet{height:800px;min-height:800px}      /* Sheets bigger */
 
-    .embed {
-      display: block; width: 100%; border: 1px solid var(--line);
-      border-radius: 16px; background: #0e1114;
+    /* Grids + thumbnails (hover glow) */
+    .grid{display:grid;gap:var(--gap)}
+    .grid-2{grid-template-columns:repeat(auto-fit,minmax(420px,1fr))}
+    .thumb{
+      width:100%;border-radius:16px;border:1px solid var(--line);background:#0f1418;
+      transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      display:block;
     }
-    .embed-overview { height: 880px; }
-    .embed-sheet { height: 800px; }
+    .thumb:hover{transform:scale(1.02);box-shadow:var(--glow-strong);filter:saturate(1.05)}
 
-    .grid { display: grid; gap: var(--gap); }
-    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
-
-    .thumb {
-      width: 100%; border-radius: 16px; border: 1px solid var(--line);
-      background: #0f1418; transition: transform .12s, box-shadow .12s, filter .12s;
-      display: block;
-    }
-    .thumb:hover { transform: scale(1.02); box-shadow: var(--glow-strong); filter: saturate(1.05); }
-
-    footer { color: #e6eef3; opacity: .9; padding: 32px 0; text-align: center; }
-    code.inline { padding: 1px 6px; border: 1px solid var(--line);
-      border-radius: 6px; background: #0f1418; color: #fff; }
+    footer{color:#e6eef3;opacity:.9;padding:32px 0;text-align:center}
+    code.inline{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0f1418;color:#fff}
   </style>
 
+  <!-- CONFIG: exact sheet paths (embeddable views) -->
   <script>
     window.TAB = {
       base: "https://public.tableau.com/views/Book1_17618490659490/",
@@ -129,149 +134,320 @@
       rfm:      "CustomerSegmentationRFMModel",
       kpi:      "KPIOverviewDynamicSelector"
     };
-    function tabURL(sheet){ return `${TAB.base}${sheet}?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top`; }
+    function tabURL(sheet){
+      return `${TAB.base}${sheet}?:showVizHome=no&:embed=y&:tabs=no&:toolbar=top`;
+    }
   </script>
 </head>
 <body>
-<header>
-  <div class="wrap head-row">
-    <h1>📊 E-commerce & Finance — Live Analytics</h1>
-    <div class="badges">
-      <img src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main" alt="Refresh Status">
-      <img src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml/badge.svg?branch=main" alt="Previews">
-      <img src="https://img.shields.io/badge/Python-3.13|3.11-3776AB?logo=python&logoColor=white" alt="Python">
+
+  <!-- Header -->
+  <header>
+    <div class="wrap head-row">
+      <h1>📊 E-commerce & Finance — Live Analytics</h1>
+      <div class="badges" aria-label="Workflow status badges">
+        <a aria-label="Nightly Refresh status" href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml" target="_blank" rel="noopener">
+          <img alt="Nightly Refresh" src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/refresh-report.yml/badge.svg?branch=main">
+        </a>
+        <a aria-label="Build PDF previews status" href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml" target="_blank" rel="noopener">
+          <img alt="PDF Previews" src="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/actions/workflows/build-report-previews.yml/badge.svg?branch=main">
+        </a>
+        <img alt="Python" src="https://img.shields.io/badge/Python-3.13%20%7C%203.11-3776AB?logo=python&logoColor=white">
+      </div>
     </div>
-  </div>
-  <nav class="wrap subnav">
-    <a class="chip" href="#overview">Overview</a>
-    <a class="chip" href="#monthly">Monthly Revenue</a>
-    <a class="chip" href="#topprod">Top Products</a>
-    <a class="chip" href="#rfm">Customer Segmentation</a>
-    <a class="chip" href="#kpi">KPI Overview</a>
-    <a class="chip" href="#report">Python Report</a>
-    <a class="chip" href="#tableau-pngs">Tableau PNGs</a>
-    <a class="chip" href="#automation">Automation</a>
-  </nav>
-</header>
 
-<main class="wrap">
-  <section id="overview" class="section">
-    <div class="card">
-      <h2>Interactive Tableau — Overview</h2>
-      <iframe id="overviewFrame" class="embed embed-overview" loading="lazy"></iframe>
-    </div>
-  </section>
+    <nav class="wrap subnav" aria-label="Section navigation">
+      <a class="chip" href="#overview">Overview</a>
+      <a class="chip" href="#monthly">Monthly Revenue</a>
+      <a class="chip" href="#topprod">Top Products</a>
+      <a class="chip" href="#rfm">Customer Segmentation</a>
+      <a class="chip" href="#kpi">KPI Overview</a>
+      <a class="chip" href="#report">Python Report</a>
+      <a class="chip" href="#tableau-pngs">Tableau PNGs</a>
+      <a class="chip" href="#automation">Automation</a>
+    </nav>
+  </header>
 
-  <section id="monthly" class="section">
-    <div class="card"><h2>Monthly Revenue Trend</h2>
-      <iframe id="monthlyFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
+  <main class="wrap">
 
-  <section id="topprod" class="section">
-    <div class="card"><h2>Top Products by Revenue</h2>
-      <iframe id="topprodFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
+    <!-- 1) Overview dashboard -->
+    <section id="overview" class="section">
+      <div class="card">
+        <h2>Interactive Tableau — Overview</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <a class="btn" target="_blank" rel="noopener"
+             href="https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard">
+            Open on Tableau
+          </a>
+          <a class="btn-ghost" href="#report">Jump to Python Report</a>
+        </div>
+        <iframe class="embed embed-overview" loading="lazy" title="Tableau — Overview" src="" id="overviewFrame"></iframe>
+        <p class="hint">Fully interactive (hover tooltips, toolbar enabled).</p>
+      </div>
+    </section>
 
-  <section id="rfm" class="section">
-    <div class="card"><h2>Customer Segmentation (RFM)</h2>
-      <iframe id="rfmFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
+    <!-- 2) Monthly Revenue -->
+    <section id="monthly" class="section">
+      <div class="card">
+        <h2>Monthly Revenue Trend</h2>
+        <iframe class="embed embed-sheet" loading="lazy" title="Monthly Revenue" src="" id="monthlyFrame"></iframe>
+      </div>
+    </section>
 
-  <section id="kpi" class="section">
-    <div class="card"><h2>KPI Overview (Dynamic Selector)</h2>
-      <iframe id="kpiFrame" class="embed embed-sheet" loading="lazy"></iframe>
-    </div>
-  </section>
+    <!-- 3) Top Products by Revenue -->
+    <section id="topprod" class="section">
+      <div class="card">
+        <h2>Top Products by Revenue</h2>
+        <iframe class="embed embed-sheet" loading="lazy" title="Top Products by Revenue" src="" id="topprodFrame"></iframe>
+      </div>
+    </section>
 
-  <section id="report" class="section">
-    <div class="card">
-      <h2>Python Report — Auto-generated PDF</h2>
-      <a id="pdfBtn" class="btn" href="#">View / Download PDF</a>
-      <iframe id="pdfFrame" class="embed embed-overview" loading="lazy"></iframe>
-    </div>
-  </section>
+    <!-- 4) Customer Segmentation -->
+    <section id="rfm" class="section">
+      <div class="card">
+        <h2>Customer Segmentation (RFM)</h2>
+        <iframe class="embed embed-sheet" loading="lazy" title="RFM" src="" id="rfmFrame"></iframe>
+      </div>
+    </section>
 
-  <section id="tableau-pngs" class="section">
-    <div class="card">
-      <h2>Tableau PNGs</h2>
-      <div id="tableau-png-grid" class="grid grid-2"></div>
-    </div>
-  </section>
+    <!-- 5) KPI Overview -->
+    <section id="kpi" class="section">
+      <div class="card">
+        <h2>KPI Overview (Dynamic Selector)</h2>
+        <iframe class="embed embed-sheet" loading="lazy" title="KPI Overview" src="" id="kpiFrame"></iframe>
+      </div>
+    </section>
 
-  <section class="section">
-    <div class="card">
-      <h2>Report Page Previews (PNG)</h2>
-      <div id="previews" class="grid grid-2"></div>
-      <p id="previews-note" class="hint" style="display:none">PNG previews not found. Place them under <code class="inline">docs/previews/</code>.</p>
-    </div>
-  </section>
+    <!-- 6) Python report (scrollable) -->
+    <section id="report" class="section">
+      <div class="card">
+        <h2>Python Report — Auto-generated PDF</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <a id="pdfBtn" class="btn" href="#" target="_blank" rel="noopener">View / Download PDF</a>
+          <a class="btn-ghost" href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio" target="_blank" rel="noopener">View Repo</a>
+        </div>
+        <iframe id="pdfFrame" class="embed embed-overview" loading="lazy" title="PDF Report" src=""></iframe>
+        <p class="hint">Rebuilt by workflow — previews & status below update automatically.</p>
+      </div>
+    </section>
 
-  <section id="automation" class="section">
-    <div class="card"><h2>Automation — Last Run Summary</h2>
-      <div id="run-summary" class="hint">Loading…</div>
-    </div>
-  </section>
-</main>
+    <!-- 7) Tableau PNG gallery (from docs/assets/tableau) -->
+    <section id="tableau-pngs" class="section">
+      <div class="card">
+        <h2>Tableau PNGs</h2>
+        <div id="tableau-png-grid" class="grid grid-2"></div>
+        <p id="tableau-png-note" class="hint" style="display:none">Place PNGs in <code class="inline">docs/assets/tableau/</code> (e.g., <code>dashboard_overview.png</code>, <code>monthly_revenue.png</code>, <code>top_products.png</code>, <code>customer_segments.png</code> …).</p>
+      </div>
+    </section>
 
-<footer>© <span id="year"></span> Huzeif Khan · Berlin</footer>
+    <!-- 8) PNG previews (after report; also searches assets/tableau as fallback) -->
+    <section class="section">
+      <div class="card">
+        <h2>Report Page Previews (PNG)</h2>
+        <div id="previews" class="grid grid-2"></div>
+        <p id="previews-note" class="hint" style="display:none">PNG previews not found. Put them under <code class="inline">docs/previews/</code> (or <code>docs/assets/tableau/</code>).</p>
+      </div>
+    </section>
 
-<script>
-document.getElementById('year').textContent = new Date().getFullYear();
-const setSrc = (id,sheet)=>{const e=document.getElementById(id);if(e)e.src=tabURL(sheet);}
-setSrc('overviewFrame',TAB.overview);
-setSrc('monthlyFrame',TAB.monthly);
-setSrc('topprodFrame',TAB.topprod);
-setSrc('rfmFrame',TAB.rfm);
-setSrc('kpiFrame',TAB.kpi);
+    <!-- 9) Automation summary -->
+    <section id="automation" class="section">
+      <div class="card">
+        <h2>Automation — Last Run Summary</h2>
+        <div id="run-summary" class="hint">Fetching latest…</div>
+      </div>
+    </section>
 
-/* PDF loading (local vs live) */
-(async()=>{
-  const isLocal=location.protocol==='file:'||location.hostname==='localhost';
-  const local="./report/Ecommerce_Finance_Insights_Report.pdf";
-  const pages="/Ecommerce-Finance-Analytics-Portfolio/report/Ecommerce_Finance_Insights_Report.pdf";
-  const raw="https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/docs/report/Ecommerce_Finance_Insights_Report.pdf";
-  const btn=document.getElementById('pdfBtn');
-  const frame=document.getElementById('pdfFrame');
-  const path=isLocal?local:pages;
-  btn.href=path; frame.src=path+"#view=FitH";
-  try{const r=await fetch(path,{method:'HEAD',cache:'no-store'});if(!r.ok){btn.href=raw;frame.src=raw;}}catch{btn.href=raw;frame.src=raw;}
-})();
+    <!-- 10) Phase 8 – Advanced Analytics -->
+    <section class="section">
+      <div class="card">
+        <h2>Phase 8 — Advanced Analytics</h2>
+        <div id="phase8-cards" class="grid grid-2"></div>
+        <p id="phase8-note" class="hint" style="display:none">Cards appear when assets exist in <code class="inline">docs/assets/figures/</code> or <code class="inline">docs/previews/</code>.</p>
+      </div>
+    </section>
 
-/* --- Report previews (PNG) — ultra-tolerant loader --- */
-(async()=>{
-  const box=document.getElementById('previews'),note=document.getElementById('previews-note');
-  const roots=['./previews/','./report/previews/','./roport/previews/','./assets/tableau/'];
-  const makeNames=()=>{const s=new Set();for(let i=1;i<=60;i++){const d2=String(i).padStart(2,'0');
-  s.add(`report_page-${d2}.png`);s.add(`report_page-${d2}.PNG`);
-  s.add(`report_page-${i}.png`);s.add(`report_page-${i}.PNG`);
-  s.add(`page-${i}.png`);s.add(`page-${i}.PNG`);
-  s.add(`report-${i}.png`);s.add(`report-${i}.PNG`);}return[...s];}
-  const tryLoad=(url)=>new Promise(res=>{const im=new Image();let done=false;
-  const t=setTimeout(()=>{if(!done){done=true;res(false)}},8000);
-  im.onload=()=>{if(!done){done=true;clearTimeout(t);res(true)}};
-  im.onerror=()=>{if(!done){done=true;clearTimeout(t);res(false)}};
-  im.src=url+`?v=${Date.now()}`});
-  const names=makeNames();const found=[];const seen=new Set();
-  for(const r of roots){for(const n of names){const u=r+n;if(seen.has(u))continue;
-  // eslint-disable-next-line no-await-in-loop
-  const ok=await tryLoad(u);if(ok){seen.add(u);found.push(u);}}}
-  if(!found.length){note.style.display='block';return;}
-  found.sort((a,b)=>{const na=(a.match(/(\d+)\.png$/i)||[])[1]||'0';const nb=(b.match(/(\d+)\.png$/i)||[])[1]||'0';return na-nb;});
-  for(const u of found){const a=document.createElement('a');a.href=u;a.target="_blank";const i=new Image();
-  i.loading='lazy';i.src=u;i.className='thumb';a.appendChild(i);box.appendChild(a);}
-})();
+  </main>
 
-/* Automation summary from README */
-(async()=>{
-  const el=document.getElementById('run-summary');
-  try{const r=await fetch('https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/README.md',{cache:'no-store'});
-  const t=await r.text();const s=t.indexOf('<!-- RUN-SUMMARY:START -->'),e=t.indexOf('<!-- RUN-SUMMARY:END -->');
-  if(s!==-1&&e!==-1){el.innerHTML=t.slice(s,e).replace(/^> /gm,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');}
-  else el.textContent='No summary found';}catch{el.textContent='Unable to load';}
-})();
-</script>
+  <footer>© <span id="year"></span> Huzeif Khan · Berlin — SQL · Python · Tableau</footer>
+
+  <!-- JS -->
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* Tableau embed URLs (toolbar ON for all embeds) */
+    const setSrc = (id, sheet) => {
+      const el = document.getElementById(id);
+      if (el) el.src = tabURL(sheet);
+    };
+    setSrc('overviewFrame', TAB.overview);
+    setSrc('monthlyFrame',  TAB.monthly);
+    setSrc('topprodFrame',  TAB.topprod);
+    setSrc('rfmFrame',      TAB.rfm);
+    setSrc('kpiFrame',      TAB.kpi);
+
+    /* PDF: choose local vs Pages + fallback to raw if needed */
+    (async () => {
+      const isLocal = location.protocol === 'file:' || location.hostname === 'localhost';
+      const localPath   = "./report/Ecommerce_Finance_Insights_Report.pdf";
+      const pagesPath   = "/Ecommerce-Finance-Analytics-Portfolio/report/Ecommerce_Finance_Insights_Report.pdf";
+      const rawFallback = "https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/docs/report/Ecommerce_Finance_Insights_Report.pdf";
+
+      const btn   = document.getElementById('pdfBtn');
+      const frame = document.getElementById('pdfFrame');
+
+      if (isLocal) {
+        btn.href  = localPath;
+        frame.src = localPath + "#view=FitH";
+        return;
+      }
+      btn.href  = pagesPath;
+      frame.src = pagesPath + "#view=FitH";
+
+      try {
+        const res = await fetch(pagesPath, { method:"HEAD", cache:"no-store" });
+        if (!res.ok) { btn.href = rawFallback; frame.src = rawFallback + "#view=FitH"; }
+      } catch {
+        btn.href = rawFallback; frame.src = rawFallback + "#view=FitH";
+      }
+    })();
+
+    /* Last run summary from README markers */
+    (async () => {
+      const el = document.getElementById('run-summary');
+      try {
+        const r = await fetch('https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/README.md', {cache:'no-store'});
+        const md = await r.text();
+        const s = md.indexOf('<!-- RUN-SUMMARY:START -->');
+        const e = md.indexOf('<!-- RUN-SUMMARY:END -->');
+        if (s !== -1 && e !== -1 && e > s) {
+          const block = md.slice(s, e).split('\n').slice(1).join('\n').trim()
+            .replace(/^> /gm,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>');
+          el.innerHTML = block;
+        } else { el.textContent = 'No summary markers found.'; }
+      } catch { el.textContent = 'Unable to load.'; }
+    })();
+
+    /* --- Tableau PNG gallery loader (docs/assets/tableau) --- */
+    (async () => {
+      const grid = document.getElementById('tableau-png-grid');
+      const note = document.getElementById('tableau-png-note');
+      const root = './assets/tableau/';
+
+      let files = [];
+      try {
+        const res = await fetch(root + 'manifest.json', {cache:'no-store'});
+        if (res.ok) { files = await res.json(); }
+      } catch {}
+
+      if (!files.length) {
+        const candidates = [
+          'dashboard_overview.png','monthly_revenue.png','top_products.png','customer_segments.png',
+          ...Array.from({length:40},(_,i)=>`tableau-${String(i+1).padStart(2,'0')}.png`),
+          ...Array.from({length:40},(_,i)=>`sheet-${String(i+1).padStart(2,'0')}.png`)
+        ];
+        const seen = new Set();
+        for (const f of candidates){
+          try{
+            const h = await fetch(root + f, {method:'HEAD', cache:'no-store'});
+            if (h.ok && !seen.has(f)) { files.push(f); seen.add(f); }
+          }catch{}
+        }
+      }
+
+      if (!files.length){ note.style.display='block'; return; }
+
+      files.forEach(f=>{
+        const url = root + f;
+        const a  = document.createElement('a');
+        a.href   = url; a.target = "_blank"; a.rel = "noopener";
+        const im = new Image();
+        im.loading = 'lazy';
+        im.src = url;
+        im.alt = f.replace(/[_-]/g,' ').replace(/\.png$/i,'');
+        im.className = 'thumb';
+        a.appendChild(im);
+        grid.appendChild(a);
+      });
+    })();
+
+    /* --- Report previews (PNG) — tolerant finder --- */
+    (async () => {
+      const box  = document.getElementById('previews');
+      const note = document.getElementById('previews-note');
+
+      const roots = [
+        './previews/',            // your folder on Pages
+        './report/previews/',
+        './roport/previews/',
+        './assets/tableau/'       // fallback
+      ];
+
+      // Build a list of candidate names (does NOT assume continuous numbering)
+      const names = new Set();
+      for (let i=1;i<=60;i++){
+        names.add(`report_page-${String(i).padStart(2,'0')}.png`);
+        names.add(`report_page-${i}.png`);
+        names.add(`page-${i}.png`);
+        names.add(`report-${i}.png`);
+      }
+
+      const found = [];
+      const seen  = new Set();
+      for (const root of roots){
+        for (const name of names){
+          const url = root + name;
+          try {
+            const h = await fetch(url, {method:'HEAD', cache:'no-store'});
+            if (h.ok && !seen.has(url)) { seen.add(url); found.push(url); }
+          } catch {}
+        }
+      }
+
+      if (!found.length){ note.style.display='block'; return; }
+
+      // Natural sort by trailing number
+      found.sort((a,b)=>{
+        const na=(a.match(/(\d+)\.png$/)||[])[1]||'0';
+        const nb=(b.match(/(\d+)\.png$/)||[])[1]||'0';
+        return Number(na)-Number(nb);
+      });
+
+      for (const u of found){
+        const a  = document.createElement('a');
+        a.href   = u; a.target = "_blank"; a.rel = "noopener";
+        const im = new Image();
+        im.loading = 'lazy';
+        im.src  = u;
+        im.alt  = 'Report page preview';
+        im.className = 'thumb';
+        a.appendChild(im);
+        box.appendChild(a);
+      }
+    })();
+
+    /* Phase 8 cards */
+    (async () => {
+      const box = document.getElementById('phase8-cards');
+      const note = document.getElementById('phase8-note');
+      const groups = [
+        {t:'CLV — Top 20 Customers',  g:['./assets/figures/clv_top20.png','./previews/clv_top20.png']},
+        {t:'Revenue Forecast (12 months)', g:['./assets/figures/revenue_forecast_12m.png','./previews/revenue_forecast_12m.png']},
+        {t:'Cohort Retention', g:['./assets/figures/cohort_retention.png','./previews/cohort_retention.png']},
+      ];
+      let shown=0;
+      for(const x of groups){
+        let src=null;
+        for(const g of x.g){ try{ const h=await fetch(g,{method:'HEAD',cache:'no-store'}); if(h.ok){src=g;break;} }catch{} }
+        if(src){
+          const card=document.createElement('div'); card.className='card';
+          const img=new Image(); img.loading='lazy'; img.src=src; img.alt=x.t; img.className='thumb';
+          const title=document.createElement('h3'); title.textContent=x.t; title.style.margin='10px 0 0';
+          card.appendChild(img); card.appendChild(title);
+          box.appendChild(card); shown++;
+        }
+      }
+      if(!shown) note.style.display='block';
+    })();
+  </script>
 </body>
 </html>
