@@ -10,7 +10,7 @@
 
 ---
 
-# 🧾 Ecommerce & Finance Analytics Portfolio  
+# 🧾 Ecommerce & Finance Analytics Portfolio
 
 > **End-to-end Data & BI Project** — transforming raw retail data into actionable business intelligence using **SQL, Python, and Tableau**.  
 > Cleaned, analyzed, and visualized **500K+ transactions** to uncover revenue trends, top-performing products, and customer behavior patterns.
@@ -49,7 +49,7 @@
 
 <p align="center">
   <strong>📘 Downloadable Report (PDF v2):</strong><br>
-  <a href="https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/raw/main/06_Reports/Ecommerce_Finance_Insights_Report.pdf">
+  <a href="https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/docs/report/Ecommerce_Finance_Insights_Report.pdf">
     🟢 Download / View Updated PDF Report
   </a>
 </p>
@@ -71,11 +71,11 @@
 ---
 
 **Last refreshed (UTC):** see the footer in the latest PDF and the “Last Updated (UTC)” column in  
-📊 `04_Excel/KPI_Snapshot.xlsx`
+📊 `04_Excel/KPI_Snapshot.xlsx` *(update to `docs/Excel/KPI_Snapshot.xlsx` if you relocate it for Pages)*
 
 ---
 
-## 🚀 Project Overview  
+## 🚀 Project Overview
 
 An end-to-end **E-Commerce Finance Analytics** pipeline converting raw transactional data into KPIs and visual insights.  
 Built using **SQL + Python + Tableau**, automated via **PowerShell + GitHub Actions**, and updated **nightly** at 03:00 Berlin time.
@@ -83,11 +83,11 @@ Built using **SQL + Python + Tableau**, automated via **PowerShell + GitHub Acti
 **Business Impact:**  
 - Identified **seasonal peaks (Q4 surge)** and **top-revenue SKUs**  
 - Improved **customer segmentation (RFM)** for retention strategy  
-- Delivered **automated reporting** for faster decision-making  
+- Delivered **automated reporting** for faster decision-making
 
 ---
 
-## ⚙️ Tech Stack  
+## ⚙️ Tech Stack
 
 | Layer | Tools | Purpose |
 |:--|:--|:--|
@@ -99,53 +99,24 @@ Built using **SQL + Python + Tableau**, automated via **PowerShell + GitHub Acti
 
 ---
 
-## 🧹 Data Cleaning Workflow  
+## 🎨 Visual Analytics (Tableau Dashboard)
 
-**Source:** [Kaggle – E-Commerce Data (Carrie1)](https://www.kaggle.com/datasets/carrie1/ecommerce-data)
+🔗 **[→ Open Live Dashboard on Tableau Public](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)**
 
-1. Loaded 541 K transactions via `LOAD DATA INFILE`  
-2. Standardized timestamps (`STR_TO_DATE`)  
-3. Removed invalid & duplicate invoices  
-4. Filtered anomalies (negative or zero price)  
-5. Engineered fields  
-   - `LineAmount = Quantity × UnitPrice`  
-   - `IsReturn` flag  
-   - `InvoiceYear`, `InvoiceMonth`, `InvoiceHour`  
-6. Indexed key columns → optimized aggregation  
-7. Result: **534 K valid transactions**
-
----
-
-## 💰 Key Insights  
-
-| Metric | Insight |
-|:--|:--|
-| **Total Revenue** | € 10,641,558.95 |
-| **Valid Transactions** | 534 K |
-| **Peak Month** | November 2011 (holiday season) |
-| **Top Products** | Gift & Décor items – “DOTCOM POSTAGE”, “REGENCY CAKESTAND 3 TIER” |
-| **Customer Segments** | RFM segmentation (Recency · Frequency · Monetary) |
-
----
-
-## 🎨 Visual Analytics (Tableau Dashboard)  
-
-🔗 **[→ Open Live Dashboard on Tableau Public](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)**  
-
-| Overview | Monthly Revenue | Top 10 Products | Customer Segments |
+| Overview | Monthly Revenue | Top Products | Customer Segments |
 |:--:|:--:|:--:|:--:|
-| [![Dashboard](05_Tableau/exports/dashboard_overview.png)](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard) | ![Revenue](05_Tableau/exports/monthly_revenue.png) | ![Top Products](05_Tableau/exports/top_products.png) | ![RFM](05_Tableau/exports/customer_segments.png) |
+| [![Dashboard](docs/assets/tableau/dashboard_overview.png)](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard) | ![Revenue](docs/assets/tableau/monthly_revenue.png) | ![Top Products](docs/assets/tableau/top_products.png) | ![RFM](docs/assets/tableau/customer_segments.png) |
 
 > *Neon-cyan cyberpunk theme with clean typography and modular layout.*
 
 ---
 
-## 📦 Automated PDF + Excel Reports  
+## 📦 Automated PDF + Excel Reports
 
-Auto-generated daily using **ReportLab + PowerShell + GitHub Actions**  
+Auto-generated daily using **ReportLab + PowerShell + GitHub Actions**
 
-📄 `06_Reports/Ecommerce_Finance_Insights_Report.pdf`  
-📊 `04_Excel/KPI_Snapshot.xlsx`
+- 📄 `docs/report/Ecommerce_Finance_Insights_Report.pdf`  
+- 📊 `04_Excel/KPI_Snapshot.xlsx` *(or `docs/Excel/KPI_Snapshot.xlsx` if you mirrored it under `docs/`)*
 
 **Sections**
 - Page 1 → Overview + KPIs + Dashboard link  
@@ -155,7 +126,7 @@ Auto-generated daily using **ReportLab + PowerShell + GitHub Actions**
 
 ---
 
-## ⚙️ Automation Workflow  
+## ⚙️ Automation Workflow
 
 ### 🔁 Local Automation (PowerShell + Task Scheduler)
 - Script `scripts/update_all.ps1` → builds PDF + Excel, commits & pushes  
@@ -166,82 +137,71 @@ Auto-generated daily using **ReportLab + PowerShell + GitHub Actions**
 - Workflow → `.github/workflows/refresh-report.yml`  
 - Runs nightly at **02:00 UTC** (≈ **03:00 CET** / **04:00 CEST**)  
 - Installs dependencies, rebuilds PDF/Excel, and commits artifacts  
-- Status badge above 👆 reflects last run status  
+- Status badge above 👆 reflects last run status
 
 ---
 
-## 📁 Project Structure  
+## 📁 Project Structure
+
 ```
 Ecommerce-Finance-Analytics-Portfolio/
 │
-├── 01_Data/
-│ ├── raw/ # Original Kaggle dataset
-│ └── processed/ # Cleaned + analytical datasets (RFM, Cohorts)
+├── docs/
+│ ├── index.html # GitHub Pages site
+│ ├── report/Ecommerce_Finance_Insights_Report.pdf
+│ ├── assets/tableau/ # Static tableau PNGs used by site & README
+│ │ ├── dashboard_overview.png
+│ │ ├── monthly_revenue.png
+│ │ ├── top_products.png
+│ │ └── customer_segments.png
+│ ├── previews/ # Optional: report_page-00.png, ...
+│ └── assets/figures/ # Phase 8 figures (CLV, cohorts, forecast)
 │
-├── 02_SQL/
-│ ├── 01_load_raw.sql # Data import & staging
-│ └── 02_cleaning.sql # Cleaning & transformation logic
-│
-├── 03_Python/
-│ ├── ecommerce_analysis.ipynb # Exploratory analysis & RFM modeling
-│ └── make_report.py # Automated PDF/Excel generation
-│
-├── 04_Excel/
-│ └── KPI_Snapshot.xlsx
-│
+├── 04_Excel/KPI_Snapshot.xlsx
 ├── 05_Tableau/
-│ ├── exports/ # Static Tableau PNG exports
-│ └── EFA_Dashboard.twbx # Interactive workbook
+│ ├── exports/ (legacy; now using docs/assets/tableau/)
+│ └── EFA_Dashboard.twbx
+├── 06_Reports/ (legacy; canonical PDF lives under docs/report/)
 │
-├── 06_Reports/
-│ └── Ecommerce_Finance_Insights_Report.pdf
-│
+├── .github/workflows/refresh-report.yml
 ├── scripts/
-│ ├── update_all.ps1 # Pull → build → commit → push
-│ └── run_scheduled.ps1 # Logging wrapper for Task Scheduler
-│
-├── logs/
-│ └── run_YYYY-MM-DD_HH-mm.log # Execution logs
-│
-├── .github/workflows/
-│ └── refresh-report.yml # Nightly CI workflow (02:00 UTC)
-│
-├── requirements.txt
+│ ├── update_all.ps1
+│ └── run_scheduled.ps1
 └── README.md
 ```
 
 ---
 
-## ✨ Highlights  
+## ✨ Highlights
 
 ✅ Full pipeline: SQL → Python → Tableau → PDF → CI/CD  
 ✅ Cyberpunk visuals + dark neon theme  
 ✅ **Daily refresh automation** (local + cloud)  
 ✅ Robust logging & binary-safe Git workflow  
-✅ Clean, modular structure ready for enterprise pipelines  
+✅ Clean, modular structure ready for enterprise pipelines
 
 ---
 
-## 📈 Quick Links  
+## 📈 Quick Links
 
 - **Live Dashboard:**  
   [View on Tableau Public](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard)  
-- **Auto-generated PDF Report:**  
-  [View Report on GitHub](https://github.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/blob/main/06_Reports/Ecommerce_Finance_Insights_Report.pdf)  
+- **Auto-generated PDF Report (Pages copy):**  
+  [Open PDF](https://raw.githubusercontent.com/HuzeifKhan/Ecommerce-Finance-Analytics-Portfolio/main/docs/report/Ecommerce_Finance_Insights_Report.pdf)  
 - **Portfolio Site (GitHub Pages):**  
   [Visit Site](https://huzeifkhan.github.io/Ecommerce-Finance-Analytics-Portfolio/)
 
 ---
 
-## 🧩 Next Steps  
+## 🧩 Next Steps
 
 - 📈 Add CLV & Churn prediction modules  
 - 🧾 Integrate Power BI version for benchmarking  
-- 🔁 Simulate dbt / Airflow pipelines for enterprise refresh  
+- 🔁 Simulate dbt / Airflow pipelines for enterprise refresh
 
 ---
 
-## 👨‍💻 Author  
+## 👨‍💻 Author
 
 **Huzeif Khan**  
 📍 Berlin, Germany  |  💼 Data Analyst / BI Analyst  
