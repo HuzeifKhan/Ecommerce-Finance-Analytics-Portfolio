@@ -71,9 +71,9 @@
 ---
 
 <!-- RUN-SUMMARY:START -->
-> ✅ Last successful refresh: **2025-11-12 04:09 CET**  
-> ⏱️ Duration: **189 min 52 sec**  
-> 🌍 UTC: **2025-11-12 03:09 UTC**
+> ✅ Last successful refresh: **2025-11-13 04:12 CET**  
+> ⏱️ Duration: **192 min 35 sec**  
+> 🌍 UTC: **2025-11-13 03:12 UTC**
 <!-- RUN-SUMMARY:END -->
 
 ---
