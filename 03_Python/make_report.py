@@ -1,4 +1,130 @@
 ﻿# -*- coding: utf-8 -*-
+
+# === Shared Chart Style (Neon Dark) =========================================
+import matplotlib
+import matplotlib.pyplot as plt
+
+plt.rcParams.update({
+    "figure.dpi": 160,
+    "savefig.dpi": 160,
+    "axes.facecolor": "#222222",
+    "figure.facecolor": "#1b1b1b",
+    "axes.edgecolor": "#444444",
+    "axes.labelcolor": "#e6e6e6",
+    "xtick.color": "#e6e6e6",
+    "ytick.color": "#e6e6e6",
+    "grid.color": "#3a3a3a",
+    "text.color": "#f2f2f2",
+    "font.size": 11,
+})
+
+_CYAN = "#03C4A1"
+_PANEL_BG = "#1b1b1b"
+_ACCENT = "#6FFFE9"
+
+def _apply_ax_decor(ax, title: str, xlabel: str = "", ylabel: str = ""):
+    ax.grid(True, alpha=0.35, linestyle="--", linewidth=0.6)
+    ax.set_title(title, pad=12, color="white", fontsize=14, fontweight="bold")
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    for spine in ax.spines.values():
+        spine.set_color("#555555")
+
+# KPI 1: Monthly Revenue Trend
+def build_monthly_revenue_chart(monthly_df, out_path: Path):
+    df = monthly_df.copy()
+    # Expect columns: YearMonth, Revenue
+    # Normalize column names
+    cols = {c.lower(): c for c in df.columns}
+    ym_col = cols.get("yearmonth") or [c for c in df.columns if "Year" in c and "Month" in c]
+    if isinstance(ym_col, list):
+        ym_col = ym_col[0] if ym_col else df.columns[0]
+    rev_col = cols.get("revenue") or "Revenue"
+    if rev_col not in df.columns:
+        # try total_revenue
+        rev_col = "total_revenue" if "total_revenue" in df.columns else df.columns[-1]
+
+    fig, ax = plt.subplots(figsize=(8.5, 4.2))
+    ax.plot(df[ym_col], df[rev_col], marker="o", linewidth=2.2, color=_CYAN)
+    _apply_ax_decor(ax, "Monthly Revenue Trend", xlabel="Month", ylabel="Revenue")
+    ax.fill_between(range(len(df[rev_col])), df[rev_col]*0, df[rev_col], alpha=0.08, color=_CYAN)
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+
+# KPI 2: Top 10 Products by Revenue
+def build_top_products_chart(top_df, out_path: Path, top_n: int = 10):
+    df = top_df.copy()
+    # Expect columns: Description, Revenue
+    # Normalize
+    lc = {c.lower(): c for c in df.columns}
+    desc_col = lc.get("description") or next((c for c in df.columns if "Desc" in c or "Product" in c), df.columns[0])
+    rev_col = lc.get("revenue") or next((c for c in df.columns if "revenue" in c.lower() or "amount" in c.lower()), df.columns[1])
+
+    df = df.sort_values(df.columns[df.columns.get_loc(rev_col)], ascending=False).head(top_n)
+    fig, ax = plt.subplots(figsize=(8.5, 4.2))
+    ax.barh(df[desc_col][::-1], df[rev_col][::-1], color=_CYAN)
+    _apply_ax_decor(ax, "Top 10 Products by Revenue", xlabel="Revenue")
+    ax.invert_yaxis()
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+
+# KPI 3: Customer Segmentation (RFM) – Donut
+def build_rfm_pie_chart(rfm_df, out_path: Path):
+    df = rfm_df.copy()
+    lc = {c.lower(): c for c in df.columns}
+    # We expect either 'Segment' + 'Count' OR one row per customer with 'Segment' to aggregate
+    if "segment" in lc:
+        seg_col = lc["segment"]
+        if "count" in lc:
+            cnt_col = lc["count"]
+            grouped = df.groupby(seg_col, as_index=False)[cnt_col].sum()
+            labels = grouped[seg_col].tolist()
+            sizes = grouped[cnt_col].astype(float).tolist()
+        else:
+            grouped = df.groupby(seg_col, as_index=False).size()
+            labels = grouped[seg_col].tolist()
+            sizes = grouped["size"].astype(float).tolist()
+    else:
+        # fallback: try to detect segment-like column
+        seg_col = next((c for c in df.columns if "segment" in c.lower() or c.lower() in ("rfm","rfm_segment")), df.columns[0])
+        grouped = df.groupby(seg_col, as_index=False).size()
+        labels = grouped[seg_col].tolist()
+        sizes = grouped["size"].astype(float).tolist()
+
+    explode = [0.03] * len(labels)
+    colors_list = [_CYAN if i % 2 == 0 else _ACCENT for i in range(len(labels))]
+
+    fig, ax = plt.subplots(figsize=(8.5, 4.2))
+    wedges, texts, autotexts = ax.pie(
+        sizes, labels=None, autopct="%1.1f%%", startangle=140,
+        explode=explode, colors=colors_list,
+        wedgeprops={"linewidth":1.0, "edgecolor":_PANEL_BG},
+        pctdistance=0.76
+    )
+    for t in autotexts:
+        t.set_color("white")
+        t.set_fontweight("bold")
+
+    # Inner circle for donut
+    centre_circle = plt.Circle((0,0),0.60,fc=_PANEL_BG)
+    fig.gca().add_artist(centre_circle)
+    ax.axis("equal")
+    _apply_ax_decor(ax, "Customer Segmentation (RFM)")
+
+    # Legend on the right
+    ax.legend(wedges, labels, title="Segments", loc="center left", bbox_to_anchor=(1, 0.5), frameon=False)
+
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+
 """
 Ecommerce & Finance - Insights Report (Dark + Cyan theme to match index.html)
 
