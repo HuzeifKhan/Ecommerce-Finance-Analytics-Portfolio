@@ -161,7 +161,7 @@ Key drivers of CLV:
 
 The feature importance chart is auto-generated and stored at:
 
-```text
+
 03_Analysis/ml_outputs/clv_rf_feature_importance.png
 
 ---
