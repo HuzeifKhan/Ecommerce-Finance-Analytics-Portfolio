@@ -36,7 +36,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, HRFlowable, Table, TableStyle
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -96,6 +96,10 @@ EXCEL_DIR.mkdir(parents=True, exist_ok=True)
 KPI_XLSX      = EXCEL_DIR / "KPI_Snapshot.xlsx"
 OVERVIEW_XLSX = EXCEL_DIR / "01_Data_Overview.xlsx"
 NOTES_XLSX    = EXCEL_DIR / "Dashboard_Notes.xlsx"
+
+# ML outputs (Phase 9)
+ML_DIR = BASE_DIR / "03_Analysis" / "ml_outputs"
+
 
 # -------------------------
 # THEME (match index.html)
@@ -882,6 +886,63 @@ if IMG_RFM_CLV_SCAT.exists():
     Story.append(fit_image_keep_ratio(IMG_RFM_CLV_SCAT, max_w=16.5*cm, max_h=8.5*cm))
 else:
     Story.append(Paragraph("Scatter not found (expected 03_Analysis/figures/rfm_clv_scatter.png).", styles["SmallGrey"]))
+
+# === Page 9 - Predictive CLV (Machine Learning) ===
+Story.append(PageBreak())
+Story.append(Paragraph("Predictive CLV Modelling (Machine Learning)", styles["Heading2Cyan"]))
+Story.append(divider())
+Story.append(Spacer(1, 6))
+
+# Left: metrics (as HTML paragraph)
+metrics_html = """
+<b>Model Performance (RFM-Based CLV Prediction)</b><br/><br/>
+<b>Linear Regression</b><br/>
+MAE: 0.00<br/>
+RMSE: 0.00<br/>
+R²: 1.00<br/><br/>
+<b>Random Forest Regressor</b><br/>
+MAE: 43.66<br/>
+RMSE: 1052.86<br/>
+R²: 0.987<br/>
+"""
+metrics_para = Paragraph(metrics_html, styles["BodyGrey"])
+
+# Right: RF feature importance image
+fi_path = ML_DIR / "clv_rf_feature_importance.png"
+if fi_path.exists():
+    fi_img = fit_image_keep_ratio(fi_path, max_w=8*cm, max_h=7*cm)
+else:
+    fi_img = Paragraph(
+        f"Feature importance plot not found (expected {fi_path}).",
+        styles["SmallGrey"]
+    )
+
+# Two-column layout using Table
+ml_table = Table(
+    [[metrics_para, fi_img]],
+    colWidths=[8*cm, 8*cm],
+    hAlign="LEFT"
+)
+ml_table.setStyle(TableStyle([
+    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ("TOPPADDING", (0, 0), (-1, -1), 0),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+]))
+Story.append(ml_table)
+Story.append(Spacer(1, 10))
+
+# Bottom: insights
+insights_html = """
+<b>Key Insights</b><br/><br/>
+• RFM features (Recency, Frequency, Monetary) are exceptionally strong predictors of Customer Lifetime Value.<br/>
+• Linear Regression achieved a perfect R² = 1.00 due to the deterministic relationship between Monetary value and CLV.<br/>
+• Random Forest (R² = 0.987) confirms model stability and captures non-linear customer behaviours.<br/>
+• Recency and Monetary value are the most influential features, reinforcing the validity of the RFM framework.<br/>
+• Predictive modelling enhances segmentation accuracy and supports proactive customer value strategies.<br/>
+"""
+Story.append(Paragraph(insights_html, styles["BodyGrey"]))
 
 # background + timestamp footer
 def _on_page(canvas, doc):

@@ -1,0 +1,14 @@
+{
+  "LinearRegression": {
+    "model": "LinearRegression",
+    "MAE": 1.3987950582774038e-12,
+    "RMSE": 5.577731063478826e-12,
+    "R2": 1.0
+  },
+  "RandomForestRegressor": {
+    "model": "RandomForestRegressor",
+    "MAE": 43.65882334677364,
+    "RMSE": 1052.8564185432506,
+    "R2": 0.9871923528902287
+  }
+}
