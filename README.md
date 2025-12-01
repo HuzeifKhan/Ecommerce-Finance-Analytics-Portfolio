@@ -91,7 +91,8 @@ Built using **SQL + Python + Tableau**, automated via **PowerShell + GitHub Acti
 **Business Impact:**  
 - Identified **seasonal peaks (Q4 surge)** and **top-revenue SKUs**  
 - Improved **customer segmentation (RFM)** for retention strategy  
-- Delivered **automated reporting** for faster decision-making
+- Delivered **automated reporting** for faster decision-making  
+- Added **ML-based CLV prediction** to support value-based targeting
 
 ---
 
@@ -100,7 +101,7 @@ Built using **SQL + Python + Tableau**, automated via **PowerShell + GitHub Acti
 | Layer | Tools | Purpose |
 |:--|:--|:--|
 | **Data Cleaning** | MySQL / SQL | Import, clean, aggregate, KPI computation |
-| **Analytics** | Python (Pandas · Statsmodels · ReportLab) | RFM modeling, forecasting, PDF/Excel automation |
+| **Analytics** | Python (Pandas · Statsmodels · ReportLab · scikit-learn) | RFM modeling, forecasting, CLV prediction, PDF/Excel automation |
 | **Visualization** | Tableau Public | Interactive KPI dashboard |
 | **Automation** | PowerShell · Task Scheduler · GitHub Actions | Daily refresh, logging, CI/CD |
 | **Hosting** | GitHub Pages | Live portfolio preview |
@@ -115,7 +116,7 @@ Built using **SQL + Python + Tableau**, automated via **PowerShell + GitHub Acti
 |:--:|:--:|:--:|:--:|
 | [![Dashboard](docs/assets/tableau/dashboard_overview.png)](https://public.tableau.com/app/profile/huzeif.khan/viz/Book1_17618490659490/E-commerceFinanceAnalyticsDashboard) | ![Revenue](docs/assets/tableau/monthly_revenue.png) | ![Top Products](docs/assets/tableau/top_products.png) | ![RFM](docs/assets/tableau/customer_segments.png) |
 
-> *Neon-cyan cyberpunk theme with clean typography and modular layout.*
+> *A refined and organized layout that supports clear, decision-ready insights.*
 
 ---
 
@@ -126,26 +127,42 @@ Auto-generated daily using **ReportLab + PowerShell + GitHub Actions**
 - 📄 `docs/report/Ecommerce_Finance_Insights_Report.pdf`  
 - 📊 `04_Excel/KPI_Snapshot.xlsx` *(or `docs/Excel/KPI_Snapshot.xlsx` if you mirrored it under `docs/`)*
 
-**Sections**
-- Page 1 → Overview + KPIs + Dashboard link  
-- Page 2 → Monthly Revenue & Top Products  
-- Page 3 → RFM Segmentation  
-- Page 4 → Cohort Retention & CLV analysis (in progress)
+**Report Sections (v2.0)**  
+- **Page 1** → Overview, KPIs, and dashboard link  
+- **Page 2** → Monthly Revenue & Top Products (Python charts)  
+- **Page 3** → RFM Segmentation (Python chart)  
+- **Page 4** → Cohort Retention heatmap  
+- **Page 5–8** → CLV views (Top 20, 12-month model, CLV by Segment, RFM × CLV Insights)  
+- **Page 9** → **Predictive CLV Modelling (Machine Learning)**  
 
 ---
 
-## ⚙️ Automation Workflow
+## 📘 Phase 9 — Predictive CLV Machine Learning (NEW 🚀)
 
-### 🔁 Local Automation (PowerShell + Task Scheduler)
-- Script `scripts/update_all.ps1` → builds PDF + Excel, commits & pushes  
-- Wrapper `scripts/run_scheduled.ps1` → runs nightly, logs output → `/logs/run_*.log`  
-- Task Scheduler → **EFA_Portfolio_Nightly_Refresh @ 03:00 Berlin**
+This phase introduces **machine learning–based Customer Lifetime Value (CLV) prediction** using the cleaned RFM-style customer dataset.  
+Two models were trained and compared on customer-level features (Recency, Frequency, Monetary):
 
-### ☁️ Cloud Automation (GitHub Actions)
-- Workflow → `.github/workflows/refresh-report.yml`  
-- Runs nightly at **02:00 UTC** (≈ **03:00 CET** / **04:00 CEST**)  
-- Installs dependencies, rebuilds PDF/Excel, and commits artifacts  
-- Status badge above 👆 reflects last run status
+### 🧠 Models Implemented
+
+| Model | MAE | RMSE | R² | Notes |
+|-------|-----|------|----|------|
+| **Linear Regression** | 0.00 | 0.00 | **1.00** | Perfect fit due to deterministic Monetary → CLV relationship |
+| **Random Forest Regressor** | 43.66 | 1052.86 | **0.987** | Captures non-linear patterns & validates robustness |
+
+---
+
+### 📊 Feature Importance (Random Forest)
+
+Key drivers of CLV:
+
+- **Monetary value** – strongest predictor of future value  
+- **Recency** – recent buyers are far more valuable  
+- **Frequency** – repeat purchase behaviour boosts CLV  
+
+The feature importance chart is auto-generated and stored at:
+
+```text
+03_Analysis/ml_outputs/clv_rf_feature_importance.png
 
 ---
 
@@ -155,26 +172,32 @@ Auto-generated daily using **ReportLab + PowerShell + GitHub Actions**
 Ecommerce-Finance-Analytics-Portfolio/
 │
 ├── docs/
-│ ├── index.html # GitHub Pages site
-│ ├── report/Ecommerce_Finance_Insights_Report.pdf
-│ ├── assets/tableau/ # Static tableau PNGs used by site & README
-│ │ ├── dashboard_overview.png
-│ │ ├── monthly_revenue.png
-│ │ ├── top_products.png
-│ │ └── customer_segments.png
-│ ├── previews/ # Optional: report_page-00.png, ...
-│ └── assets/figures/ # Phase 8 figures (CLV, cohorts, forecast)
+│   ├── index.html                      # GitHub Pages site
+│   ├── report/Ecommerce_Finance_Insights_Report.pdf
+│   ├── assets/tableau/                 # Static Tableau PNGs used by site & README
+│   │   ├── dashboard_overview.png
+│   │   ├── monthly_revenue.png
+│   │   ├── top_products.png
+│   │   └── customer_segments.png
+│   ├── previews/                       # Optional: report_page-00.png, ...
+│   └── assets/figures/                 # Phase 8+ figures (CLV, cohorts, forecast, etc.)
 │
+├── 01_Data/                            # Raw & processed datasets
+├── 03_Analysis/
+│   ├── figures/                        # Python-generated charts
+│   └── ml_outputs/                     # Phase 9 ML metrics + feature importance
+│
+├── 03_Python/                          # Report engine, analysis scripts
 ├── 04_Excel/KPI_Snapshot.xlsx
 ├── 05_Tableau/
-│ ├── exports/ (legacy; now using docs/assets/tableau/)
-│ └── EFA_Dashboard.twbx
-├── 06_Reports/ (legacy; canonical PDF lives under docs/report/)
+│   ├── exports/                        # (legacy; now mirrored under docs/assets/tableau/)
+│   └── EFA_Dashboard.twbx
+├── 06_Reports/                         # (legacy; canonical PDF lives under docs/report/)
 │
 ├── .github/workflows/refresh-report.yml
 ├── scripts/
-│ ├── update_all.ps1
-│ └── run_scheduled.ps1
+│   ├── update_all.ps1
+│   └── run_scheduled.ps1
 └── README.md
 ```
 
@@ -183,7 +206,7 @@ Ecommerce-Finance-Analytics-Portfolio/
 ## ✨ Highlights
 
 ✅ Full pipeline: SQL → Python → Tableau → PDF → CI/CD  
-✅ Cyberpunk visuals + dark neon theme  
+✅ A clean and cohesive visual design. 
 ✅ **Daily refresh automation** (local + cloud)  
 ✅ Robust logging & binary-safe Git workflow  
 ✅ Clean, modular structure ready for enterprise pipelines
@@ -203,9 +226,13 @@ Ecommerce-Finance-Analytics-Portfolio/
 
 ## 🧩 Next Steps
 
-- 📈 Add CLV & Churn prediction modules  
-- 🧾 Integrate Power BI version for benchmarking  
-- 🔁 Simulate dbt / Airflow pipelines for enterprise refresh
+🧩 Next Steps
+
+- 📉 Extend ML layer with churn prediction and risk scoring
+
+- 🧾 Integrate a Power BI version for benchmarking vs Tableau
+
+- 🔁 Simulate dbt / Airflow-style pipelines for a warehouse-ready architecture
 
 ---
 
