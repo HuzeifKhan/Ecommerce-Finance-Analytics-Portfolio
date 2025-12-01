@@ -944,6 +944,73 @@ insights_html = """
 """
 Story.append(Paragraph(insights_html, styles["BodyGrey"]))
 
+# === Page 10 — Churn Prediction (Phase 10) ===
+Story.append(PageBreak())
+Story.append(Paragraph("Customer Churn Prediction (Phase 10)", styles["Heading2Cyan"]))
+Story.append(divider())
+
+# Intro
+intro = (
+    "This section introduces a binary classification model predicting whether a "
+    "customer is likely to become inactive based on purchase behavior. "
+    "Churn is defined as no purchases in the last 90 days."
+)
+Story.append(Paragraph(intro, styles["BodyGrey"]))
+Story.append(Spacer(1, 8))
+
+# Try loading metrics
+churn_metrics_path = BASE_DIR / "03_Analysis" / "ml_outputs" / "churn_ml_metrics.json"
+if churn_metrics_path.exists():
+    with open(churn_metrics_path, "r", encoding="utf-8") as f:
+        churn_metrics = json.load(f)
+
+    # Display metrics in table
+    table_data = [["Model", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]]
+
+    for model_name, m in churn_metrics.items():
+        table_data.append([
+            model_name,
+            f"{m['accuracy']:.3f}",
+            f"{m['precision']:.3f}",
+            f"{m['recall']:.3f}",
+            f"{m['f1']:.3f}",
+            f"{m['roc_auc']:.3f}",
+        ])
+
+    t = Table(table_data, colWidths=[5*cm, 2*cm, 2*cm, 2*cm, 2*cm, 2*cm])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#03C4A1")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#222222")),
+        ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor("#d3d3d3")),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#2b2b2b")),
+    ]))
+    Story.append(t)
+else:
+    Story.append(Paragraph("Churn metrics not found.", styles["SmallGrey"]))
+
+Story.append(Spacer(1, 10))
+
+# Feature Importance
+Story.append(Paragraph("Random Forest Feature Importance", styles["Heading3Cyan"]))
+fi_path = BASE_DIR / "03_Analysis" / "ml_outputs" / "churn_rf_feature_importance.png"
+if fi_path.exists():
+    Story.append(fit_image_keep_ratio(fi_path, max_w=16.5*cm, max_h=12*cm))
+else:
+    Story.append(Paragraph("Feature importance image not found.", styles["SmallGrey"]))
+Story.append(Spacer(1, 10))
+
+# ROC Curve
+Story.append(Paragraph("Random Forest ROC Curve", styles["Heading3Cyan"]))
+roc_path = BASE_DIR / "03_Analysis" / "ml_outputs" / "churn_rf_roc_curve.png"
+if roc_path.exists():
+    Story.append(fit_image_keep_ratio(roc_path, max_w=16.5*cm, max_h=12*cm))
+else:
+    Story.append(Paragraph("ROC curve image not found.", styles["SmallGrey"]))
+
 # background + timestamp footer
 def _on_page(canvas, doc):
     paint_background(canvas, doc)

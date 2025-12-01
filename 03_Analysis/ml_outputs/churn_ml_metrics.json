@@ -1,0 +1,18 @@
+{
+  "LogisticRegression": {
+    "model": "LogisticRegression",
+    "accuracy": 0.9917050691244239,
+    "precision": 1.0,
+    "recall": 0.9751381215469613,
+    "f1": 0.9874125874125874,
+    "roc_auc": 0.9999961792103192
+  },
+  "RandomForestClassifier": {
+    "model": "RandomForestClassifier",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0
+  }
+}
