@@ -93,7 +93,8 @@ jobs:
 
           if ! git diff --cached --quiet; then
             git commit -m "ci: refresh reports & README last-run summary ($(date -u +'%Y-%m-%d %H:%M UTC'))"
-            git push
+            # Don't fail the workflow if the push is non–fast-forward
+            git push origin "${GITHUB_REF_NAME}" || echo "Non-fast-forward push, remote already has newer commits – skipping."
           else
             echo "No artifact/README changes detected."
           fi
