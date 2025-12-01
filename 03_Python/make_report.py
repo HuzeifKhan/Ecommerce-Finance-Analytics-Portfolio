@@ -30,6 +30,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 import pandas as pd
 import numpy as np
+import json
 
 # ReportLab
 from reportlab.lib.pagesizes import A4
@@ -944,12 +945,11 @@ insights_html = """
 """
 Story.append(Paragraph(insights_html, styles["BodyGrey"]))
 
-# === Page 10 — Churn Prediction (Phase 10) ===
+# === Page 10 – Customer Churn Prediction (Phase 10) ===
 Story.append(PageBreak())
 Story.append(Paragraph("Customer Churn Prediction (Phase 10)", styles["Heading2Cyan"]))
 Story.append(divider())
 
-# Intro
 intro = (
     "This section introduces a binary classification model predicting whether a "
     "customer is likely to become inactive based on purchase behavior. "
@@ -958,13 +958,12 @@ intro = (
 Story.append(Paragraph(intro, styles["BodyGrey"]))
 Story.append(Spacer(1, 8))
 
-# Try loading metrics
+# Load churn metrics
 churn_metrics_path = BASE_DIR / "03_Analysis" / "ml_outputs" / "churn_ml_metrics.json"
 if churn_metrics_path.exists():
     with open(churn_metrics_path, "r", encoding="utf-8") as f:
         churn_metrics = json.load(f)
 
-    # Display metrics in table
     table_data = [["Model", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]]
 
     for model_name, m in churn_metrics.items():
@@ -990,17 +989,17 @@ if churn_metrics_path.exists():
     ]))
     Story.append(t)
 else:
-    Story.append(Paragraph("Churn metrics not found.", styles["SmallGrey"]))
+    Story.append(Paragraph("Churn metrics not found (expected churn_ml_metrics.json).", styles["SmallGrey"]))
 
 Story.append(Spacer(1, 10))
 
 # Feature Importance
 Story.append(Paragraph("Random Forest Feature Importance", styles["Heading3Cyan"]))
-fi_path = BASE_DIR / "03_Analysis" / "ml_outputs" / "churn_rf_feature_importance.png"
-if fi_path.exists():
-    Story.append(fit_image_keep_ratio(fi_path, max_w=16.5*cm, max_h=12*cm))
+fi_churn_path = BASE_DIR / "03_Analysis" / "ml_outputs" / "churn_rf_feature_importance.png"
+if fi_churn_path.exists():
+    Story.append(fit_image_keep_ratio(fi_churn_path, max_w=16.5*cm, max_h=12*cm))
 else:
-    Story.append(Paragraph("Feature importance image not found.", styles["SmallGrey"]))
+    Story.append(Paragraph("Feature importance image not found (expected churn_rf_feature_importance.png).", styles["SmallGrey"]))
 Story.append(Spacer(1, 10))
 
 # ROC Curve
@@ -1009,7 +1008,7 @@ roc_path = BASE_DIR / "03_Analysis" / "ml_outputs" / "churn_rf_roc_curve.png"
 if roc_path.exists():
     Story.append(fit_image_keep_ratio(roc_path, max_w=16.5*cm, max_h=12*cm))
 else:
-    Story.append(Paragraph("ROC curve image not found.", styles["SmallGrey"]))
+    Story.append(Paragraph("ROC curve image not found (expected churn_rf_roc_curve.png).", styles["SmallGrey"]))
 
 # background + timestamp footer
 def _on_page(canvas, doc):
@@ -1019,3 +1018,4 @@ def _on_page(canvas, doc):
 doc.build(Story, onFirstPage=_on_page, onLaterPages=_on_page)
 
 print(f"\n✅ Report saved to {OUTPUT_PATH}\n")
+
